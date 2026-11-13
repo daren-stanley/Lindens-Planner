@@ -339,15 +339,7 @@ function findAll(p,lim){ const out=[], pis=CL.map(L=>pidxL(p,L));
 
 const DRAWN=[
  ['0',  {S:'S1',H:'H0',W:'W0',K:'K0',F:'F1',R:'R0',G:'G0',A:'A1',P:'P0',L:'L0',M:'M0',B:'B0',LO:'LO0',N:'N1'}],
- ['1',  {S:'S1',H:'H1',W:'W1',K:'K1',F:'F1',R:'R1',G:'G1',A:'A4',P:'P1',L:'L1',M:'M1',B:'B1',LO:'LO1',N:'N0'}],
- ['1B', {S:'S2',H:'H3',W:'W2',K:'K1',F:'F1',R:'R1',G:'G1',A:'A3',P:'P1',L:'L1',M:'M1',B:'B1',LO:'LO1',N:'N0'}],
- ['1C', {S:'S2',H:'H2',W:'W2',K:'K1',F:'F1',R:'R1',G:'G1',A:'A3',P:'P1',L:'L1',M:'M1',B:'B1',LO:'LO1',N:'N0'}],
- ['1D', {S:'S4',H:'H3',W:'W3',K:'K1',F:'F1',R:'R1',G:'G1',A:'A3',P:'P1',L:'L1',M:'M1',B:'B1',LO:'LO1',N:'N0'}],
- ['1E', {S:'S2',H:'H3',W:'W2',K:'K1',F:'F1',R:'R1',G:'G1',A:'A3',P:'P1',L:'L2',M:'M2',B:'B1',LO:'LO4',N:'N0'}],
- ['1F', {S:'S4',H:'H3',W:'W3',K:'K1',F:'F1',R:'R1',G:'G1',A:'A3',P:'P1',L:'L2',M:'M2',B:'B1',LO:'LO4',N:'N0'}],
- ['2B', {S:'S6',H:'H3',W:'W6',K:'K1',F:'F1',R:'R2',G:'G1',A:'A3',P:'P1',L:'L1',M:'M8',B:'B2',LO:'LO2',N:'N3'}],
- ['2C', {S:'S6',H:'H2',W:'W6',K:'K1',F:'F1',R:'R2',G:'G1',A:'A3',P:'P1',L:'L1',M:'M8',B:'B2',LO:'LO2',N:'N3'}],
- ['3',  {S:'S1',H:'H1',W:'W7',K:'K1',F:'F2',R:'R3',G:'G2',A:'A0',P:'P1',L:'L1',M:'M7',B:'B3',LO:'LO3',N:'N1'}]
+ ['MB Board 1', {S:'S5',H:'H3',W:'W5',G:'G5',F:'F1',R:'R7',K:'K1',P:'P4',M:'M4',B:'B0',L:'L0',LO:'LO0',N:'N0',A:'A2',KL:'K1A',BL:'B0A',EL:'M4A',LL:'F1A'}]
 ];
 
 /* ================= geometry (cm; x east from the west outer corner, y south from the rear face) ================= */
@@ -1103,7 +1095,7 @@ function render(){
   const fitVis=FIT.filter(st.vis), fitDone=st.complete&&fitVis.every(s=>st.resolved(s));
   $('status').innerHTML=
     (st.complete?`<span class="pill ok">Structure complete</span>`:`<span class="pill">${np} of ${STRUCT.length} parts picked</span>`)+
-    (dn?`<span class="pill ok">${st.complete?'Structure drawn on the canvas':'Preview from'}: board ${dn}</span>`:`<span class="pill warn">Untested combination: check before relying on it</span>`)+
+    (dn?`<span class="pill ok">${st.complete?'Saved board':'Preview from'}: ${dn==='0'?'Original house':dn}</span>`:`<span class="pill warn">Untested combination: check before relying on it</span>`)+
     (st.complete?`<span class="pill ${fitDone?'ok':''}">Layouts ${fitVis.filter(s=>st.resolved(s)).length} of ${fitVis.length}</span>`:
       `<span class="pill">${st.count.toLocaleString()} complete houses still possible</span>`);
 
@@ -1217,7 +1209,7 @@ $('load').addEventListener('click',()=>{
   $('msg').textContent=''; $('codeIn').value=''; applyPicks(p,true);
 });
 $('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('load').click(); });
-const ps=$('preset'); DRAWN.forEach(([n])=>{const o=document.createElement('option');o.value=n;o.textContent=n==='0'?'Original house':'Board '+n+(n==='2C'?' (and Concept 2)':'');ps.appendChild(o);});
+const ps=$('preset'); DRAWN.forEach(([n])=>{const o=document.createElement('option');o.value=n;o.textContent=n==='0'?'Original house':n;ps.appendChild(o);});
 ps.addEventListener('change',()=>{const d=DRAWN.find(([n])=>n===ps.value); if(d) applyPicks(Object.assign({},d[1]),true); ps.value='';});
 
 /* start: code in the address wins, then the last picks in this browser */
