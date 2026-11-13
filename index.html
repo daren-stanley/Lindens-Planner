@@ -120,8 +120,8 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v29 · 13 Nov 2026</small></h1>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v29';document.title='Lindens house picker '+APP_VERSION;</script>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v30 · 13 Nov 2026</small></h1>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v30';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -343,7 +343,9 @@ function findAll(p,lim){ const out=[], pis=CL.map(L=>pidxL(p,L));
 
 const DRAWN=[
  ['0',  {S:'S1',H:'H0',W:'W0',K:'K0',F:'F1',R:'R0',G:'G0',A:'A1',P:'P0',L:'L0',M:'M0',B:'B0',LO:'LO0',N:'N1'}],
- ['MB Board 1', {S:'S5',H:'H3',W:'W5',G:'G5',F:'F1',R:'R7',K:'K1',P:'P4',M:'M4',B:'B0',L:'L0',LO:'LO0',N:'N0',A:'A2',KL:'K1A',BL:'B0A',EL:'M4A',LL:'F1A'}]
+ ['MB Board 1', {S:'S5',H:'H3',W:'W5',G:'G5',F:'F1',R:'R7',K:'K1',P:'P4',M:'M4',B:'B0',L:'L0',LO:'LO0',N:'N0',A:'A2',KL:'K1A',BL:'B0A',EL:'M4A',LL:'F1A'}],
+ ['Daren Board 1', {S:'S5',H:'H3',W:'W4',G:'G5',F:'F1',K:'K1',P:'P1',M:'M2',B:'B1',L:'L2',LO:'LO6',N:'N0',A:'A3',BL:'B1A',EL:'M2B',LL:'F1A',FP:'FP3',R:'R5'}],
+ ['Daren Board 2', {S:'S5',H:'H3',W:'W4',G:'G5',F:'F1',K:'K1',P:'P1',M:'M2',B:'B1',L:'L2',LO:'LO6',N:'N0',A:'A3',BL:'B1A',EL:'M2B',LL:'F1A',FP:'FP3',R:'R10'}]
 ];
 
 /* ================= geometry (cm; x east from the west outer corner, y south from the rear face) ================= */
