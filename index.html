@@ -212,9 +212,11 @@ const SLOTS={
   ['R4','3.0 m + 5.5 m sliders','Kitchen, then goalpost across dining and living'],
   ['R5','Kitchen window, slider, picture window','Kitchen window kept · slider at dining · picture window in living'],
   ['R6','Kitchen window, picture window, slider','Kitchen window kept · picture window at dining · slider in living'],
-  ['R7','Rear extension, 5.4 m opening','7 × 2 m single storey · 5.4 m sliders'],
-  ['R8','Rear extension, window + 3.0 m opening','7 × 2 m single storey · 2.4 m window + 3.0 m sliders'],
-  ['R0','Original windows','As today',1]]},
+  ['R7','2 m rear extension, 5.4 m opening','7 × 2 m single storey · 5.4 m sliders'],
+  ['R8','2 m rear extension, window + 3.0 m opening','7 × 2 m single storey · 2.4 m window + 3.0 m sliders'],
+  ['R0','Original windows','As today',1],
+  ['R9','1 m rear extension, 5.4 m opening','7 × 1 m single storey · 5.4 m sliders'],
+  ['R10','1 m rear extension, window + 3.0 m opening','7 × 1 m single storey · 2.4 m window + 3.0 m sliders']]},
  K:{name:'Open plan walls',opts:[
   ['K1','Both walls out','Kitchen–dining and spine walls out · kitchen zone set by the layout'],
   ['K2','(merged into K1)','',0,1],
@@ -267,16 +269,17 @@ const SLOTS={
  KL:{name:'Kitchen layout',ctx:'K',fit:1},
  BL:{name:'Family bathroom layout',ctx:'B',fit:1},
  EL:{name:'Ensuite layout',ctx:'M',fit:1},
- LL:{name:'Living room layout',ctx:'F',fit:1}
+ LL:{name:'Living room layout',ctx:'F',fit:1},
+ FP:{name:'Fireplace',ctx:'FP',fit:1}
 };
 const GROUPS=[
  {id:'gf',name:'Ground floor',slots:['S','K','H','W','G','A','F','R','P']},
  {id:'ff',name:'First floor',slots:['M','N','B','L']},
  {id:'lo',name:'Loft',slots:['LO']},
- {id:'fit',name:'Fit-out layouts',slots:['KL','LL','BL','EL'],fit:1}
+ {id:'fit',name:'Fit-out layouts',slots:['KL','LL','FP','BL','EL'],fit:1}
 ];
 const STRUCT=['S','H','W','G','F','R','K','P','M','B','L','LO','N','A'];   // code order (v3, 14 characters)
-const FIT=['KL','BL','EL','LL'];   // code order
+const FIT=['KL','BL','EL','LL','FP'];   // code order
 const NAME={};Object.values(SLOTS).forEach(s=>(s.opts||[]).forEach(o=>NAME[o[0]]=o[1]));
 
 /* ---------- rules (each: slots involved, test, plain words) ---------- */
@@ -295,7 +298,7 @@ const RULES=[
  [['S','H'],c=>c.H!=='H0'||c.S==='S1'],
  [['H','K'],c=>(c.H==='H0')===inn(c.K,['K0','K4'])],
  [['H','W'],c=>!inn(c.W,['W4','W5'])||c.H!=='H4'],                           /* the back lobby is reached through the old kitchen door */
- [['K','R'],c=>({K0:['R0','R3'],K4:['R0','R2','R3'],K3:['R0','R1','R3','R5','R6','R7','R8']}[c.K]||['R0','R1','R2','R3','R4','R5','R6','R7','R8']).includes(c.R)],
+ [['K','R'],c=>({K0:['R0','R3'],K4:['R0','R2','R3'],K3:['R0','R1','R3','R5','R6','R7','R8','R9','R10']}[c.K]||['R0','R1','R2','R3','R4','R5','R6','R7','R8','R9','R10']).includes(c.R)],
  [['K','F'],c=>!inn(c.K,['K0','K3'])||c.F==='F1'],                           /* with the spine wall kept, the living room is reached from the hall */
  [['M','N'],c=>inn(c.M,['M1','M2','M3','M4','M5','M6'])?c.N==='N0':c.M==='M8'?inn(c.N,['N1','N3']):inn(c.N,['N1','N2','N3','N4','N5'])],
  [['N','B'],c=>({N0:['B0','B1','B3'],N1:['B0','B3'],N2:['B0','B3'],N3:['B2'],N4:['B0','B3'],N5:['B0','B1','B3']}[c.N]).includes(c.B)],
@@ -383,6 +386,9 @@ const widerX=c=>c.S==='S1'?520:c.S==='S6'?570:550;
 const b1wide=c=>c.B==='B1'&&c.S==='S1'&&c.L!=='L1';   /* B1 can reach the stairwell edge only with today's stair and no loft stair landing there */
 const mDoor=c=>{const x=b1wide(c)?345:305;return D(1,x,390,x+80,400);};   /* M2/M3/M6 master door: just east of the bathroom wall */
 const wideK=c=>inn(c.KL,['K1I','K1J','K1K','K1L']);   /* kitchen layouts drawn for a 3.7 m kitchen zone */
+const hearth=(c,k,x1,y1,x2,y2)=>!c.FP||c.FP==='FP1'?[FX(0,k,x1,y1,x2,y2)]:k==='fireTV'?[FX(0,'tv',x2-8,y1+8,x2,y2-8)]:[];
+const fdx=c=>c.FP==='FP2'?30:0;   /* living furniture moved clear of a three-sided fire */
+const fp2Door=c=>(GEO[c.H]?GEO[c.H](c):[]).some(e=>e.t==='d'&&e.y1===390&&e.x2>665);
 const kdOpen=c=>inn(c.K,['K1','K2','K3']), spOpen=c=>inn(c.K,['K1','K2','K4']);   /* kitchen–dining wall out / dining–living (spine) wall out */
 const viaOld=c=>['W2','W3','W6'].includes(c.W);   /* the old kitchen door opens into the hall itself */
 const corner=c=>inn(c.S,['S2','S3']), flipped=c=>inn(c.S,['S4','S5']);
@@ -394,9 +400,11 @@ const front=(c,x1,els)=>openP(c)?[D(0,x1,636,708,662),RS(0,x1,636,708,662)]:els;
 const strip=c=>c.L==='L2'?[R(1,618,26,708,106,'be')]:[R(1,618,26,708,390,'ut','Wardrobe','0.9 × 3.6')];
 
 /* single-storey rear extension behind the kitchen and dining, 7.0 × 2.0 m outside: old rear wall out on a goalpost, living windows as today */
-const rearExt=c=>[SH(0,0,-200,700,0),R(0,26,-174,674,26,'so','Extension','6.5 × 1.7',{ly:-60,lab:!c._fit}),RS(0,26,0,674,26),
-  Object.assign(WN(0,0,-140,26,-70),{hasRs:1}),Object.assign(WN(0,674,-160,700,-30),{hasRs:1}),
-  WE(0,797,0,859,26),D(0,859,0,939,26),WE(0,939,0,1005,26),TX(0,-60,-100,'small window'),TX(0,770,-100,'panel window'),TX(0,890,-16,'living windows as today')];
+const extD=c=>inn(c.R,['R7','R8'])?200:inn(c.R,['R9','R10'])?100:0;   /* outside depth of the rear extension */
+const rearExt=(c,d=200)=>{const i=d-26, sw=d===200?[-140,-70,-160,-30]:[-66,-16,-70,-10];
+ return [SH(0,0,-d,700,0),R(0,26,-i,674,26,'so','Extension',d===200?'6.5 × 1.7':'6.5 × 0.7',{ly:d===200?-60:-25,lab:!c._fit}),RS(0,26,0,674,26),
+  Object.assign(WN(0,0,sw[0],26,sw[1]),{hasRs:1}),Object.assign(WN(0,674,sw[2],700,sw[3]),{hasRs:1}),
+  WE(0,797,0,859,26),D(0,859,0,939,26),WE(0,939,0,1005,26),TX(0,-60,-d/2,'small window'),TX(0,770,-d/2,'panel window'),TX(0,890,-16,'living windows as today')];};
 const GEO={
  S1:c=>[R(0,202,400,708,636,'ci','Hall',c.H==='H2'?'open':'enclosed',{top:1}),ST(0,202,524,278,546,'N',1),R(0,202,546,278,636,'ci'),ST(0,278,546,550,636,'E',12),
    WL(0,[[240,515],[240,591],[540,591]]),...front(c,550,[WE(0,524,636,578,662),D(0,578,636,657,662),WE(0,657,636,707,662)]),WE(0,202,636,326,662),
@@ -482,6 +490,8 @@ const GEO={
  R6:c=>[WE(0,100,0,286,26),WN(0,330,0,650,26),FX(0,'led',330,26,650,56),WN(0,740,0,1060,26),TX(0,490,-16,'3.2 m picture window + ledge'),TX(0,900,-16,'3.2 m slider')],
  R7:c=>[...rearExt(c),WN(0,80,-200,620,-174),TX(0,350,-216,'5.4 m sliders')],
  R8:c=>[...rearExt(c),Object.assign(WN(0,54,-200,294,-174),{hasRs:1}),WA(0,172,-200,176,-174),WN(0,344,-200,644,-174),TX(0,174,-216,'2.4 m split window'),TX(0,494,-216,'3.0 m sliders')],
+ R9:c=>[...rearExt(c,100),WN(0,80,-100,620,-74),TX(0,350,-116,'5.4 m sliders')],
+ R10:c=>[...rearExt(c,100),Object.assign(WN(0,54,-100,294,-74),{hasRs:1}),WA(0,172,-100,176,-74),WN(0,344,-100,644,-74),TX(0,174,-116,'2.4 m split window'),TX(0,494,-116,'3.0 m sliders')],
  R4:c=>[WN(0,110,0,410,26),WN(0,510,0,1060,26),TX(0,260,-16,'3.0 m sliders'),TX(0,785,-16,'5.5 m sliders · steel goalpost')],
  G0:c=>[SH(0,-434,78,-106,662),R(0,-410,92,-117,650,'ga','Garage','2.9 × 5.6'),R(0,-106,92,0,662,'ou','',''),WE(0,-372,650,-146,662),WE(0,-305,78,-184,92),D(0,-117,196,-106,272),WE(0,0,61,26,130),TX(0,-60,712,'Side passage kept')],
  G1:c=>[SH(0,-434,78,0,662),R(0,-410,92,0,650,'ga','Garage','4.1 × 5.6'),WN(0,-400,650,-10,662),TX(0,-217,712,'Side passage infilled')],
@@ -593,7 +603,7 @@ const LAYOUTS=[
   geo:c=>[FX(0,'wt',26,26,86,210),FX(0,'sk',34,56,78,120),FX(0,'tall',26,210,86,390),FX(0,'wt',190,90,290,310),FX(0,'hob',215,170,265,230),
    ...STOOLS(0,[[300,110],[300,182],[300,254]]),FX(0,'tbl',500,70,600,290),...CHAIRS(0,[[455,90],[455,160],[455,230],[605,90],[605,160],[605,230],[530,295]])]},
  {id:'K1B',name:'Garden window, L-run and island',ds:'Sink under a garden window · 1.6 m island',src:'drawn',
-  ok:c=>notG2(c)&&!inn(c.R,['R4','R7','R8']),why:c=>c.G==='G2'?g2why:c.R==='R4'?'R4 puts sliders where the sink window goes.':'The rear extension takes the wall this sink run stands on.',sum:'sink under the window, island hob',
+  ok:c=>notG2(c)&&!inn(c.R,['R4','R7','R8','R9','R10']),why:c=>c.G==='G2'?g2why:c.R==='R4'?'R4 puts sliders where the sink window goes.':'The rear extension takes the wall this sink run stands on.',sum:'sink under the window, island hob',
   geo:c=>[FX(0,'wt',26,26,330,86),FX(0,'sk',140,34,200,78),FX(0,'wt',26,86,86,150),FX(0,'tall',26,150,86,390),FX(0,'wt',186,190,346,290),FX(0,'hob',236,210,296,270),
    ...STOOLS(0,[[350,205],[350,245]]),FX(0,'tbl',470,110,690,210),...CHAIRS(0,[[500,65],[560,65],[620,65],[500,215],[560,215],[620,215],[425,140],[695,140]])]},
  {id:'K1C',name:'Door to garage utility, island hob',ds:'Keeps the garage-utility door clear · island hob',src:'new',
@@ -628,43 +638,49 @@ const LAYOUTS=[
    ...STOOLS(0,[[130,170],[200,170],[270,170]]),FX(0,'tbl',520,80,620,300),...CHAIRS(0,[[475,100],[475,170],[475,240],[625,100],[625,170],[625,240],[550,305]])];}},
  /* kitchens in the rear extension (R7/R8); old rear wall line at y 0–26, extension inside y −174 to 0 */
  ...[['K1','F','G','H']].flatMap(([z,a,b,d])=>[
- {id:z+a,name:'Garden-view island',ds:'Sink under the side window · island hob facing the sliders · table by the glass',src:'new',
-  ok:c=>inn(c.R,['R7','R8']),why:()=>'Needs the rear extension (R7 or R8).',sum:'island facing the garden',
-  geo:c=>[FX(0,'tall',26,180,86,390),FX(0,'wt',26,-174,86,180),FX(0,'sk',34,-140,78,-80),FX(0,'wt',190,-50,390,40),FX(0,'hob',260,-40,320,30),
-   ...STOOLS(0,[[210,48],[280,48],[350,48]]),FX(0,'tbl',500,-150,590,30),...CHAIRS(0,[[455,-135],[455,-80],[455,-25],[595,-135],[595,-80],[595,-25]])]},
+ {id:z+a,name:'Garden-view island',ds:'Sink by the side window · island hob facing the sliders · table by the glass',src:'new',
+  ok:c=>extD(c)>0,why:()=>'Needs a rear extension (R7–R10).',sum:'island facing the garden',
+  geo:c=>{const y=extD(c)===200?0:100, j=y/2; return [FX(0,'tall',26,180,86,390),FX(0,'wt',26,-174+y,86,180),FX(0,'sk',34,-140+y,78,-80+y),FX(0,'wt',190,-50+j,390,40+j),FX(0,'hob',260,-40+j,320,30+j),
+   ...STOOLS(0,[[210,48+j],[280,48+j],[350,48+j]]),FX(0,'tbl',500,-150+y,590,30+y),...CHAIRS(0,[[455,-135+y],[455,-80+y],[455,-25+y],[595,-135+y],[595,-80+y],[595,-25+y]])];}},
  {id:z+b,name:'Sink under the split window',ds:'Sink run under the R8 window · prep island · table by the sliders',src:'new',
-  ok:c=>c.R==='R8',why:()=>'Needs the split window of R8.',sum:'sink under the extension window',
-  geo:c=>[FX(0,'wt',26,-174,330,-114),FX(0,'sk',144,-166,204,-122),FX(0,'wt',26,-114,86,200),FX(0,'hob',34,-40,78,20),FX(0,'tall',26,200,86,390),
-   FX(0,'wt',190,-10,330,80),...STOOLS(0,[[205,88],[270,88]]),FX(0,'tbl',470,-150,560,30),...CHAIRS(0,[[425,-135],[425,-80],[425,-25],[565,-135],[565,-80],[565,-25]])]},
+  ok:c=>inn(c.R,['R8','R10']),why:()=>'Needs the split window of R8 or R10.',sum:'sink under the extension window',
+  geo:c=>{const y=c.R==='R8'?0:100, j=y/2; return [FX(0,'wt',26,-174+y,330,-114+y),FX(0,'sk',144,-166+y,204,-122+y),FX(0,'wt',26,-114+y,86,200),FX(0,'hob',34,-40+j,78,20+j),FX(0,'tall',26,200,86,390),
+   FX(0,'wt',190,-10+j,330,80+j),...STOOLS(0,[[205,88+j],[270,88+j]]),FX(0,'tbl',470,-150+y,560,30+y),...CHAIRS(0,[[425,-135+y],[425,-80+y],[425,-25+y],[565,-135+y],[565,-80+y],[565,-25+y]])];}},
  {id:z+d,name:'Garden dining room',ds:'Kitchen stays in the house · 2.4 m table and sofa in the extension',src:'new',
-  ok:c=>inn(c.R,['R7','R8']),why:()=>'Needs the rear extension (R7 or R8).',sum:'kitchen in the house, dining in the extension',
+  ok:c=>inn(c.R,['R7','R8']),why:()=>'Needs the 2 m rear extension (R7 or R8).',sum:'kitchen in the house, dining in the extension',
   geo:c=>[FX(0,'wt',26,26,86,300),FX(0,'sk',34,100,78,160),FX(0,'tall',26,300,86,390),FX(0,'wt',190,100,290,280),FX(0,'hob',215,160,265,220),
    ...STOOLS(0,[[300,130],[300,190]]),FX(0,'tbl',180,-130,420,-40),...CHAIRS(0,[[195,-172],[255,-172],[315,-172],[375,-172],[195,-35],[255,-35],[315,-35],[375,-35]]),
    FX(0,'sofa',579,-170,674,20,'E')]}]),
+ /* fireplace: 0 none, 1 the chimney breast on the east wall, 2 a three-sided fire on the old spine line against the hall wall */
+ {id:'FP0',name:'No fireplace',ds:'Chimney breast without a fire · TV on the east wall',src:'new',sum:'no fireplace',geo:c=>[]},
+ {id:'FP1',name:'East-wall hearth',ds:'Fire in the chimney breast, mid east wall',src:'drawn',sum:'fire on the east wall',geo:c=>[]},
+ {id:'FP2',name:'Three-sided fire',ds:'1.2 × 0.9 m glass fire between dining and living · 0.5 m up · flue pier to the ceiling',src:'new',
+  ok:c=>spOpen(c)&&!fp2Door(c),why:c=>!spOpen(c)?'Needs the dining–living wall out (K1 or K4).':'The hall door to the open plan sits where the fire goes.',sum:'three-sided fire between dining and living',
+  geo:c=>[FX(0,'fire3',668,270,758,390),TX(0,713,258,'3-sided fire · 0.5 m up')]},
  /* living rooms, full depth (3.7 × 6.1 m): fire on the chimney breast, east wall, y 290–390 */
  {id:'F1A',name:'Hearth',ds:'Sofa faces the fire, TV above',src:'new',sum:'sofa facing the fire, TV above it',
-  geo:c=>[FX(0,'rug',788,180,1048,500),FX(0,'wt',1046,196,1084,286),FX(0,'wt',1046,394,1084,484),FX(0,'fireTV',1052,290,1084,390),
+  geo:c=>[FX(0,'rug',788,180,1048,500),FX(0,'wt',1046,196,1084,286),FX(0,'wt',1046,394,1084,484),...hearth(c,'fireTV',1052,290,1084,390),
    FX(0,'sofa',808,230,903,450,'W'),FX(0,'arm',935,128,1025,218,'N'),FX(0,'arm',935,450,1025,540,'S'),FX(0,'tbl',915,280,985,400),
    FX(0,'arm',950,548,1035,626,'S'),FX(0,'lamp',1045,560,1069,584),FX(0,'wt',718,520,754,630)]},
  {id:'F1B',name:'Cinema corner and fireside',ds:'Sofa faces a TV on the hall wall · fireside chairs',src:'new',sum:'TV opposite a corner sofa, fire lounge',
-  geo:c=>[FX(0,'rug',790,185,1040,440),FX(0,'wt',1046,196,1084,286),FX(0,'fire',1054,290,1084,390),
+  geo:c=>[FX(0,'rug',790,185,1040,440),FX(0,'wt',1046,196,1084,286),...hearth(c,'fire',1054,290,1084,390),
    FX(0,'arm',820,196,910,286,'W'),FX(0,'arm',820,330,910,420,'W'),FX(0,'tbl',850,295,900,325),
    FX(0,'wt',718,505,758,636),FX(0,'tv',718,520,726,632),FX(0,'sofa',989,430,1084,630,'E'),FX(0,'tbl',925,470,975,590),FX(0,'plant',1040,128,1076,164)]},
  {id:'F1C',name:'Sectional',ds:'Sectional facing the fire and TV',src:'new',sum:'sectional, TV above the fire',
-  geo:c=>[FX(0,'rug',760,150,1030,470),FX(0,'wt',1046,196,1084,286),FX(0,'wt',1046,394,1084,484),FX(0,'fireTV',1052,290,1084,390),
-   FX(0,'sofa',742,170,837,380,'W'),FX(0,'sofa',837,285,977,380,''),FX(0,'tbl',882,180,952,260),FX(0,'arm',955,440,1045,530,'S'),FX(0,'plant',1040,128,1076,164)]},
+  geo:c=>[FX(0,'rug',760+fdx(c),150,1030+fdx(c),470),FX(0,'wt',1046,196,1084,286),FX(0,'wt',1046,394,1084,484),...hearth(c,'fireTV',1052,290,1084,390),
+   FX(0,'sofa',742+fdx(c),170,837+fdx(c),380,'W'),FX(0,'sofa',837+fdx(c),285,977+fdx(c),380,''),FX(0,'tbl',882+fdx(c),180,952+fdx(c),260),FX(0,'arm',955,440,1045,530,'S'),FX(0,'plant',1040,128,1076,164)]},
  {id:'F1D',name:'Salon',ds:'Two facing sofas · swivel TV',src:'new',sum:'two facing sofas, swivel TV',
-  geo:c=>[FX(0,'rug',790,165,1050,470),FX(0,'wt',1046,196,1084,286),FX(0,'fire',1054,290,1084,390),
+  geo:c=>[FX(0,'rug',790,165,1050,470),FX(0,'wt',1046,196,1084,286),...hearth(c,'fire',1054,290,1084,390),
    FX(0,'sofa',810,175,1000,270,'N'),FX(0,'sofa',810,370,1000,465,'S'),FX(0,'tbl',850,290,960,350),
    FX(0,'wt',1044,450,1084,600),FX(0,'tv',1076,460,1084,590),FX(0,'plant',1040,128,1076,164)]},
  /* living room + front office (3.7 × 3.6 m living, 3.7 × 2.4 m office) */
  {id:'F2A',name:'Hearth snug and window desk',ds:'Sofa faces the fire · window desk',src:'new',sum:'sofa facing the fire; window desk',
-  geo:c=>[FX(0,'rug',780,130,1040,375),FX(0,'wt',1046,200,1084,290),FX(0,'fireTV',1052,290,1084,380),
+  geo:c=>[FX(0,'rug',780,130,1040,375),FX(0,'wt',1046,200,1084,290),...hearth(c,'fireTV',1052,290,1084,380),
    FX(0,'sofa',800,155,895,365,'W'),FX(0,'arm',930,125,1020,215,'N'),FX(0,'tbl',915,240,985,330),
    FX(0,'desk',790,570,960,632),...CHAIRS(0,[[840,525]]),FX(0,'wt',1044,430,1084,600),FX(0,'lamp',1000,590,1024,614)]},
  {id:'F2B',name:'Compact sectional and east-wall desk',ds:'Sectional · east-wall desk',src:'new',sum:'sectional; east-wall desk',
-  geo:c=>[FX(0,'rug',770,125,1040,380),FX(0,'wt',1046,200,1084,290),FX(0,'fireTV',1052,290,1084,380),
-   FX(0,'sofa',742,150,837,330,'W'),FX(0,'sofa',837,235,977,330,''),FX(0,'tbl',882,140,945,215),FX(0,'plant',1040,128,1076,164),
+  geo:c=>[FX(0,'rug',770+fdx(c),125,1040+fdx(c),380),FX(0,'wt',1046,200,1084,290),...hearth(c,'fireTV',1052,290,1084,380),
+   FX(0,'sofa',742+fdx(c),150,837+fdx(c),330,'W'),FX(0,'sofa',837+fdx(c),235,977+fdx(c),330,''),FX(0,'tbl',882+fdx(c),140,945+fdx(c),215),FX(0,'plant',1040,128,1076,164),
    FX(0,'desk',1010,430,1084,590),...CHAIRS(0,[[955,490]]),FX(0,'wt',718,530,756,632)]},
  /* family bathrooms */
  {id:'B1A',name:'Bath and corner shower',ds:'Bath + 0.9 m shower',src:'drawn',sum:'bath + 0.9 m shower',
@@ -727,7 +743,7 @@ LAYOUTS.forEach(l=>{const g=l.geo; l.geo=c=>{let r=g(c); if(c.K==='K3') r=r.filt
 const LBY={};LAYOUTS.forEach(l=>{LBY[l.id]=l;const ok0=l.ok||(()=>true), why0=l.why||(()=>'');
   if(l.id[0]==='K'){ l.ok=c=>ok0(c)&&!westClash(l.raw(c),c); l.why=c=>!ok0(c)?why0(c):'The house-to-garage door ('+c.A+') is where this layout’s sink goes.'; }
   else { l.ok=ok0; l.why=why0; } });
-const ctxOf=(slot,c)=>slot==='KL'?(c.K==='K3'?'K1':c.K==='K4'?'K0':c.K):c[SLOTS[slot].ctx];
+const ctxOf=(slot,c)=>slot==='KL'?(c.K==='K3'?'K1':c.K==='K4'?'K0':c.K):(slot==='FP'?'FP':c[SLOTS[slot].ctx]);
 function layoutOpts(slot,c){
   const ctx=ctxOf(slot,c);
   return LAYOUTS.filter(l=>l.id.slice(0,2)===ctx);
@@ -740,7 +756,7 @@ const FILL={so:'#F2DFC2',be:'#D8E3EE',we:'#C9E6DF',ut:'#E4E0D7',ga:'#D6D1C6',of:
 const BASE=[SH(0,0,0,1110,662),SH(0,1110,300,1126,380),SH(1,0,0,1110,662),SH(1,1110,300,1126,380),SH(2,0,0,1110,662),
   R(2,26,433,1084,636,'ea','Eaves storage (under 1.5 m)')];
 /* ground-floor view box: taller for the rear extension (above) and the deep porch (below) */
-const gfBox=c=>{const t=inn(c.R,['R7','R8'])?-260:-60, b=inn(c.P,['P3','P4'])?900:c.P==='P0'?780:850; return {vb:`-470 ${t} 1620 ${b-t}`,h:b-t};};
+const gfBox=c=>{const t=extD(c)===200?-260:extD(c)===100?-160:-60, b=inn(c.P,['P3','P4'])?900:c.P==='P0'?780:850; return {vb:`-470 ${t} 1620 ${b-t}`,h:b-t};};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');
 function label(cx,cy,name,dims,w,h){
   if(!name) return '';
@@ -761,6 +777,7 @@ function fx(e){
      if(e.k==='sofa'){ const n=Math.max(2,Math.round(long/70)); for(let i=1;i<n;i++){ o+=w>h?`<line x1="${x1+w*i/n}" y1="${y1+(d==='N'?t:0)}" x2="${x1+w*i/n}" y2="${y2-(d==='S'?t:0)}" stroke="#CFC8B9" stroke-width="1.5"/>`:`<line x1="${x1+(d==='W'?t:0)}" y1="${y1+h*i/n}" x2="${x2-(d==='E'?t:0)}" y2="${y1+h*i/n}" stroke="#CFC8B9" stroke-width="1.5"/>`; } }
      if(bk) o+=`<rect x="${bk[0]}" y="${bk[1]}" width="${bk[2]}" height="${bk[3]}" rx="6" fill="#D9D2C3" stroke="#7A746A" stroke-width="1.8"/>`;
      return o; }
+   case 'fire3': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="#CFC8BC" stroke="#4A4640" stroke-width="2"/><rect x="${x1+10}" y="${y1+10}" width="${w-20}" height="${h-12}" fill="#F3B58C" stroke="#B9501C" stroke-width="2"/><path d="M${x1+2} ${y1+8}V${y2-2}M${x2-2} ${y1+8}V${y2-2}M${x1+2} ${y1+2}H${x2-2}" stroke="#7FB3D9" stroke-width="4"/><path d="M${cx-18} ${y2-14}Q${cx-10} ${cy} ${cx} ${y1+26}Q${cx+10} ${cy} ${cx+18} ${y2-14}" fill="none" stroke="#B9501C" stroke-width="2"/>`;
    case 'tv': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" rx="2" fill="#2E2C29"/>`;
    case 'fire': case 'fireTV': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" rx="3" fill="#F3B58C" stroke="#B9501C" stroke-width="2"/><path d="M${x1+6} ${y1+h*.25}L${x2-8} ${y1+h*.25}M${x1+6} ${cy}L${x2-8} ${cy}M${x1+6} ${y1+h*.75}L${x2-8} ${y1+h*.75}" stroke="#B9501C" stroke-width="2"/>`+(e.k==='fireTV'?`<rect x="${x2-7}" y="${y1+8}" width="7" height="${h-16}" fill="#2E2C29"/>`:'');
    case 'plant': return `<circle cx="${cx}" cy="${cy}" r="${w/2}" fill="#A9C298" stroke="#6F8F5E" stroke-width="2"/>`;
@@ -904,7 +921,7 @@ function sanitizeFit(c){
 /* ---------- rebuild code ---------- */
 function makeCode(c){
   const st=STRUCT.map(s=>(SLOTS[s].opts.findIndex(o=>o[0]===c[s])+1).toString(36)).join('');
-  const ft=FIT.map(s=>picks[s]?picks[s].slice(2):'0').join('');
+  const ft=FIT.map(s=>!picks[s]?'0':s==='FP'?'ABC'[+picks[s][2]]:picks[s].slice(2)).join('');
   return `LND-${st}-${ft}`.toUpperCase();
 }
 /* option lists of the 13-character (and older 12-character) codes, before the house-to-garage door, the 2-step winders, R7/R8, the new porches and masters */
@@ -925,7 +942,7 @@ function readLegacy(str){
   return p;
 }
 function readCode(str){
-  const m=String(str).trim().toUpperCase().match(/^LND-([0-9A-Z]{12,14})(?:-([0-9A-L]{3,4}))?$/);
+  const m=String(str).trim().toUpperCase().match(/^LND-([0-9A-Z]{12,14})(?:-([0-9A-L]{3,5}))?$/);
   if(!m) return null;
   let p={};
   if(m[1].length<14){ p=readLegacy(m[1]); if(!p) return null; }
@@ -934,14 +951,14 @@ function readCode(str){
   const k2=p._k2; delete p._k2;
   const vs=findAll(p,2);
   if(!vs.length) return null;
-  if(m[2]&&vs.length===1){ const c=vs[0]; FIT.forEach((s,i)=>{ let ch=m[2][i]; if(s==='KL'&&k2&&ch) ch=({A:'I',B:'J',C:'K',D:'L',E:'F',F:'G',G:'H'})[ch]||ch; if(ch&&ch!=='0'){ const id=ctxOf(s,c)+ch; if(LBY[id]&&LBY[id].ok(c)) p[s]=id; } }); }
+  if(m[2]&&vs.length===1){ const c=vs[0]; FIT.forEach((s,i)=>{ let ch=m[2][i]; if(s==='KL'&&k2&&ch) ch=({A:'I',B:'J',C:'K',D:'L',E:'F',F:'G',G:'H'})[ch]||ch; if(s==='FP'){ const id='FP'+'ABC'.indexOf(ch); if(LBY[id]&&LBY[id].ok(c)) p[s]=id; return; } if(ch&&ch!=='0'){ const id=ctxOf(s,c)+ch; if(LBY[id]&&LBY[id].ok(c)) p[s]=id; } }); }
   return p;
 }
 
 /* ================= cost ================= */
 /* Rough relative build cost of each option, in points. For ranking only, not budgeting. */
 /* Building work other than steels, in rough cost points (ranking only, not budgeting). */
-const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
+const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2,R9:2.8,R10:3,FP0:0,FP1:.2,FP2:1.6, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
   R1:.8,R2:1.2,R3:.8,R4:1,R5:1,R6:1,F1A:.2,F1B:.3,F1C:.3,F1D:.3,F2A:.2,F2B:.2, K1:0,K2:0, P1:0,P2:0, M1:.4,M2:.8,M8:0,M7:1.5,M3:.6,M4:.6,M5:.5, B1:.4,B2:.8,B3:.8, L1:0,L2:.3,
   H0:0,W0:0,G0:0,K0:0,R0:0,P0:0,M6:.5,M0:0,N1:0,N2:.3,N3:0,N4:.3,N5:.5,N0:0,B0:0,L0:0,LO0:0,K0A:.2,K0B:.2,B0A:.1,B0B:.2, LO1:0,LO2:.5,LO3:1,LO4:1,LO5:1,LO6:.8,LO7:.2,LO8:-.3,LO9:-.1,
   K1A:.2,K1B:.3,K1C:.2,K1I:.2,K1J:.3,K1K:.2, B1A:.3,B1B:.2,B2A:.4,B2B:.3,B3A:.3,B3B:.3,
@@ -958,6 +975,8 @@ const STEELS={
   P2:[['s','front wall opened up to the porch']], P4:[['s','front wall opened up to the porch']],
   R7:[['g','old rear wall opened to the extension, about 6.5 m'],['l','5.4 m garden opening']],
   R8:[['g','old rear wall opened to the extension, about 6.5 m'],['l','3.0 m garden opening']],
+  R9:[['g','old rear wall opened to the extension, about 6.5 m'],['l','5.4 m garden opening']],
+  R10:[['g','old rear wall opened to the extension, about 6.5 m'],['l','3.0 m garden opening']],
   G2:[['s','kitchen door to the garage utility'],['s','garden door from the garage utility']],
   G3:[['s','garden door from the garage']], G4:[['s','rear garage window']],
   R1:[['l','5.5 m opening'],['l','3.0 m opening']], R2:[['g','6.4 m opening across the spine wall']],
@@ -1006,7 +1025,7 @@ function totals(c){
   if(c.LO==='LO4') plan.push('Balcony: full planning needed');
   if(inn(c.G,['G2','G5'])) plan.push('Garage extended 0.8 m at the rear');
   if(c.S==='S6') plan.push('New first-floor stair window (front elevation change)');
-  if(inn(c.R,['R7','R8'])) plan.push('Single-storey rear extension 7 × 2 m: usually permitted development (check the eaves height near the boundary)');
+  if(extD(c)) plan.push(`Single-storey rear extension 7 × ${extD(c)/100} m: usually permitted development (check the eaves height near the boundary)`);
   if(openP(c)) plan.push('Porch opened to the hall: it becomes part of the house, the porch door is the front door');
   if(inn(c.R,['R2','R4'])) plan.push('Steel goalpost across the spine wall');
   if(c.M==='M7') plan.push('New soil stack on the east gable');
