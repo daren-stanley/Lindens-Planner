@@ -120,7 +120,8 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker</h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v29 · 13 Nov 2026</small></h1>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v29';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -381,14 +382,14 @@ function eastBlock(){return [
 const hallExt=c=>c.S!=='S1'?[R(0,202,400,290,499,'ci'),R(0,202,509,282,636,'ut','Store'),D(0,212,499,272,509)]:[];
 const wideDoor=c=>c.S==='S1'?[D(0,430,390,600,400)]:c.S==='S6'?[D(0,480,390,660,400)]:[D(0,486,390,656,400)];
 const wideX=c=>c.S==='S1'?515:c.S==='S6'?570:571;
-const widerDoor=c=>c.S==='S1'?[D(0,400,390,640,400)]:c.S==='S6'?[D(0,450,390,690,400)]:[D(0,430,390,670,400)];
-const widerX=c=>c.S==='S1'?520:c.S==='S6'?570:550;
+const widerDoor=c=>c.S==='S1'?[D(0,400,390,640,400)]:[D(0,420,390,660,400)];   /* ends 8 cm short of the fireplace spot */
+const widerX=c=>c.S==='S1'?520:505;
 const b1wide=c=>c.B==='B1'&&c.S==='S1'&&c.L!=='L1';   /* B1 can reach the stairwell edge only with today's stair and no loft stair landing there */
 const mDoor=c=>{const x=b1wide(c)?345:305;return D(1,x,390,x+80,400);};   /* M2/M3/M6 master door: just east of the bathroom wall */
 const wideK=c=>inn(c.KL,['K1I','K1J','K1K','K1L']);   /* kitchen layouts drawn for a 3.7 m kitchen zone */
 const hearth=(c,k,x1,y1,x2,y2)=>!c.FP||c.FP==='FP1'?[FX(0,k,x1,y1,x2,y2)]:k==='fireTV'?[FX(0,'tv',x2-8,y1+8,x2,y2-8)]:[];
-const fdx=c=>c.FP==='FP2'?30:0;   /* living furniture moved clear of a three-sided fire */
-const fp2Door=c=>(GEO[c.H]?GEO[c.H](c):[]).some(e=>e.t==='d'&&e.y1===390&&e.x2>665);
+const fdx=c=>inn(c.FP,['FP2','FP3','FP4'])?30:0;   /* living furniture moved clear of a three-sided fire */
+const fp2Door=c=>(GEO[c.H]?GEO[c.H](c):[]).some(e=>e.t==='d'&&e.y1===390&&e.x2>662);
 const kdOpen=c=>inn(c.K,['K1','K2','K3']), spOpen=c=>inn(c.K,['K1','K2','K4']);   /* kitchen–dining wall out / dining–living (spine) wall out */
 const viaOld=c=>['W2','W3','W6'].includes(c.W);   /* the old kitchen door opens into the hall itself */
 const corner=c=>inn(c.S,['S2','S3']), flipped=c=>inn(c.S,['S4','S5']);
@@ -440,7 +441,7 @@ const GEO={
    ST(1,290,521,380,546,'N',1),ST(1,480,521,570,546,'S',1),WD(1,290,546,380,636,380,546),ST(1,380,546,480,636,'W',4),WD(1,480,546,570,636,480,546),
    WL(1,[[525,525],[525,591],[335,591],[335,527]]),WN(1,330,636,560,662),WE(1,600,636,700,662)],
  H0:c=>[D(0,207,390,283,400),D(0,580,390,655,400),TX(0,245,382,'kitchen door'),TX(0,618,382,'living door')],
- H1:c=>viaOld(c)?[TX(0,240,382,'old kitchen door = the fire door')]:c.S==='S1'?[D(0,430,390,510,400),RS(0,430,390,510,400),TX(0,470,382,'fire door')]:c.S==='S6'?[D(0,590,390,670,400),RS(0,590,390,670,400),TX(0,630,382,'fire door')]:[D(0,560,390,640,400),RS(0,560,390,640,400),TX(0,600,382,'fire door')],
+ H1:c=>viaOld(c)?[TX(0,240,382,'old kitchen door = the fire door')]:c.S==='S1'?[D(0,430,390,510,400),RS(0,430,390,510,400),TX(0,470,382,'fire door')]:c.S==='S6'?[D(0,580,390,660,400),RS(0,580,390,660,400),TX(0,620,382,'fire door')]:[D(0,560,390,640,400),RS(0,560,390,640,400),TX(0,600,382,'fire door')],
  H3:c=>[...wideDoor(c),...wideDoor(c).map(d=>RS(0,d.x1,d.y1,d.x2,d.y2)),...(viaOld(c)||inn(c.W,['W4','W5'])?[]:[D(0,207,390,283,400)]),TX(0,wideX(c),382,c.S==='S6'?'fire-rated glazed slider':'glazed fire doors'),...(inn(c.W,['W4','W5'])?[]:[TX(0,245,382,'old door kept')])],
  H4:c=>[...widerDoor(c),...widerDoor(c).map(d=>RS(0,d.x1,d.y1,d.x2,d.y2)),TX(0,widerX(c),382,'2.4 m glazed fire opening · only way in')],
  H2:c=>{const g=[];
@@ -651,12 +652,12 @@ const LAYOUTS=[
   geo:c=>[FX(0,'wt',26,26,86,300),FX(0,'sk',34,100,78,160),FX(0,'tall',26,300,86,390),FX(0,'wt',190,100,290,280),FX(0,'hob',215,160,265,220),
    ...STOOLS(0,[[300,130],[300,190]]),FX(0,'tbl',180,-130,420,-40),...CHAIRS(0,[[195,-172],[255,-172],[315,-172],[375,-172],[195,-35],[255,-35],[315,-35],[375,-35]]),
    FX(0,'sofa',579,-170,674,20,'E')]}]),
- /* fireplace: 0 none, 1 the chimney breast on the east wall, 2 a three-sided fire on the old spine line against the hall wall */
+ /* fireplace: 0 none, 1 the chimney breast on the east wall, 2–4 a 0.5 m wide three-sided fire (0.8/1.0/1.2 m long) flush with the living room's west wall line, against the hall wall */
  {id:'FP0',name:'No fireplace',ds:'Chimney breast without a fire · TV on the east wall',src:'new',sum:'no fireplace',geo:c=>[]},
  {id:'FP1',name:'East-wall hearth',ds:'Fire in the chimney breast, mid east wall',src:'drawn',sum:'fire on the east wall',geo:c=>[]},
- {id:'FP2',name:'Three-sided fire',ds:'1.2 × 0.9 m glass fire between dining and living · 0.5 m up · flue pier to the ceiling',src:'new',
-  ok:c=>spOpen(c)&&!fp2Door(c),why:c=>!spOpen(c)?'Needs the dining–living wall out (K1 or K4).':'The hall door to the open plan sits where the fire goes.',sum:'three-sided fire between dining and living',
-  geo:c=>[FX(0,'fire3',668,270,758,390),TX(0,713,258,'3-sided fire · 0.5 m up')]},
+ ...[[2,80],[3,100],[4,120]].map(([n,L])=>({id:'FP'+n,name:`Three-sided fire, ${L/100} m`,ds:`${L/100} × 0.5 m glass fire on the old dining–living wall line · 0.5 m up · flue pier to the ceiling`,src:'new',
+  ok:c=>spOpen(c)&&!fp2Door(c),why:c=>!spOpen(c)?'Needs the dining–living wall out (K1 or K4).':'The hall door to the open plan sits where the fire goes.',sum:`${L/100} m three-sided fire between dining and living`,
+  geo:c=>[FX(0,'fire3',668,390-L,718,390),TX(0,693,378-L,'3-sided fire')]})),
  /* living rooms, full depth (3.7 × 6.1 m): fire on the chimney breast, east wall, y 290–390 */
  {id:'F1A',name:'Hearth',ds:'Sofa faces the fire, TV above',src:'new',sum:'sofa facing the fire, TV above it',
   geo:c=>[FX(0,'rug',788,180,1048,500),FX(0,'wt',1046,196,1084,286),FX(0,'wt',1046,394,1084,484),...hearth(c,'fireTV',1052,290,1084,390),
@@ -777,7 +778,7 @@ function fx(e){
      if(e.k==='sofa'){ const n=Math.max(2,Math.round(long/70)); for(let i=1;i<n;i++){ o+=w>h?`<line x1="${x1+w*i/n}" y1="${y1+(d==='N'?t:0)}" x2="${x1+w*i/n}" y2="${y2-(d==='S'?t:0)}" stroke="#CFC8B9" stroke-width="1.5"/>`:`<line x1="${x1+(d==='W'?t:0)}" y1="${y1+h*i/n}" x2="${x2-(d==='E'?t:0)}" y2="${y1+h*i/n}" stroke="#CFC8B9" stroke-width="1.5"/>`; } }
      if(bk) o+=`<rect x="${bk[0]}" y="${bk[1]}" width="${bk[2]}" height="${bk[3]}" rx="6" fill="#D9D2C3" stroke="#7A746A" stroke-width="1.8"/>`;
      return o; }
-   case 'fire3': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="#CFC8BC" stroke="#4A4640" stroke-width="2"/><rect x="${x1+10}" y="${y1+10}" width="${w-20}" height="${h-12}" fill="#F3B58C" stroke="#B9501C" stroke-width="2"/><path d="M${x1+2} ${y1+8}V${y2-2}M${x2-2} ${y1+8}V${y2-2}M${x1+2} ${y1+2}H${x2-2}" stroke="#7FB3D9" stroke-width="4"/><path d="M${cx-18} ${y2-14}Q${cx-10} ${cy} ${cx} ${y1+26}Q${cx+10} ${cy} ${cx+18} ${y2-14}" fill="none" stroke="#B9501C" stroke-width="2"/>`;
+   case 'fire3': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" fill="#CFC8BC" stroke="#4A4640" stroke-width="2"/><rect x="${x1+10}" y="${y1+10}" width="${w-20}" height="${h-12}" fill="#F3B58C" stroke="#B9501C" stroke-width="2"/><path d="M${x1+2} ${y1+8}V${y2-2}M${x2-2} ${y1+8}V${y2-2}M${x1+2} ${y1+2}H${x2-2}" stroke="#7FB3D9" stroke-width="4"/><path d="M${cx-w/5} ${y2-10}Q${cx-w/8} ${cy} ${cx} ${y1+22}Q${cx+w/8} ${cy} ${cx+w/5} ${y2-10}" fill="none" stroke="#B9501C" stroke-width="2"/>`;
    case 'tv': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" rx="2" fill="#2E2C29"/>`;
    case 'fire': case 'fireTV': return `<rect x="${x1}" y="${y1}" width="${w}" height="${h}" rx="3" fill="#F3B58C" stroke="#B9501C" stroke-width="2"/><path d="M${x1+6} ${y1+h*.25}L${x2-8} ${y1+h*.25}M${x1+6} ${cy}L${x2-8} ${cy}M${x1+6} ${y1+h*.75}L${x2-8} ${y1+h*.75}" stroke="#B9501C" stroke-width="2"/>`+(e.k==='fireTV'?`<rect x="${x2-7}" y="${y1+8}" width="7" height="${h-16}" fill="#2E2C29"/>`:'');
    case 'plant': return `<circle cx="${cx}" cy="${cy}" r="${w/2}" fill="#A9C298" stroke="#6F8F5E" stroke-width="2"/>`;
@@ -921,7 +922,7 @@ function sanitizeFit(c){
 /* ---------- rebuild code ---------- */
 function makeCode(c){
   const st=STRUCT.map(s=>(SLOTS[s].opts.findIndex(o=>o[0]===c[s])+1).toString(36)).join('');
-  const ft=FIT.map(s=>!picks[s]?'0':s==='FP'?'ABC'[+picks[s][2]]:picks[s].slice(2)).join('');
+  const ft=FIT.map(s=>!picks[s]?'0':s==='FP'?'ABCDE'[+picks[s][2]]:picks[s].slice(2)).join('');
   return `LND-${st}-${ft}`.toUpperCase();
 }
 /* option lists of the 13-character (and older 12-character) codes, before the house-to-garage door, the 2-step winders, R7/R8, the new porches and masters */
@@ -951,14 +952,14 @@ function readCode(str){
   const k2=p._k2; delete p._k2;
   const vs=findAll(p,2);
   if(!vs.length) return null;
-  if(m[2]&&vs.length===1){ const c=vs[0]; FIT.forEach((s,i)=>{ let ch=m[2][i]; if(s==='KL'&&k2&&ch) ch=({A:'I',B:'J',C:'K',D:'L',E:'F',F:'G',G:'H'})[ch]||ch; if(s==='FP'){ const id='FP'+'ABC'.indexOf(ch); if(LBY[id]&&LBY[id].ok(c)) p[s]=id; return; } if(ch&&ch!=='0'){ const id=ctxOf(s,c)+ch; if(LBY[id]&&LBY[id].ok(c)) p[s]=id; } }); }
+  if(m[2]&&vs.length===1){ const c=vs[0]; FIT.forEach((s,i)=>{ let ch=m[2][i]; if(s==='KL'&&k2&&ch) ch=({A:'I',B:'J',C:'K',D:'L',E:'F',F:'G',G:'H'})[ch]||ch; if(s==='FP'){ const id='FP'+'ABCDE'.indexOf(ch); if(LBY[id]&&LBY[id].ok(c)) p[s]=id; return; } if(ch&&ch!=='0'){ const id=ctxOf(s,c)+ch; if(LBY[id]&&LBY[id].ok(c)) p[s]=id; } }); }
   return p;
 }
 
 /* ================= cost ================= */
 /* Rough relative build cost of each option, in points. For ranking only, not budgeting. */
 /* Building work other than steels, in rough cost points (ranking only, not budgeting). */
-const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2,R9:2.8,R10:3,FP0:0,FP1:.2,FP2:1.6, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
+const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2,R9:2.8,R10:3,FP0:0,FP1:.2,FP2:1.4,FP3:1.5,FP4:1.6, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
   R1:.8,R2:1.2,R3:.8,R4:1,R5:1,R6:1,F1A:.2,F1B:.3,F1C:.3,F1D:.3,F2A:.2,F2B:.2, K1:0,K2:0, P1:0,P2:0, M1:.4,M2:.8,M8:0,M7:1.5,M3:.6,M4:.6,M5:.5, B1:.4,B2:.8,B3:.8, L1:0,L2:.3,
   H0:0,W0:0,G0:0,K0:0,R0:0,P0:0,M6:.5,M0:0,N1:0,N2:.3,N3:0,N4:.3,N5:.5,N0:0,B0:0,L0:0,LO0:0,K0A:.2,K0B:.2,B0A:.1,B0B:.2, LO1:0,LO2:.5,LO3:1,LO4:1,LO5:1,LO6:.8,LO7:.2,LO8:-.3,LO9:-.1,
   K1A:.2,K1B:.3,K1C:.2,K1I:.2,K1J:.3,K1K:.2, B1A:.3,B1B:.2,B2A:.4,B2B:.3,B3A:.3,B3B:.3,
@@ -1028,6 +1029,7 @@ function totals(c){
   if(extD(c)) plan.push(`Single-storey rear extension 7 × ${extD(c)/100} m: usually permitted development (check the eaves height near the boundary)`);
   if(openP(c)) plan.push('Porch opened to the hall: it becomes part of the house, the porch door is the front door');
   if(inn(c.R,['R2','R4'])) plan.push('Steel goalpost across the spine wall');
+  if(c._fit&&inn(c.FP,['FP2','FP3','FP4'])) plan.push('Three-sided fire: flue route up through the first floor to confirm (Building Regs Part J)');
   if(c.M==='M7') plan.push('New soil stack on the east gable');
   const parts=[...STRUCT,...(c._fit?FIT:[])].map(s=>[s,c[s],costOf(c[s],c)]);
   const steels=STRUCT.flatMap(s=>steelsOf(c[s],c));
