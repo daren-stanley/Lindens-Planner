@@ -151,9 +151,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v31 · 14 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v32 · 14 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v31';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v32';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -316,16 +316,17 @@ const SLOTS={
  BL:{name:'Family bathroom layout',ctx:'B',fit:1},
  EL:{name:'Ensuite layout',ctx:'M',fit:1},
  LL:{name:'Living room layout',ctx:'F',fit:1},
- FP:{name:'Fireplace',ctx:'FP',fit:1}
+ FP:{name:'Fireplace',ctx:'FP',fit:1},
+ PL:{name:'Extension pillar',ctx:'PL',fit:1}
 };
 const GROUPS=[
  {id:'gf',name:'Ground floor',slots:['S','K','H','W','G','A','F','R','P']},
  {id:'ff',name:'First floor',slots:['M','N','B','L']},
  {id:'lo',name:'Loft',slots:['LO']},
- {id:'fit',name:'Fireplace',slots:['FP'],fit:1}
+ {id:'fit',name:'Fireplace and pillar',slots:['PL','FP'],fit:1}
 ];
 const STRUCT=['S','H','W','G','F','R','K','P','M','B','L','LO','N','A'];   // code order (v3, 14 characters)
-const FIT=['KL','BL','EL','LL','FP'];   // code order
+const FIT=['KL','BL','EL','LL','FP','PL'];   // code order
 const NAME={};Object.values(SLOTS).forEach(s=>(s.opts||[]).forEach(o=>NAME[o[0]]=o[1]));
 
 /* ---------- rules (each: slots involved, test, plain words) ---------- */
@@ -398,6 +399,7 @@ const E=(t,f,o)=>Object.assign({t,f},o);
 const R=(f,x1,y1,x2,y2,cls,name,dims,o)=>E('r',f,Object.assign({x1,y1,x2,y2,cls,name,dims},o||{}));
 const SH=(f,x1,y1,x2,y2)=>E('sh',f,{x1,y1,x2,y2});
 const WA=(f,x1,y1,x2,y2)=>E('wall',f,{x1,y1,x2,y2});
+const PIL=(f,x1,y1,x2,y2)=>E('pil',f,{x1,y1,x2,y2});
 const D=(f,x1,y1,x2,y2)=>E('d',f,{x1,y1,x2,y2});
 const WE=(f,x1,y1,x2,y2)=>E('w',f,{x1,y1,x2,y2,k:'e'});
 const WN=(f,x1,y1,x2,y2)=>E('w',f,{x1,y1,x2,y2,k:'n'});
@@ -705,6 +707,9 @@ const LAYOUTS=[
  ...[[2,80],[3,100],[4,120]].map(([n,L])=>({id:'FP'+n,name:`Three-sided fire, ${L/100} m`,ds:`${L/100} × 0.5 m glass fire on the old dining–living wall line · 0.5 m up · flue pier to the ceiling`,src:'new',
   ok:c=>spOpen(c)&&!fp2Door(c),why:c=>!spOpen(c)?'Needs the dining–living wall out (K1 or K4).':'The hall door to the open plan sits where the fire goes.',sum:`${L/100} m three-sided fire between dining and living`,
   geo:c=>[FX(0,'fire3',668,390-L,718,390),TX(0,693,378-L,'3-sided fire')]})),
+ /* extension pillar: 0.1 × 0.1 m post under the steel on the old rear-wall line, centre 2.0–3.25 m from the inside of the west wall */
+ ...[200,225,250,275,300,325].map((m,n)=>({id:'PL'+(n+1),name:`Pillar ${(m/100).toFixed(2).replace(/0$/,'')} m from the left wall`,ds:`0.1 × 0.1 m post under the steel · centre ${m/100} m from the inside of the west wall`,src:'new',sum:`pillar ${m/100} m from the left wall`,
+  ok:c=>extD(c)>0,why:()=>'Only with a rear extension (R7–R10).',geo:c=>[PIL(0,26+m-5,8,26+m+5,18),TX(0,26+m,-8,'pillar '+(m/100).toFixed(2).replace(/0$/,'')+' m')]})),
  /* living rooms, full depth (3.7 × 6.1 m): fire on the chimney breast, east wall, y 290–390 */
  {id:'F1A',name:'Hearth',ds:'Sofa faces the fire, TV above',src:'new',sum:'sofa facing the fire, TV above it',
   geo:c=>[FX(0,'rug',788,180,1048,500),FX(0,'wt',1046,196,1084,286),FX(0,'wt',1046,394,1084,484),...hearth(c,'fireTV',1052,290,1084,390),
@@ -791,7 +796,7 @@ LAYOUTS.forEach(l=>{const g=l.geo; l.geo=c=>{let r=g(c); if(c.K==='K3') r=r.filt
 const LBY={};LAYOUTS.forEach(l=>{LBY[l.id]=l;const ok0=l.ok||(()=>true), why0=l.why||(()=>'');
   if(l.id[0]==='K'){ l.ok=c=>ok0(c)&&!westClash(l.raw(c),c); l.why=c=>!ok0(c)?why0(c):'The house-to-garage door ('+c.A+') is where this layout’s sink goes.'; }
   else { l.ok=ok0; l.why=why0; } });
-const ctxOf=(slot,c)=>slot==='KL'?(c.K==='K3'?'K1':c.K==='K4'?'K0':c.K):(slot==='FP'?'FP':c[SLOTS[slot].ctx]);
+const ctxOf=(slot,c)=>slot==='KL'?(c.K==='K3'?'K1':c.K==='K4'?'K0':c.K):(slot==='FP'?'FP':slot==='PL'?(extD(c)>0?'PL':'--'):c[SLOTS[slot].ctx]);
 function layoutOpts(slot,c){
   const ctx=ctxOf(slot,c);
   return LAYOUTS.filter(l=>l.id.slice(0,2)===ctx);
@@ -799,7 +804,7 @@ function layoutOpts(slot,c){
 
 /* ================= svg ================= */
 const RENDER_ORDER=['G','P','K','F','S','H','W','A','R','L','M','N','B','LO'];
-const LAYER={sh:0,r:1,pg:1,wall:2,s:3,wn:3,bed:3.5,fx:3.6,it:3.7,dash:4,pk:4,d:5,w:5,gl:5,wl:6,rsj:5.5,tx:7};
+const LAYER={sh:0,r:1,pg:1,wall:2,s:3,wn:3,bed:3.5,fx:3.6,it:3.7,pil:5.6,dash:4,pk:4,d:5,w:5,gl:5,wl:6,rsj:5.5,tx:7};
 const FILL={so:'#F2DFC2',be:'#D8E3EE',we:'#C9E6DF',ut:'#E4E0D7',ga:'#D6D1C6',of:'#E3DAF0',ci:'#FAF8F4',po:'#EFE6D2',ou:'#E3ECDD',void:'#CFCAC0',wd:'#CFC6B5'};
 const BASE=[SH(0,0,0,1110,662),SH(0,1110,300,1126,380),SH(1,0,0,1110,662),SH(1,1110,300,1126,380),SH(2,0,0,1110,662),
   R(2,26,433,1084,636,'ea','Eaves storage (under 1.5 m)')];
@@ -858,6 +863,7 @@ function el(e,id){
   const a=(faded||e._f)?' opacity="0.42"':'', ds=e.slot?` data-slot="${e.slot}"`:'';
   const w=(e.x2-e.x1),h=(e.y2-e.y1);
   switch(e.t){
+   case 'pil': return `<rect x="${e.x1}" y="${e.y1}" width="${w}" height="${h}" fill="#2E2C29" stroke="#B9501C" stroke-width="2"/>`;
    case 'sh': case 'wall': return `<rect x="${e.x1}" y="${e.y1}" width="${w}" height="${h}" fill="#2E2C29"${ds}${a}/>`;
    case 'r': {
      const fill=e.cls==='ea'||e.cls==='rs'?`url(#hatch${id})`:FILL[e.cls];
@@ -897,7 +903,7 @@ function el(e,id){
 function floorSvg(f,c,isPicked,vb,id,noItems){
   const els=BASE.filter(e=>e.f===f).map(e=>Object.assign({},e,{slot:null}));
   RENDER_ORDER.forEach(s=>{ GEO[c[s]](c).filter(e=>e.f===f).forEach(e=>els.push(Object.assign({},e,{slot:s,picked:isPicked(s)}))); });
-  if(c._fit) ['FP'].forEach(s=>{ const l=LBY[c[s]]; if(l) l.geo(c).filter(e=>e.f===f).forEach(e=>els.push(Object.assign({},e,{slot:s,picked:isPicked(s)}))); });
+  if(c._fit) ['FP','PL'].forEach(s=>{ const l=LBY[c[s]]; if(l) l.geo(c).filter(e=>e.f===f).forEach(e=>els.push(Object.assign({},e,{slot:s,picked:isPicked(s)}))); });
   els.filter(e=>e.t==='w'&&e.k==='n'&&f<2&&!(e.slot==='G'&&e.y1>=640)&&!e.hasRs).forEach(e=>els.push(Object.assign({},e,{t:'rsj',k:null})));
   {const seen=new Set();for(let k=els.length-1;k>=0;k--){const e=els[k];if(e.t!=='rsj')continue;const key=[e.f,e.x1,e.y1,e.x2,e.y2].join();if(seen.has(key))els.splice(k,1);else seen.add(key);}}
   if(onFloor(f).some(([it])=>CAT[it.t][6]==='bed')) for(let k=els.length-1;k>=0;k--) if(els[k].t==='bed') els.splice(k,1);
@@ -1035,7 +1041,7 @@ let GRID={}, SEGS={}, GKEY='';
 function structEls(c,f){
   const els=BASE.filter(e=>e.f===f).slice();
   RENDER_ORDER.forEach(s=>GEO[c[s]](c).filter(e=>e.f===f).forEach(e=>els.push(e)));
-  const l=LBY[c.FP]; if(l) l.geo(c).filter(e=>e.f===f).forEach(e=>els.push(e));
+  ['FP','PL'].forEach(k=>{ const l=LBY[c[k]]; if(l&&l.ok(c)) l.geo(c).filter(e=>e.f===f).forEach(e=>els.push(e)); });
   return els;
 }
 function buildGrid(c){
@@ -1049,6 +1055,7 @@ function buildGrid(c){
       for(let y=Math.min(...ys);y<Math.max(...ys);y+=GC) for(let x=Math.min(...xs);x<Math.max(...xs);x+=GC){ if(inPoly(x+1,y+1,e.pts)) g[gi(x+1,y+1)]=2; } });
     els.filter(e=>e.t==='r'||e.t==='d'||e.t==='pk').forEach(e=>fill(e,e.cls==='void'?3:e.cls==='wd'?4:2));
     els.filter(e=>e.t==='s'||e.t==='wn').forEach(e=>fill(e,3));
+    els.filter(e=>e.t==='pil').forEach(e=>fill(e,5));
     els.filter(e=>e.t==='fx'&&!['rug','led'].includes(e.k)).forEach(e=>fill(e,4));
     GRID[f]=g; SEGS[f]=wallSegs(g,els);
   }
@@ -1081,7 +1088,7 @@ function clashes(f){
   L.forEach(([it,i])=>{ const [w,d]=isz(it), a=(it.r||0)*Math.PI/180, c=Math.cos(a), s=Math.sin(a);
     if(has(it.t,'t')) return;
     for(let u=-w/2+3;u<=w/2-3+0.01;u+=Math.max(4,(w-6)/Math.ceil((w-6)/8))) for(let v=-d/2+3;v<=d/2-3+0.01;v+=Math.max(4,(d-6)/Math.ceil((d-6)/8))){
-      if(gv(f,it.x+u*c-v*s,it.y+u*s+v*c)!==2){ out.add(i); return; } } });
+      const g=gv(f,it.x+u*c-v*s,it.y+u*s+v*c); if(g!==2&&!(g===5&&it.t===CK.wtop)){ out.add(i); return; } } });
   for(let p=0;p<L.length;p++) for(let q=p+1;q<L.length;q++){ const [A,i]=L[p],[B,j]=L[q];
     if(has(A.t,'t')||has(B.t,'t')||has(A.t,'f')||has(B.t,'f')) continue;
     const ka=CAT[A.t][6], kb=CAT[B.t][6]; if(ka==='glass'||kb==='glass') continue; if((SOFT.has(ka)&&UNDER.has(kb))||(SOFT.has(kb)&&UNDER.has(ka))) continue;
@@ -1224,7 +1231,7 @@ function sanitizeFit(c){
 /* ---------- rebuild code ---------- */
 function makeCode(c){
   const st=STRUCT.map(s=>(SLOTS[s].opts.findIndex(o=>o[0]===c[s])+1).toString(36)).join('');
-  const ft=FIT.map(s=>!picks[s]?'0':s==='FP'?'ABCDE'[+picks[s][2]]:picks[s].slice(2)).join('');
+  const ft=FIT.map(s=>!picks[s]?'0':s==='FP'||s==='PL'?'ABCDEFG'[+picks[s][2]]:picks[s].slice(2)).join('');
   return `LND-${st}-${ft}`.toUpperCase();
 }
 /* option lists of the 13-character (and older 12-character) codes, before the house-to-garage door, the 2-step winders, R7/R8, the new porches and masters */
@@ -1245,7 +1252,7 @@ function readLegacy(str){
   return p;
 }
 function readCode(str){
-  const m=String(str).trim().toUpperCase().match(/^LND-([0-9A-Z]{12,14})(?:-([0-9A-L]{3,5}))?$/);
+  const m=String(str).trim().toUpperCase().match(/^LND-([0-9A-Z]{12,14})(?:-([0-9A-L]{3,6}))?$/);
   if(!m) return null;
   let p={};
   if(m[1].length<14){ p=readLegacy(m[1]); if(!p) return null; }
@@ -1254,14 +1261,14 @@ function readCode(str){
   const k2=p._k2; delete p._k2;
   const vs=findAll(p,2);
   if(!vs.length) return null;
-  if(m[2]&&vs.length===1){ const c=vs[0]; FIT.forEach((s,i)=>{ let ch=m[2][i]; if(s==='KL'&&k2&&ch) ch=({A:'I',B:'J',C:'K',D:'L',E:'F',F:'G',G:'H'})[ch]||ch; if(s==='FP'){ const id='FP'+'ABCDE'.indexOf(ch); if(LBY[id]&&LBY[id].ok(c)) p[s]=id; return; } if(ch&&ch!=='0'){ const id=ctxOf(s,c)+ch; if(LBY[id]&&LBY[id].ok(c)) p[s]=id; } }); }
+  if(m[2]&&vs.length===1){ const c=vs[0]; FIT.forEach((s,i)=>{ let ch=m[2][i]; if(s==='KL'&&k2&&ch) ch=({A:'I',B:'J',C:'K',D:'L',E:'F',F:'G',G:'H'})[ch]||ch; if(s==='FP'||s==='PL'){ if(!ch) return; const id=s+'ABCDEFG'.indexOf(ch); if(LBY[id]&&LBY[id].ok(c)) p[s]=id; return; } if(ch&&ch!=='0'){ const id=ctxOf(s,c)+ch; if(LBY[id]&&LBY[id].ok(c)) p[s]=id; } }); }
   return p;
 }
 
 /* ================= cost ================= */
 /* Rough relative build cost of each option, in points. For ranking only, not budgeting. */
 /* Building work other than steels, in rough cost points (ranking only, not budgeting). */
-const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2,R9:2.8,R10:3,FP0:0,FP1:.2,FP2:1.4,FP3:1.5,FP4:1.6, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
+const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2,R9:2.8,R10:3,FP0:0,FP1:.2,PL1:.3,PL2:.3,PL3:.3,PL4:.3,PL5:.3,PL6:.3,FP2:1.4,FP3:1.5,FP4:1.6, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
   R1:.8,R2:1.2,R3:.8,R4:1,R5:1,R6:1,F1A:.2,F1B:.3,F1C:.3,F1D:.3,F2A:.2,F2B:.2, K1:0,K2:0, P1:0,P2:0, M1:.4,M2:.8,M8:0,M7:1.5,M3:.6,M4:.6,M5:.5, B1:.4,B2:.8,B3:.8, L1:0,L2:.3,
   H0:0,W0:0,G0:0,K0:0,R0:0,P0:0,M6:.5,M0:0,N1:0,N2:.3,N3:0,N4:.3,N5:.5,N0:0,B0:0,L0:0,LO0:0,K0A:.2,K0B:.2,B0A:.1,B0B:.2, LO1:0,LO2:.5,LO3:1,LO4:1,LO5:1,LO6:.8,LO7:.2,LO8:-.3,LO9:-.1,
   K1A:.2,K1B:.3,K1C:.2,K1I:.2,K1J:.3,K1K:.2, B1A:.3,B1B:.2,B2A:.4,B2B:.3,B3A:.3,B3B:.3,
@@ -1331,6 +1338,7 @@ function totals(c){
   if(extD(c)) plan.push(`Single-storey rear extension 7 × ${extD(c)/100} m: usually permitted development (check the eaves height near the boundary)`);
   if(openP(c)) plan.push('Porch opened to the hall: it becomes part of the house, the porch door is the front door');
   if(inn(c.R,['R2','R4'])) plan.push('Steel goalpost across the spine wall');
+  if(c._fit&&LBY[c.PL]&&extD(c)) plan.push(`Steel post under the extension steel, ${LBY[c.PL].sum.replace('pillar ','')}: structural engineer to size it and its pad footing`);
   if(c._fit&&inn(c.FP,['FP2','FP3','FP4'])) plan.push('Three-sided fire: flue route up through the first floor to confirm (Building Regs Part J)');
   if(c.M==='M7') plan.push('New soil stack on the east gable');
   const parts=[...STRUCT,...(c._fit?FIT:[])].map(s=>[s,c[s],costOf(c[s],c)]);
@@ -1415,7 +1423,7 @@ function render(){
   }).join('');
 
   const dn=drawnName(c), np=STRUCT.filter(s=>picks[s]).length;
-  const fitVis=['FP'].filter(st.vis), fitDone=st.complete&&fitVis.every(s=>st.resolved(s));
+  const fitVis=['FP','PL'].filter(st.vis), fitDone=st.complete&&fitVis.every(s=>st.resolved(s));
   $('status').innerHTML=
     (st.complete?`<span class="pill ok">Structure complete</span>`:`<span class="pill">${np} of ${STRUCT.length} parts picked</span>`)+
     (dn?`<span class="pill ok">${st.complete?'Saved board':'Preview from'}: ${dn==='0'?'Original house':dn}</span>`:`<span class="pill warn">Untested combination: check before relying on it</span>`)+
@@ -1500,7 +1508,7 @@ function applyPicks(p,collapse,items){
 $('fill').addEventListener('click',()=>{
   const st=state();
   if(!st.complete){ const c=preview(st.first); const p=Object.assign({},picks); STRUCT.forEach(k=>p[k]=c[k]); applyPicks(p,true); }
-  else { ['FP'].forEach(s=>{ if(!picks[s]&&st.c[s]) picks[s]=st.c[s]; }); applyPicks(picks,true); }
+  else { ['FP','PL'].forEach(s=>{ if(!picks[s]&&st.c[s]) picks[s]=st.c[s]; }); applyPicks(picks,true); }
 });
 $('orig').addEventListener('click',()=>{ $('msg').textContent=''; applyPicks(Object.assign({},DRAWN.find(d=>d[0]==='0')[1]),true); });
 function composeSvg(){
