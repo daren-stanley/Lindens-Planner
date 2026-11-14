@@ -151,9 +151,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v32 · 14 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v33 · 14 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v32';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v33';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -389,7 +389,7 @@ function findAll(p,lim){ const out=[], pis=CL.map(L=>pidxL(p,L));
 
 const DRAWN=[
  ['0',  {S:'S1',H:'H0',W:'W0',K:'K0',F:'F1',R:'R0',G:'G0',A:'A1',P:'P0',L:'L0',M:'M0',B:'B0',LO:'LO0',N:'N1'}],
- ['MB Board 1', {S:'S5',H:'H3',W:'W5',G:'G5',F:'F1',R:'R7',K:'K1',P:'P4',M:'M4',B:'B0',L:'L0',LO:'LO0',N:'N0',A:'A2',KL:'K1A',BL:'B0A',EL:'M4A',LL:'F1A'}],
+ ['MB Board 1', {S:'S5',H:'H3',W:'W5',G:'G5',F:'F1',R:'R7',K:'K1',P:'P4',M:'M4',B:'B0',L:'L0',LO:'LO0',N:'N0',A:'A2',FP:'FP0',PL:'PL3'}, 'F1LQwEIAOgEgDMADwRMgQEGAN8EgBAACwoBAQgBNMSAIcAPC0MBNEERAYBNgBkESoEBL0EKQAAPAAyCQwFzQQtAABkANwGCgwFhwR7EgAoACgiCgwGEwQQBgAoACgiCgwGEwR-BgAoACgiCgwGEwPcBgAoACgiIAUEVQY_DACmAEsXBQQcBeUSACQANhgFBBkFpwYAPAAtHAUELwRZEgCuAFoiBQReBH4MAAMAZBcFBIQEHgAAKAA3GAUEwAQZAAA8AC0OBQVSBIkSALQA0i0MBCAESRIAhgA8EQoMBYcD3BIAKAAoIgoMBYcEEBIAKAAoIgoMBYcEQhIAKAAoIgoMBhMEPgYAKAAoIi4ABUMFlgAvAAVDBdIAKQAE7QZGDCYABUgGRQwfAARJBjsAFwAEIwXgEhkABBkFlhIBAAc-BUsSAgAHPgWlEgEAB5gFpQwBAAc-BPESBQAIEAUKBgYACCAFCgYEAAenBQAGBwQHbAU7BgFeAOYTAAWIBZ0SEgAFiAXcEg8BBPwE-hIPAQT8BBkSDAEHwASwBgwBB8AF6AY'],
  ['Daren Board 1', {S:'S5',H:'H3',W:'W4',G:'G5',F:'F1',K:'K1',P:'P1',M:'M2',B:'B1',L:'L2',LO:'LO6',N:'N0',A:'A3',BL:'B1A',EL:'M2B',LL:'F1A',FP:'FP3',R:'R5'}],
  ['Daren Board 2', {S:'S5',H:'H3',W:'W4',G:'G5',F:'F1',K:'K1',P:'P1',M:'M2',B:'B1',L:'L2',LO:'LO6',N:'N0',A:'A3',BL:'B1A',EL:'M2B',LL:'F1A',FP:'FP3',R:'R10'}]
 ];
@@ -1079,12 +1079,13 @@ function corners(it){ const [w,d]=isz(it), a=(it.r||0)*Math.PI/180, c=Math.cos(a
 function overlap(A,B){ const pa=corners(A), pb=corners(B);
   for(const P of [pa,pb]) for(let i=0;i<4;i++){ const [x1,y1]=P[i],[x2,y2]=P[(i+1)%4], nx=y2-y1, ny=x1-x2;
     const pr=Q=>Q.map(([x,y])=>x*nx+y*ny); const a=pr(pa), b=pr(pb);
-    if(Math.max(...a)<=Math.min(...b)+0.5||Math.max(...b)<=Math.min(...a)+0.5) return false; }
+    if(Math.max(...a)<=Math.min(...b)+1.5||Math.max(...b)<=Math.min(...a)+1.5) return false; }
   return true; }
 function aabb(it){ const p=corners(it), xs=p.map(q=>q[0]), ys=p.map(q=>q[1]); return [Math.min(...xs),Math.min(...ys),Math.max(...xs),Math.max(...ys)]; }
 const SOFT=new Set(['chair','stool']), UNDER=new Set(['table','box','unit']);
 function clashes(f){
   const out=new Set(), L=onFloor(f);
+  if(!GRID[f]){ const st=state(); if(!st.complete) return out; buildGrid(st.c); }
   L.forEach(([it,i])=>{ const [w,d]=isz(it), a=(it.r||0)*Math.PI/180, c=Math.cos(a), s=Math.sin(a);
     if(has(it.t,'t')) return;
     for(let u=-w/2+3;u<=w/2-3+0.01;u+=Math.max(4,(w-6)/Math.ceil((w-6)/8))) for(let v=-d/2+3;v<=d/2-3+0.01;v+=Math.max(4,(d-6)/Math.ceil((d-6)/8))){
@@ -1546,7 +1547,7 @@ $('load').addEventListener('click',()=>{
 });
 $('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('load').click(); });
 const ps=$('preset'); DRAWN.forEach(([n])=>{const o=document.createElement('option');o.value=n;o.textContent=n==='0'?'Original house':n;ps.appendChild(o);});
-ps.addEventListener('change',()=>{const d=DRAWN.find(([n])=>n===ps.value); if(d) applyPicks(Object.assign({},d[1]),true); ps.value='';});
+ps.addEventListener('change',()=>{const d=DRAWN.find(([n])=>n===ps.value); if(d) applyPicks(Object.assign({},d[1]),true,d[2]?readFit(d[2]):undefined); ps.value='';});
 
 
 /* ---------- page 2 controller ---------- */
