@@ -172,9 +172,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v37 · 15 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v38 · 15 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v37';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v38';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -427,7 +427,7 @@ function findAll(p,lim){ const out=[], pis=CL.map(L=>pidxL(p,L));
   return out; }
 
 const DRAWN=[
- ['0',  {S:'S1',H:'H0',W:'W0',K:'K0',F:'F1',R:'R0',G:'G0',A:'A1',P:'P0',L:'L0',M:'M0',B:'B0',LO:'LO0',N:'N1'}],
+ ['0',  {S:'S1',H:'H0',W:'W0',K:'K0',F:'F1',R:'R0',G:'G0',A:'A1',P:'P0',L:'L0',M:'M0',B:'B0',LO:'LO0',N:'N1'}, 'F1IgUE2QYMBgADAFoXBQQdBagSACQANhgFBBkF8BIAPAAtIgUELwUWEgADAFoiBQRbBUEMAAMAWikIBLYEIAAdLQwFJASEBgEEAFodKwgFMwUkBh0mCAQgBCASHSoIBSQEuQYLAQgHugR6Bg4BCAe6BNQGDgEIB7oFLgYOAQgHYAWJDA4CCAe6BYkMDgQIBygEywYTBwwHawT6BgGaARgBKQgEIAYoEgYuAASKBkYGJggEIARcEh0mCARcBCAAHQ4FBFwFBQwAtADSDAEHvgW4Bg4BB7sEqgYOAQZDBK0G_wEHbQSzx6iJ_wEFmAS4x6iJ_wEHpAWox6iJ_wEHbQYgx6iJ_wEGfwQqx6iJ_wEEhAXu9_Tq_wAFRgOetpl7_wAF9AS4tpl7_wAEmgS4tpl7_wAHbQUztpl7_wAF2wXutpl7_wAE2gWjtpl7_wAFOAWjtpl7_wAGVAbNtpl7'],
  ['MB Board 1', {S:'S5',H:'H3',W:'W5',G:'G5',F:'F1',R:'R7',K:'K1',P:'P4',M:'M4',B:'B0',L:'L0',LO:'LO0',N:'N0',A:'A2',FP:'FP0',PL:'PL3'}, 'F1LQwEIAOgEgDMADwRMgQEGAN8EgBAACwoBAQgBNMSAIcAPC0MBNEERAYBNgBkESoEBL0EKQAAPAAyCQwFzQQtAABkANwGCgwFhwR7EgAoACgiCgwGEwQQBgAoACgiCgwGEwR-BgAoACgiCgwGEwPcBgAoACgiIAUEVQY_DACmAEsXBQQcBeUSACQANhgFBBkFpwYAPAAtHAUELwRZEgCuAFoiBQReBH4MAAMAZBcFBIQEHgAAKAA3GAUEwAQZAAA8AC0OBQVSBIkSALQA0i0MBCAESRIAhgA8EQoMBYcD3BIAKAAoIgoMBYcEEBIAKAAoIgoMBYcEQhIAKAAoIgoMBhMEPgYAKAAoIi4ABUMFlgAvAAVDBdIAKQAE7QZGDCYABUgGRQwfAARJBjsAFwAEIwXgEhkABBkFlhIBAAc-BUsSAgAHPgWlEgEAB5gFpQwBAAc-BPESBQAIEAUKBgYACCAFCgYEAAenBQAGBwQHbAU7BgFeAOYTAAWIBZ0SEgAFiAXcEg8BBPwE-hIPAQT8BBkSDAEHwASwBgwBB8AF6AY'],
  ['Daren Board 1', {S:'S5',H:'H3',W:'W4',G:'G5',F:'F1',K:'K1',P:'P1',M:'M2',B:'B1',L:'L2',LO:'LO6',N:'N0',A:'A3',FP:'FP3',R:'R5'}, 'F1BwQHcgUfAAEYAYYxBAgJBiQAABgAGCAFBFcGPwwAqgBLHAUE2QY3BgBaAFoiBQTZBgwGAAMAWhcFBB0FqBIAJAA2GAUEegWPAAA8AC0cBQQvBUEMAFoAWiIFBC8FFhIAAwBaIgUEWwVBDAADAFoXBQSEBVMMACgANxgFBCoE1QAAPAAtDgUF3wS4BgC0ANImCAQgBCASBSYIBCAEXBIFJggEIASYEgUpCAR9BCAABSYIBNcEIAAFJggFFAQgAAUtCAUFBJgGBSgIBCAFUAwFKAgEXAVQDAUoCAQgBRISBTMMBUYEmAYAtAAoBSsIBCAE1hIFCAgGBASwBgYKCAXOBHgSBwsIBW4EagAECwgFbgSSAAQLCAVuBLsABAoIBc4EsxIHCggFzgTmEgcKCAYxBHgGBwoIBjEEswYHCggGMQTmBgcCCAfHBaUMBwEIB8cFSwYHAQgHxwTxBgcBCAdtBaUMBwEIB8cElwYHBiAGugVIEpYoDAWHBZsAADwARgUoDAWHBeEAADwARgX_AQdtBLPHqIn_AQWYBLjHqIn_AQekBajHqIn_AQdtBiDHqIn_AQZ_BCrHqIn_AQSEBe739Or_AAVGA562mXv_AAX0BLi2mXv_AASaBLi2mXv_AAdtBTO2mXv_AATaBaO2mXv_AAU4BaO2mXv_AAZUBs22mXv_AAXbBe7Zx7j-AAdtBTN_j2v-AAX0BLh_j2v-AASaBLh_j2v-AAXbBe7p5Nc'],
  ['Daren Board 2', {S:'S5',H:'H3',W:'W4',G:'G5',F:'F1',K:'K1',P:'P1',M:'M2',B:'B1',L:'L2',LO:'LO6',N:'N0',A:'A3',FP:'FP3',R:'R8'}, 'F1BgQIIAU8BgBUAAggBQRXBj8MAKoASxwFBNkGNwYAWgBaIgUE2QYMBgADAFoXBQQdBagSACQANhgFBHoFjwAAPAAtHAUELwVBDABaAFoiBQQvBRYSAAMAWiIFBFsFQQwAAwBaFwUEhAVTDAAoADcYBQQqBNUAADwALQ4FBd8EuAYAtADSCQgF1QRKBgYpCAQgA7MSHSYIBCADWAAdJggEXANYAB0mCASYA1gAHSYIBNQDWAAdKAgEIASYEh0oDAQgBN4SAFAAPB0oCASHBVAMHSgIBD4FMQ8dLQwExQRGBgEEAFodJggFEANYAB0rCAQgBFwSHSYIBCAEIBIdKggEwwQ7AAsKCAYKA_wGIgoIBgoENwYiCggGCgRkBiIKCAYKBJcGIgoIBZsD_BIiCggFmwQ3EiIKCAWbBJcSIgoIBZsEZBIiBiAGugVIEpEBCAe6BHoGDgEIB7oE1AYOAQgHugUuBg4BCAdgBYkMDgIIB7oFiQwOBAgHKATLBhMHDAdrBPoGAZoBGAEpCAQgBigSBi4ABIoGRgYXAAUwBkQMGgAE2gZODAsIBTAEOQAiCwgFMAP5ACILCAUuBHsAIjMMBQYERgYBBAAoHQMBBjMGIQ40BQadBiMSAIIAHv8BB20Es8eoif8BBZgEuMeoif8BB6QFqMeoif8BB20GIMeoif8BBn8EKseoif8BBIQF7vf06v8ABUYDnraZe_8ABfQEuLaZe_8ABJoEuLaZe_8AB20FM7aZe_8ABdsF7raZe_8ABNoFo7aZe_8ABTgFo7aZe_8ABlQGzbaZew']
@@ -1574,7 +1574,7 @@ $('fill').addEventListener('click',()=>{
   if(!st.complete){ const c=preview(st.first); const p=Object.assign({},picks); STRUCT.forEach(k=>p[k]=c[k]); applyPicks(p,true); }
   else { ['FP','PL'].forEach(s=>{ if(!picks[s]&&st.c[s]) picks[s]=st.c[s]; }); applyPicks(picks,true); }
 });
-$('orig').addEventListener('click',()=>{ $('msg').textContent=''; applyPicks(Object.assign({},DRAWN.find(d=>d[0]==='0')[1]),true); });
+$('orig').addEventListener('click',()=>{ $('msg').textContent=''; const d=DRAWN.find(d=>d[0]==='0'); BD.cur=null; try{ localStorage.removeItem('lindens-board'); }catch(e){} applyPicks(Object.assign({},d[1]),true,readFit(d[2])); });
 function composeSvg(){
   const st=state(), c=st.c, isPicked=s=>!!picks[s]||(!SLOTS[s].fit&&st.av[s].size===1);
   const P=40, G=40, T=160, gb=gfBox(c), GH=gb.h, W=P*2+2400+G, H=T+GH+G+800+P;
