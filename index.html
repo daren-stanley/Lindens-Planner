@@ -31,6 +31,11 @@ body.p2 .layout,body.p2 #sb,body.p2 #fill,body.p2 #clear,body.p2 #orig{display:n
 .cit:hover{border-color:var(--line)}.cit svg{background:#FBFAF7;border-radius:4px;flex:none}
 .cit span{display:flex;flex-direction:column;font-size:13px}.cit small{font-family:var(--mono);font-size:11px;color:var(--muted)}
 body.dragging,body.dragging *{cursor:copy!important}
+.bdbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;max-width:1500px;margin:0 auto 12px;padding:8px 12px;background:var(--panel);border:1px solid var(--line);border-radius:8px}
+.bdp{flex-basis:100%;display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:6px;border-top:1px solid var(--line)}
+.bdp label{display:flex;gap:6px;align-items:center;font-size:13px}
+.bdv{list-style:none;padding:0;margin:6px 0;max-height:260px;overflow:auto}
+.bdv li{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid var(--line);font-size:13px}
 #w3page{display:none;max-width:1500px;margin:0 auto}
 body.p3 #w3page{display:block}
 body.p3 .layout,body.p3 #fitPage,body.p3 #sb,body.p3 #fill,body.p3 #clear,body.p3 #orig{display:none}
@@ -167,9 +172,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v36 · 15 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v37 · 15 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v36';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v37';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -187,6 +192,7 @@ body.nosteel .rsj{display:none}
   </div>
 </div>
 
+<div id="bdbar" class="bdbar" aria-live="polite"></div>
 <div class="layout">
   <aside class="side" aria-label="House parts"><div class="slots" id="slots"></div><div id="sumwrap"></div></aside>
   <main class="main">
@@ -1603,8 +1609,6 @@ $('load').addEventListener('click',()=>{
   $('msg').textContent=''; $('codeIn').value=''; applyPicks(p,true,fi);
 });
 $('codeIn').addEventListener('keydown',e=>{ if(e.key==='Enter') $('load').click(); });
-const ps=$('preset'); DRAWN.forEach(([n])=>{const o=document.createElement('option');o.value=n;o.textContent=n==='0'?'Original house':n;ps.appendChild(o);});
-ps.addEventListener('change',()=>{const d=DRAWN.find(([n])=>n===ps.value); if(d) applyPicks(Object.assign({},d[1]),true,d[2]?readFit(d[2]):undefined); ps.value='';});
 
 
 /* ---------- page 2 controller ---------- */
@@ -1612,7 +1616,7 @@ const FLOORS=['Ground floor','First floor','Loft'];
 let FVB={}, CLASH=new Set();
 function floorBox(c,f){ return f===0?gfBox(c).vb:f===1?'-30 -60 1200 800':'-30 -60 1200 720'; }
 function fitShare(){ const st=state(); return st.complete?makeCode(st.c)+(ITEMS.length||PAINT.length?'~'+fitCode(ITEMS,PAINT):''):''; }
-function syncHash(){ const h=fitShare(); try{ if(h) history.replaceState(null,'','#'+h); }catch(e){} }
+function syncHash(){ const h=fitShare(); try{ if(h) history.replaceState(null,'','#'+h); }catch(e){} if(typeof BD!=='undefined'&&!BD.mode) bdBar(); }
 function setPage(p){
   const st=state(); if(p===2&&!st.complete){ $('msg').textContent='Finish the structure first: every part on page 1 needs a pick.'; p=1; }
   PAGE=p; document.body.classList.toggle('p2',p===2); document.body.classList.toggle('p3',p===3); if(p!==3) W3.running=false;
@@ -2149,6 +2153,115 @@ function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b
     if(!c||fi===null){ $('w3msg').textContent='That doesn\'t look like a planner code or link.'; return; }
     c._fit=1; ['FP','PL'].forEach(s=>{ if(!c[s]) c[s]=fitPreview(s,c); });
     W3.srcCode=c; W3.srcItems=fi; W3.src='link'; w3Start(); });
+})();
+
+
+/* ================= shared boards (Supabase) ================= */
+const SB={url:'https://vzsovyitrmxyjozyflam.supabase.co',key:'sb_publishable_qnu2I_UKkGI0ltej4lgm9g_Peft807J'};
+const MAIN_SITE='https://daren-stanley.github.io/Lindens-Planner/';
+const BD={list:[],ok:null,cur:null,mode:null,msg:'',busy:false,versions:null};
+const lsGet=k=>{ try{ return localStorage.getItem(k)||''; }catch(e){ return ''; } }, lsSet=(k,v)=>{ try{ v?localStorage.setItem(k,v):localStorage.removeItem(k); }catch(e){} };
+async function sbGet(path){ const r=await fetch(SB.url+'/rest/v1/'+path,{headers:{apikey:SB.key}}); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
+async function sbRpc(fn,args){ const r=await fetch(SB.url+'/rest/v1/rpc/'+fn,{method:'POST',headers:{apikey:SB.key,'Content-Type':'application/json'},body:JSON.stringify(args)}); if(!r.ok) throw new Error('HTTP '+r.status); return r.json(); }
+const bdCode=b=>b.structure+(b.fittings?'~'+b.fittings:'');
+const bdWhen=t=>{ try{ const d=new Date(t); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } };
+function bdMenu(){
+  const ps=$('preset'), names=new Set(BD.list.map(b=>b.name.toLowerCase()));
+  const built=DRAWN.filter(([n])=>n==='0'||!names.has(n.toLowerCase()));
+  ps.innerHTML='<option value="">Start from a board…</option>'+
+    (BD.list.length?`<optgroup label="Shared boards">${BD.list.map(b=>`<option value="db:${b.id}">${esc(b.name)}${b.author?' · '+esc(b.author):''} · ${bdWhen(b.updated_at)}</option>`).join('')}</optgroup>`:'')+
+    `<optgroup label="${BD.list.length?'Built in':'Boards'}">${built.map(([n])=>`<option value="${esc(n)}">${n==='0'?'Original house':esc(n)}</option>`).join('')}</optgroup>`;
+}
+async function bdRefresh(){
+  try{ BD.list=await sbGet('boards?select=id,name,author,structure,fittings,version,updated_at&order=name.asc'); BD.ok=true;
+    if(BD.cur){ const b=BD.list.find(q=>q.id===BD.cur.id); if(b) BD.cur=b; } }
+  catch(e){ BD.ok=false; }
+  bdMenu(); bdBar();
+}
+function bdLoad(b){ const p=readCode(b.structure), fi=readFit(b.fittings||''); lsSet('lindens-board',b.id);
+  if(!p||fi===null){ BD.msg='That board could not be read.'; bdBar(); return; }
+  BD.cur=b; BD.mode=null; BD.msg=''; BD.versions=null; applyPicks(p,true,fi); bdBar(); }
+function bdDirty(){ return BD.cur&&fitShare()!==bdCode(BD.cur); }
+function bdBar(){
+  const el=$('bdbar'); if(!el) return;
+  if(BD.ok===false){ el.innerHTML=`<span class="note">Shared boards and saving work on the main site: <a href="${MAIN_SITE}">${MAIN_SITE.replace('https://','')}</a></span>`; return; }
+  if(BD.ok===null){ el.innerHTML='<span class="note">Loading shared boards…</span>'; return; }
+  const c=BD.cur, dirty=bdDirty();
+  let h=c?`<span>Board: <b>${esc(c.name)}</b> <span class="note">v${c.version} · saved by ${esc(c.author||'someone')}, ${bdWhen(c.updated_at)}</span></span>${dirty?'<span class="pill warn">Unsaved changes</span>':'<span class="pill ok">Saved</span>'}
+     <button class="btn${dirty?' primary':''}" data-bd="save">Save</button><button class="btn" data-bd="new">Save as new…</button><button class="btn" data-bd="ver">Versions</button><button class="btn" data-bd="link">Copy board link</button><button class="btn" data-bd="del">Delete</button>`
+    :`<span class="note">This design isn't a shared board yet.</span><button class="btn primary" data-bd="new">Save as new board…</button>`;
+  if(BD.mode) h+=`<div class="bdp">${bdPanel()}</div>`;
+  else if(BD.msg) h+=`<span class="note" role="status">${esc(BD.msg)}</span>`;
+  el.innerHTML=h;
+}
+function bdPanel(){
+  const c=BD.cur, m=BD.mode, who=esc(lsGet('lindens-author')), pass=lsGet('lindens-pass');
+  const passF=pass?'':`<label>Family passcode <input class="inp" id="bdpass" type="password" autocomplete="off" style="width:11em"></label>`;
+  const msg=BD.msg?`<p class="note" role="status" style="flex-basis:100%;margin:0">${esc(BD.msg)}</p>`:'';
+  if(m==='save'||m==='new') return `<label>Board name <input class="inp" id="bdname" maxlength="60" value="${m==='save'&&c?esc(c.name):''}" style="width:14em"></label>
+      <label>Your name <input class="inp" id="bdwho" maxlength="40" value="${who}" style="width:9em"></label>${passF}
+      <button class="btn primary" data-bd="${m==='save'?'dosave':'donew'}" ${BD.busy?'disabled':''}>${m==='save'?'Save changes':'Save new board'}</button><button class="btn" data-bd="cancel">Cancel</button>${msg}`;
+  if(m==='conflict') return `${msg}<button class="btn primary" data-bd="force">Overwrite with mine</button><button class="btn" data-bd="new">Save mine as a new board</button><button class="btn" data-bd="reload">Load their version</button><button class="btn" data-bd="cancel">Cancel</button>`;
+  if(m==='del') return `<span>Delete <b>${esc(c.name)}</b> for everyone? Its history is kept.</span>${passF}<button class="btn" data-bd="dodel" style="border-color:var(--warn);color:var(--warn)">Delete board</button><button class="btn" data-bd="cancel">Cancel</button>${msg}`;
+  if(m==='ver'){ const v=BD.versions; if(!v) return '<span class="note">Loading versions…</span>';
+    return `<div style="flex-basis:100%"><b>Versions of ${esc(c.name)}</b> <span class="note">Loading one puts it in the planner; press Save to make it the latest.</span>
+      <ul class="bdv">${v.map(q=>`<li><span>v${q.version} · ${esc(q.author||'someone')} · ${bdWhen(q.saved_at)}${q.name!==c.name?' · as “'+esc(q.name)+'”':''}</span><button class="btn" data-bdv="${q.version}">Load</button></li>`).join('')}</ul>
+      <button class="btn" data-bd="cancel">Close</button></div>`; }
+  return '';
+}
+async function bdSave(asNew,force){
+  const st=state(); if(!st.complete){ BD.msg='Finish the structure on page 1 before saving.'; bdBar(); return; }
+  const name=(($('bdname')||{}).value||(BD.cur&&BD.cur.name)||'').trim(), who=(($('bdwho')||{}).value||lsGet('lindens-author')).trim();
+  const pass=lsGet('lindens-pass')||(($('bdpass')||{}).value||'').trim();
+  if(!name){ BD.msg='Give the board a name.'; bdBar(); return; }
+  if(!pass){ BD.msg='Enter the family passcode.'; bdBar(); return; }
+  if(who) lsSet('lindens-author',who);
+  const [sc,fc]=fitShare().split('~');
+  BD.busy=true; BD.msg='Saving…'; bdBar();
+  let r; try{ r=await sbRpc('save_board',{p_pass:pass,p_id:asNew?null:BD.cur.id,p_name:name,p_author:who,p_structure:sc,p_fittings:fc||'',p_expected:asNew?0:BD.cur.version,p_force:!!force}); }
+  catch(e){ BD.busy=false; BD.msg='Could not reach the boards database. Check the connection and try again.'; bdBar(); return; }
+  BD.busy=false;
+  if(!r.ok){
+    if(r.error==='passcode'){ lsSet('lindens-pass',''); BD.msg='That passcode is wrong.'; }
+    else if(r.error==='taken') BD.msg='There is already a board called “'+name+'”. Pick another name.';
+    else if(r.error==='conflict'){ BD.mode='conflict'; BD.msg=`${r.author||'Someone'} saved this board (v${r.version}) at ${bdWhen(r.updated_at)}, after you loaded it.`; BD.pendingName=name; }
+    else if(r.error==='missing') BD.msg='This board has been deleted. Save yours as a new board.';
+    else BD.msg='The save was refused ('+r.error+').';
+    bdBar(); return; }
+  lsSet('lindens-pass',pass); lsSet('lindens-board',r.id); BD.mode=null; BD.msg='Saved.';
+  await bdRefresh(); BD.cur=BD.list.find(b=>b.id===r.id)||BD.cur; bdBar();
+}
+(function(){
+  const ps=$('preset');
+  ps.addEventListener('change',()=>{ const v=ps.value; ps.value=''; if(!v) return;
+    if(v.startsWith('db:')){ const b=BD.list.find(q=>q.id===v.slice(3)); if(b) bdLoad(b); return; }
+    const d=DRAWN.find(([n])=>n===v); if(d){ BD.cur=null; lsSet('lindens-board',''); BD.mode=null; BD.msg=''; applyPicks(Object.assign({},d[1]),true,d[2]?readFit(d[2]):undefined); bdBar(); } },true);
+  $('bdbar').addEventListener('click',async ev=>{
+    const vb=ev.target.closest('[data-bdv]');
+    if(vb){ const q=BD.versions.find(x=>x.version===+vb.dataset.bdv); const p=readCode(q.structure), fi=readFit(q.fittings||''); if(p&&fi!==null){ BD.mode=null; BD.msg='Loaded v'+q.version+'. Save to make it the latest version.'; applyPicks(p,true,fi); bdBar(); } return; }
+    const b=ev.target.closest('[data-bd]'); if(!b) return; const a=b.dataset.bd;
+    if(a==='save'){ BD.mode='save'; BD.msg=''; }
+    else if(a==='new'){ BD.mode='new'; BD.msg=''; }
+    else if(a==='cancel'){ BD.mode=null; BD.msg=''; }
+    else if(a==='dosave') return bdSave(false,false);
+    else if(a==='donew') return bdSave(true,false);
+    else if(a==='force'){ const id=BD.cur.id; await bdRefresh(); BD.cur=BD.list.find(q=>q.id===id)||BD.cur; return bdSave(false,true); }
+    else if(a==='reload'){ await bdRefresh(); const b2=BD.list.find(q=>q.id===BD.cur.id); if(b2) bdLoad(b2); return; }
+    else if(a==='link'){ const url=MAIN_SITE+'?board='+BD.cur.id; try{ await navigator.clipboard.writeText(url); BD.msg='Board link copied. It always opens the latest saved version.'; }catch(e){ BD.msg=url; } }
+    else if(a==='del'){ BD.mode='del'; BD.msg=''; }
+    else if(a==='dodel'){ const pass=lsGet('lindens-pass')||(($('bdpass')||{}).value||'').trim(); if(!pass){ BD.msg='Enter the family passcode.'; bdBar(); return; }
+      try{ const r=await sbRpc('delete_board',{p_pass:pass,p_id:BD.cur.id}); if(!r.ok){ lsSet('lindens-pass',''); BD.msg='That passcode is wrong.'; bdBar(); return; } lsSet('lindens-pass',pass); }
+      catch(e){ BD.msg='Could not reach the boards database.'; bdBar(); return; }
+      BD.cur=null; BD.mode=null; BD.msg='Board deleted.'; await bdRefresh(); return; }
+    else if(a==='ver'){ BD.mode='ver'; BD.versions=null; bdBar();
+      try{ BD.versions=await sbGet('board_versions?board_id=eq.'+BD.cur.id+'&select=version,name,author,structure,fittings,saved_at&order=version.desc&limit=30'); }catch(e){ BD.mode=null; BD.msg='Could not load the versions.'; } }
+    bdBar(); });
+  bdMenu(); bdBar();
+  bdRefresh().then(()=>{ let id=''; try{ id=new URLSearchParams(location.search).get('board')||''; }catch(e){}
+    const b=id&&BD.list.find(q=>q.id===id);
+    if(b){ bdLoad(b); try{ history.replaceState(null,'',location.pathname+location.hash); }catch(e){} }
+    else if(!BD.cur){ const k=lsGet('lindens-board'), b2=k&&BD.list.find(q=>q.id===k); if(b2){ BD.cur=b2; bdBar(); } } });
+  $('load').addEventListener('click',()=>{ BD.cur=null; BD.mode=null; lsSet('lindens-board',''); setTimeout(bdBar,0); });
 })();
 
 /* start: code in the address wins, then the last picks in this browser */
