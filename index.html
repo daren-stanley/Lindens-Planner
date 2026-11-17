@@ -172,9 +172,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v44 · 17 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v45 · 17 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v44';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v45';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -779,12 +779,12 @@ const LAYOUTS=[
  {id:'FP5',name:'Three-sided fire inside the living room, 1.0 m',ds:'1.0 × 0.5 m glass fire standing in the living room on the old dining–living wall line · glass on the long east side and both ends · as far south as the hall door allows · flue pier to the ceiling',src:'new',
   sum:'1.0 m three-sided fire inside the living room',
   geo:c=>{const b=c.F==='F2'?390:420; return [FX(0,'fire3l',718,b-100,768,b),TX(0,743,b-112,'3-sided fire')];}},
- /* living–dining sliding door: six equal leaves in the dining–living wall line, the middle four slide (two each way) to stack on the fixed end leaves; with FP5 it stops short of the fire */
+ /* living–dining sliding door: six equal leaves in the dining–living wall line, the middle four slide (two each way) to stack on the fixed end leaves; full length even with FP5, whose fire then sits slightly in front of the south leaves */
  {id:'DS0',name:'No sliding door',ds:'Dining and living stay as the wall or opening in the structure picks',src:'new',sum:'no sliding door',geo:c=>[]},
- {id:'DS1',name:'Telescopic sliding door, 6 leaves',ds:'Large double-sided telescopic slider in the dining–living wall line · six equal leaves · the middle four open, two each side · two thirds of the width clear',src:'new',
+ {id:'DS1',name:'Telescopic sliding door, 6 leaves',ds:'Large double-sided telescopic slider in the dining–living wall line · six equal leaves · the middle four open, two each side · two thirds of the width clear · with FP5 the fire stands slightly in front of the south end',src:'new',
   ok:c=>!c.FP||inn(c.FP,['FP0','FP1','FP5']),why:()=>'Only with no fire, the east-wall hearth or the inside fire (FP0, FP1, FP5).',
   sum:'telescopic sliding door between dining and living',
-  geo:c=>{const y0=36,y1=c.FP==='FP5'?310:384; return [D(0,709,y0,718,y1),FX(0,'tsd',707,y0,720,y1),TX(0,713,22,'telescopic slider')];}},
+  geo:c=>{const y0=36,y1=384; return [D(0,709,y0,718,y1),FX(0,'tsd',707,y0,720,y1),TX(0,713,22,'telescopic slider')];}},
  /* extension pillar: 0.1 × 0.1 m post under the steel on the old rear-wall line, centre 2.0–3.25 m from the inside of the west wall */
  ...[200,225,250,275,300,325].map((m,n)=>({id:'PL'+(n+1),name:`Pillar ${(m/100).toFixed(2).replace(/0$/,'')} m from the left wall`,ds:`0.1 × 0.1 m post under the steel · centre ${m/100} m from the inside of the west wall`,src:'new',sum:`pillar ${m/100} m from the left wall`,
   ok:c=>extD(c)>0,why:()=>'Only with a rear extension (R7–R10).',geo:c=>[PIL(0,26+m-5,8,26+m+5,18),TX(0,26+m,-8,'pillar '+(m/100).toFixed(2).replace(/0$/,'')+' m')]})),
