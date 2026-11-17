@@ -172,9 +172,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v41 · 17 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v42 · 17 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v41';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v42';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -341,7 +341,8 @@ const SLOTS={
   ['L1','Old cupboard strip','0.85 m wide, in the cupboard strip'],
   ['L2','Beside Bedroom 2','Beside Bedroom 2, arrives mid-loft'],
   ['L0','No loft stair','Hatch only',1],
-  ['L3','From the Bedroom 4 doorway','0.8 m wide, rises from today’s Bedroom 4 door · goes with M9']]},
+  ['L3','From the Bedroom 4 doorway','0.8 m wide, rises from today’s Bedroom 4 door · goes with M9'],
+  ['L4','Off the landing, over the main stair','Architect’s idea · 2 steps west, 3-step winder, 7 up into the loft · flipped stairs only']]},
  LO:{name:'Loft',opts:[
   ['LO1','Office + den','Office + bedroom or den · full dormer'],
   ['LO2','Master suite','Loft master suite'],
@@ -353,7 +354,8 @@ const SLOTS={
   ['LO8','Office + bedroom, shorter dormer','Office + bedroom · 7.7 m dormer'],
   ['LO9','Office + store + bedroom','Office, store, bedroom · 7.7 m dormer'],
   ['LO0','Leave the loft','Roof space as today',1],
-  ['LO10','Store + office + bedroom','Store left of the stair top, office and bedroom to the right · dormer about 8.9 m']]},
+  ['LO10','Store + office + bedroom','Store left of the stair top, office and bedroom to the right · dormer about 8.9 m'],
+  ['LO11','Bedroom + office either side of the stair','Wide bedroom to the west wall, 3 m office east of the stair · dormer about 8.1 m · goes with L4']]},
  KL:{name:'Kitchen layout',ctx:'K',fit:1},
  BL:{name:'Family bathroom layout',ctx:'B',fit:1},
  EL:{name:'Ensuite layout',ctx:'M',fit:1},
@@ -395,9 +397,10 @@ const RULES=[
  [['B','L'],c=>c.L!=='L3'||inn(c.B,['B0','B3'])],                          /* the corridor to the old Bedroom 4 door must stay open */
  [['M','B','L'],c=>c.M!=='M5'||c.B!=='B1'||c.L==='L0'],                      /* with a loft stair M5's door is today's Bedroom 4 door, which B1 takes */
  [['N','L'],c=>c.N!=='N4'||c.L==='L0'],                                      /* equal bedrooms use the whole strip */
- [['M','N','L'],c=>c.L==='L1'?(c.M==='M1'||(inn(c.M,['M8','M7','M0'])&&inn(c.N,['N1','N3']))):c.L==='L2'?inn(c.M,['M2','M3','M4','M5','M6','M7','M0']):c.L==='L3'?c.M==='M9':!inn(c.M,['M8','M9'])],
+ [['M','N','L'],c=>c.L==='L1'?(c.M==='M1'||(inn(c.M,['M8','M7','M0'])&&inn(c.N,['N1','N3']))):c.L==='L2'?inn(c.M,['M2','M3','M4','M5','M6','M7','M0']):c.L==='L3'?c.M==='M9':c.L==='L4'?!inn(c.M,['M8','M9']):!inn(c.M,['M8','M9'])],
+ [['S','L'],c=>c.L!=='L4'||inn(c.S,['S4','S5'])],                          /* sits over the flipped stair */
  [['M','LO'],c=>(c.M==='M8')===(c.LO==='LO2')],
- [['L','LO'],c=>c.L==='L1'?inn(c.LO,['LO1','LO2','LO3','LO7','LO8','LO9']):c.L==='L2'?inn(c.LO,['LO4','LO5','LO6']):c.L==='L3'?c.LO==='LO10':c.LO==='LO0']
+ [['L','LO'],c=>c.L==='L1'?inn(c.LO,['LO1','LO2','LO3','LO7','LO8','LO9']):c.L==='L2'?inn(c.LO,['LO4','LO5','LO6']):c.L==='L3'?c.LO==='LO10':c.L==='L4'?c.LO==='LO11':c.LO==='LO0']
 ];
 /* Every valid house is the join of a ground-floor combination and a first-floor-and-loft combination on the main stair,
    the only slot both sides depend on. Each side is enumerated once, pruning with its rules as soon as their slots are set. */
@@ -613,6 +616,9 @@ const GEO={
    R(2,308,26,388,116,'ci'),ST(2,308,116,388,352,'N',11),R(2,308,352,388,390,'ci'),WL(2,[[348,347],[348,125]]),WN(2,308,0,388,26,FULL)],
  L2:c=>[...stripCpd(c),ST(1,628,116,708,390,'N',12),D(1,628,390,708,400),WL(1,[[668,395],[668,125]]),
    R(2,628,26,708,116,'ci'),ST(2,628,116,708,352,'N',11),R(2,628,352,708,390,'ci'),WL(2,[[668,347],[668,125]]),WN(2,628,0,708,26,FULL)],
+ L4:c=>{ const lf=e=>Object.assign(e,{loft:1}); return [lf(ST(1,523,556,568,636,'W',2)),lf(WD(1,443,556,523,636,523,556,3)),lf(ST(1,443,399,523,556,'N',7)),
+   WL(1,[[566,596],[483,596],[483,405]]),TX(1,560,738,'loft stair rises over the landing and the main stair'),
+   ST(2,443,399,523,556,'N',7),WD(2,443,556,523,636,523,556,3),ST(2,523,556,546,636,'W',1)]; },
  L3:c=>[R(1,209,26,289,116,'ci'),ST(1,209,116,289,390,'N',12),D(1,210,390,288,400),WL(1,[[249,395],[249,130]]),D(1,199,36,209,106),D(1,289,36,299,106),
    R(2,209,26,289,116,'ci'),ST(2,209,116,289,352,'N',11),WL(2,[[249,347],[249,125]]),WN(2,209,0,289,26,FULL)],
  M1:c=>{const x=b3w(c);return [R(1,26,26,295,246,'be','Dressing','2.7 × 2.2'),R(1,26,256,295,390,'we','Ensuite','2.7 × 1.3',{lab:!c._fit}),R(1,295,26,x,110,'be'),
@@ -686,6 +692,8 @@ const GEO={
    D(2,298,40,308,100),D(2,388,40,398,100),D(2,70,220,150,230),WN(2,80,0,240,26),WN(2,480,0,720,26),WN(2,820,0,1000,26),TX(2,555,-16,'Full-width rear dormer')],
  LO8:c=>[R(2,26,26,298,433,'of','Office','2.7 × 4.1*'),R(2,398,26,800,433,'be','Bedroom','4.0 × 4.1*'),R(2,810,26,1084,433,'rs','Roof store','under the slope'),
    D(2,298,40,308,100),D(2,388,40,398,100),D(2,800,300,810,380),WN(2,80,0,240,26),WN(2,480,0,720,26),TX(2,413,-16,'Shorter dormer, about 7.7 m')],
+ LO11:c=>[R(2,26,26,433,433,'be','Bedroom','4.1 × 4.1*'),R(2,443,26,523,399,'ci'),R(2,533,26,833,433,'of','Office','3.0 × 4.1*'),R(2,843,26,1084,433,'rs','Roof store','under the slope'),
+   D(2,433,300,443,380),D(2,523,300,533,380),D(2,833,60,843,140),WN(2,80,0,380,26),WN(2,583,0,783,26),WN(2,443,0,523,26,FULL),TX(2,430,-16,'Dormer about 8.1 m')],
  LO10:c=>[R(2,26,26,199,433,'rs','Store','under the slope'),R(2,299,26,640,433,'of','Office','3.4 × 4.1*'),R(2,209,352,299,433,'of'),R(2,650,26,1084,433,'be','Bedroom','4.3 × 4.1*'),
    D(2,199,368,209,428),D(2,289,40,299,110),D(2,640,60,650,140),WN(2,380,0,600,26),WN(2,760,0,1000,26),TX(2,640,-16,'Dormer about 8.9 m · bedroom through the office')],
  LO9:c=>[R(2,26,26,298,220,'of','Office','2.7 × 1.9'),R(2,26,230,298,433,'ut','Store','2.7 × 2.0*'),R(2,398,26,800,433,'be','Bedroom','4.0 × 4.1*'),
@@ -1355,7 +1363,7 @@ function readCode(str){
 /* Rough relative build cost of each option, in points. For ranking only, not budgeting. */
 /* Building work other than steels, in rough cost points (ranking only, not budgeting). */
 const WORK={S1:0,S2:1,S3:1,S4:1,S5:1,S6:1.2, H1:.3,H2:1.5,H3:.5,H4:.7, W1:0,W2:.6,W3:1,W4:1.1,W5:1,W6:1,W7:.3,W8:.4,W9:.5, A0:0,A1:0,A2:.2,A3:.2,A4:.2, R7:4,R8:4.2,R9:2.8,R10:3,FP0:0,FP1:.2,PL1:.3,PL2:.3,PL3:.3,PL4:.3,PL5:.3,PL6:.3,FP2:1.4,FP3:1.5,FP4:1.6, P3:.2,P4:.2, G1:.8,G2:1.6,G3:.8,G4:.9,G5:1.6, F1:0,F2:.5,
-  R1:.8,R2:1.2,R3:.8,R4:1,R5:1,R6:1,F1A:.2,F1B:.3,F1C:.3,F1D:.3,F2A:.2,F2B:.2, K1:0,K2:0, P1:0,P2:0, M1:.4,M2:.8,M9:.9,L3:.3,LO10:.9,M8:0,M7:1.5,M3:.6,M4:.6,M5:.5, B1:.4,B2:.8,B3:.8, L1:0,L2:.3,
+  R1:.8,R2:1.2,R3:.8,R4:1,R5:1,R6:1,F1A:.2,F1B:.3,F1C:.3,F1D:.3,F2A:.2,F2B:.2, K1:0,K2:0, P1:0,P2:0, M1:.4,M2:.8,M9:.9,L3:.3,LO10:.9,L4:.5,LO11:.9,M8:0,M7:1.5,M3:.6,M4:.6,M5:.5, B1:.4,B2:.8,B3:.8, L1:0,L2:.3,
   H0:0,W0:0,G0:0,K0:0,R0:0,P0:0,M6:.5,M0:0,N1:0,N2:.3,N3:0,N4:.3,N5:.5,N0:0,B0:0,L0:0,LO0:0,K0A:.2,K0B:.2,B0A:.1,B0B:.2, LO1:0,LO2:.5,LO3:1,LO4:1,LO5:1,LO6:.8,LO7:.2,LO8:-.3,LO9:-.1,
   K1A:.2,K1B:.3,K1C:.2,K1I:.2,K1J:.3,K1K:.2, B1A:.3,B1B:.2,B2A:.4,B2B:.3,B3A:.3,B3B:.3,
   M1A:.1,M1B:.1,M2A:.1,M2B:.1,M8A:.3,M8B:.2,M7A:.1,M7B:.2,M3A:.1,M3B:.2,M4A:.1,M4B:.1,M5A:.1,M5B:.2,K1F:.3,K1G:.3,K1H:.2};
@@ -1409,7 +1417,7 @@ function totals(c){
   const keep4=inn(c.N,['N1','N2','N4']);
   const beds={M1:3,M2:3,M3:3,M4:3,M5:3,M6:3,M7:2,M8:3,M0:3,M9:3}[c.M]+(keep4?1:0)+(c.LO==='LO0'?0:1);
   const work=[]; if(c.F==='F2') work.push('Office by the front door'); if(c.B==='B2') work.push('First-floor study');
-  if(inn(c.LO,['LO1','LO4','LO5','LO6','LO7','LO8','LO9','LO10'])) work.push('Loft office');
+  if(inn(c.LO,['LO1','LO4','LO5','LO6','LO7','LO8','LO9','LO10','LO11'])) work.push('Loft office');
   const fam={B0:'1.7 × 2.4 m',B1:b1wide(c)?'3.1 × 2.4 m':'2.6 × 2.4 m',B2:'2.7 × 3.6 m (9.8 m²)',B3:c.S==='S1'?'L-shape, about 5.75 m²':'L-shape, about 5.2 m²'}[c.B];
   const ens={M1:'2.7 × 1.3 m',M2:'1.4 × 1.8 m, 1.4 m walk-in shower',M9:'1.7 × 1.5 m, through the dressing room',M3:'2.2 × 1.8 m',M4:'2.2 × 1.7 m, through the dressing room',M5:'2.7 × 1.7 m, through the dressing room',M7:'1.5 × 2.5 m',M8:'2.7 × 2.2 m (loft)'}[c.M];
   const wc={W0:'1.7 × 2.4 m cloakroom',W1:'shared with the utility',W2:'0.8 × 1.4 m',W3:'1.8 × 1.4 m',W4:'1.8 × 1.4 m, off the back lobby',W5:'1.7 × 2.4 m, off the utility, no window',W6:'1.8 × 1.4 m',W7:'1.7 × 2.4 m with coats',W8:'1.7 × 1.2 m',W9:'1.7 × 0.8 m, floor 1 step up'}[c.W];
@@ -1417,7 +1425,7 @@ function totals(c){
   const baths=['Family '+fam+fs('BL')]; if(ens) baths.push('Ensuite '+ens+fs('EL')); baths.push('Ground-floor WC '+wc); if(c.LO==='LO3') baths.push('Loft shower 2.7 × 1.9 m'); if(c.LO==='LO5') baths.push('Loft shower 2.2 × 1.7 m');
   const fire=c.H==='H2'?['Whole-house mist (BS 9251)','Glazed fire screen at the stair top']:
     ['Enclosed, protected hall',{H0:'As today: no fire upgrade',H1:'One standard fire door to the open plan',H3:'New 1.7 m glazed fire opening plus the old kitchen door',H4:'One 2.4 m glazed fire opening; old kitchen door blocked up'}[c.H]];
-  const dorm={LO4:'about 8.3 m',LO6:'about 8.3 m',LO10:'about 8.9 m',LO8:'about 7.7 m',LO9:'about 7.7 m'}[c.LO]||'full width, about 10.6 m';
+  const dorm={LO4:'about 8.3 m',LO6:'about 8.3 m',LO10:'about 8.9 m',LO11:'about 8.1 m',LO8:'about 7.7 m',LO9:'about 7.7 m'}[c.LO]||'full width, about 10.6 m';
   const plan=[]; if(c.P!=='P0') plan.push('Porch over 3 m²: planning needed'); if(c.LO!=='LO0') plan.push(`Rear dormer ${dorm}: usually permitted development`);
   if(c.LO==='LO4') plan.push('Balcony: full planning needed');
   if(inn(c.M,['M2','M9'])) plan.push('Full-height master window: needs a Juliet balcony or glass guard to 1.1 m');
@@ -1859,15 +1867,15 @@ function gen3d(c,items,paint){
     if(f===1){ if(y1>=636) return ['win',x1>=700?90:105,210]; if(y2<=26) return ['win',90,210]; return ['win',100,210]; }
     return ['win',90,210]; }
   /* rear dormer span along the house: full width, the 8.3/8.9 m ones that stop short at the west end, or the 7.7 m one that stops short at the east */
-  const DSP=({LO4:[246,1110],LO6:[246,1110],LO8:[0,810],LO9:[0,810],LO10:[199,1110]})[c.LO]||[0,1110];
+  const DSP=({LO11:[0,843],LO4:[246,1110],LO6:[246,1110],LO8:[0,810],LO9:[0,810],LO10:[199,1110]})[c.LO]||[0,1110];
   const under=(x,y)=>y>=331?475+(697-y)*0.832:(x>=DSP[0]&&x<DSP[1]?752.8:475+(y+35)*0.832);
   const stairs=els.filter(e=>e.t==='s'||e.t==='wn');
   const ov=(a,b)=>a.x1<b.x2&&a.x2>b.x1&&a.y1<b.y2&&a.y2>b.y1;
-  const sg=stairs.filter(e=>e.f===0), s1dup=stairs.filter(e=>e.f===1&&sg.some(q=>ov(q,e))), s1rest=stairs.filter(e=>e.f===1&&!sg.some(q=>ov(q,e)));
+  const sg=stairs.filter(e=>e.f===0), s1dup=stairs.filter(e=>e.f===1&&!e.loft&&sg.some(q=>ov(q,e))), s1rest=stairs.filter(e=>e.f===1&&!e.loft&&!sg.some(q=>ov(q,e)));
   /* the main stair can carry on above the plan cut, so its upper pieces sit on the first-floor plan: take those that join on */
   const joins=(a,b)=>{ const t=3; return a.x1<=b.x2+t&&a.x2>=b.x1-t&&a.y1<=b.y2+t&&a.y2>=b.y1-t&&(Math.min(a.x2,b.x2)-Math.max(a.x1,b.x1)>10||Math.min(a.y2,b.y2)-Math.max(a.y1,b.y1)>10); };
   const s0=sg.slice(); let grew=true; while(grew){ grew=false; for(const e of s1rest) if(!s0.includes(e)&&s0.some(q=>joins(q,e))){ s0.push(e); grew=true; } }
-  const s1view=s1dup.concat(s0.filter(e=>e.f===1)), s1own=s1rest.filter(e=>!s0.includes(e));
+  const s1view=s1dup.concat(s0.filter(e=>e.f===1)), s1own=s1rest.filter(e=>!s0.includes(e)).concat(stairs.filter(e=>e.f===1&&e.loft));
   const wallMask={};
   const openings=[];
   for(const f of (LO0?[0,1]:[0,1,2])){
@@ -1878,7 +1886,7 @@ function gen3d(c,items,paint){
       for(let y=Math.floor(Math.min(...ys));y<Math.max(...ys);y++) for(let x=Math.floor(Math.min(...xs));x<Math.max(...xs);x++) if(inPolyP(x+.5,y+.5,e.pts)&&x>=X0&&x<X1&&y>=Y0&&y<Y1) m[(y-Y0)*W+(x-X0)]=0; });
     els.filter(e=>e.f===f&&e.t==='wall').forEach(e=>fillR(m,e,1));
     if(f===0) s0.forEach(e=>fillR(m,e,0));
-    if(f===2) fillR(m,{x1:26,y1:433,x2:1084,y2:443},1);
+    if(f===2){ fillR(m,{x1:26,y1:433,x2:1084,y2:443},1); els.filter(e=>e.f===2&&(e.t==='s'||e.t==='wn')).forEach(e=>fillR(m,e,0)); }
     const specs={1:null}; const key=sp=>sp.join();
     els.filter(e=>e.f===f&&['w','d','pk'].includes(e.t)).forEach(e=>{
       const sp=e.t==='w'?wspec(f,e):['door',0,(e.x2<=0||(e.x2-e.x1>150&&e.y2-e.y1<=10))?210:(f===0?205:200)];
@@ -1915,7 +1923,7 @@ function gen3d(c,items,paint){
   const holes1=els.filter(e=>e.f===1&&e.t==='r'&&e.cls==='void').map(e=>[e.x1,e.y1,e.x2,e.y2]).concat(s1view.map(e=>[e.x1,e.y1,e.x2,e.y2]));
   holed('slab','f',holes1,240.3,264.3);
   [0,1,2].forEach(f=>paintMap(els,f,paint).forEach((v,e)=>{ if(v.floor&&!(f===2&&LO0)) box('floorpaint',LAY[f],'slab',e.x1,e.y1,FB3[f],e.x2,e.y2,FB3[f]+1,v.floor); }));
-  const own2=els.filter(e=>e.f===2&&e.t==='s'), holes2=(own2.length?own2:s1own).map(e=>[e.x1,e.y1,e.x2,e.y2]);
+  const own2=els.filter(e=>e.f===2&&(e.t==='s'||e.t==='wn')), holes2=(own2.length?own2:s1own).map(e=>[e.x1,e.y1,e.x2,e.y2]);
   holed('slab','l',LO0?[]:holes2,500,517.8);
   els.filter(e=>e.f===0&&e.t==='sh'&&e.x1<1110).forEach(e=>{
     if(e.x2<=0) box('roof','g','roof',e.x1-10,e.y1-10,240,0,e.y2+10,255);
@@ -1961,13 +1969,15 @@ function gen3d(c,items,paint){
   }
   const run0=stairRun(s0,0,264.3,'g'), run1=LO0?null:stairRun(s1own,264.3,517.8,'f');
   /* guard rails round stair holes, open where you step off */
+  /* no guard rail where a loft stair passes over the stairwell edge */
+  const loftOver=(x,y)=>stairs.some(e=>e.f===1&&e.loft&&x>=e.x1-3&&x<=e.x2+3&&y>=e.y1-3&&y<=e.y2+3);
   function rails(holes,f,run){ const z=FB3[f], m=wallMask[f]; if(!m) return;
     const inHole=(x,y)=>holes.some(h=>x>h[0]&&x<h[2]&&y>h[1]&&y<h[3]);
     const isWall=(x,y)=>{ const X=Math.round(x)-X0, Y=Math.round(y)-Y0; return X>=0&&Y>=0&&X<W&&Y<H&&m[Y*W+X]>0; };
     const nearExit=(x,y)=>run&&(run.exit.o==='h'?Math.abs(y-run.exit.at)<8&&x>run.exit.a-2&&x<run.exit.b+2:Math.abs(x-run.exit.at)<8&&y>run.exit.a-2&&y<run.exit.b+2);
     holes.forEach(h=>{ const sides=[['h',h[1],h[0],h[2],-1],['h',h[3],h[0],h[2],1],['v',h[0],h[1],h[3],-1],['v',h[2],h[1],h[3],1]];
       sides.forEach(([o,at,a,b,s])=>{ let st=null; for(let t=a;t<=b;t+=5){ const px=o==='h'?t:at+s*6, py=o==='h'?at+s*6:t;
-          const need=t<b&&!inHole(px,py)&&!isWall(px,py)&&!nearExit(o==='h'?t:at,o==='h'?at:t);
+          const need=t<b&&!inHole(px,py)&&!isWall(px,py)&&!nearExit(o==='h'?t:at,o==='h'?at:t)&&!(f===1&&loftOver(o==='h'?t:at,o==='h'?at:t));
           if(need&&st===null) st=t; if((!need||t+5>b)&&st!==null){ const e=need?b:t; if(e-st>=10){ if(o==='h') box('rail',LAY[f],'rail',st,at-(s<0?4:0),z,e,at+(s>0?4:0),z+92); else box('rail',LAY[f],'rail',at-(s<0?4:0),st,z,at+(s>0?4:0),e,z+92); } st=null; } } }); }); }
   rails(holes1,1,run0); if(run1) rails(holes2,2,run1);
   if(run0){ const ex=run0.exit, c1=ex.o==='h'?[(ex.a+ex.b)/2,ex.at]:[ex.at,(ex.a+ex.b)/2], lp=run0.last; const dx=Math.sign(c1[0]-(lp.x1+lp.x2)/2)*(ex.o==='v'?1:0), dy=Math.sign(c1[1]-(lp.y1+lp.y2)/2)*(ex.o==='h'?1:0);
@@ -2099,10 +2109,12 @@ function w3Ground(x,y,feet){ let best=-1; /* the outside ground is at -1 */
     if(o.p&&!inPoly(x,y,o.p.pts)) continue; const top=b.z2; if(top<=feet+45&&top>best) best=top; }
   return best; }
 function w3Blocked(x,y,feet){ const R=20, z0=feet+40, z1=feet+175;
-  for(const o of w3Near(x,y).concat(w3Near(x+R,y),w3Near(x-R,y),w3Near(x,y+R),w3Near(x,y-R))){ if(!o.solid) continue; const b=o.b;
+  for(const o of w3Near(x,y).concat(w3Near(x+R,y),w3Near(x-R,y),w3Near(x,y+R),w3Near(x,y-R))){ const b=o.b; if(!o.solid&&!(o.walk&&(o.b.n==='tread'||(o.p&&o.p.n==='tread'))&&b.z2>feet+45)) continue;
     if(b.z2<=z0||b.z1>=z1) continue; const cx=Math.max(b.x1,Math.min(x,b.x2)), cy=Math.max(b.y1,Math.min(y,b.y2));
-    if((cx-x)**2+(cy-y)**2<R*R) return true; }
+    if((cx-x)**2+(cy-y)**2>=R*R) continue; if(o.p&&polyDist(x,y,o.p.pts)>=R) continue; return true; }
   return false; }
+function polyDist(x,y,P){ if(inPoly(x,y,P)) return 0; let d=1e9;
+  for(let i=0;i<P.length;i++){ const [ax,ay]=P[i],[bx,by]=P[(i+1)%P.length], vx=bx-ax, vy=by-ay, L=vx*vx+vy*vy||1; let t=((x-ax)*vx+(y-ay)*vy)/L; t=Math.max(0,Math.min(1,t)); d=Math.min(d,Math.hypot(ax+t*vx-x,ay+t*vy-y)); } return d; }
 function w3Goto(f){ const s=W3.spots[f]||W3.spots[0]; if(!s) return; W3.pos.x=s.x; W3.pos.y=s.y; W3.yaw=s.yaw; W3.pitch=-0.05;
   W3.feet=w3Ground(s.x,s.y,FB3[f]+5); if(W3.feet<-0.5) W3.feet=f?FB3[f]:-1; W3.pos.z=W3.feet+W3.eye; }
 function w3Visibility(){ const g=W3.groups; if(!g) return; const u=W3.mode==='walk'?3:W3.showUpTo;
