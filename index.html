@@ -172,9 +172,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v40 · 16 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v41 · 17 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v40';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v41';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -610,11 +610,11 @@ const GEO={
  P4:c=>[SH(0,483,662,757,874),R(0,495,662,745,862,'po','Porch','2.5 × 2.0'),D(0,570,862,670,874),TX(0,920,800,'porch door = front door')],
  L0:c=>[...stripCpd(c),...(c.M==='M2'?[]:[]),TX(1,860,-16,'')],
  L1:c=>[...(c.M!=='M1'?[R(1,303,26,388,110,'ut','Cpd')]:[]),RS(1,364,26,374,390),ST(1,308,120,388,390,'N',12),D(1,308,390,388,400),WL(1,[[348,395],[348,130]]),
-   R(2,308,26,388,116,'ci'),ST(2,308,116,388,390,'N',12),WL(2,[[348,385],[348,125]]),WN(2,308,0,388,26,FULL)],
+   R(2,308,26,388,116,'ci'),ST(2,308,116,388,352,'N',11),R(2,308,352,388,390,'ci'),WL(2,[[348,347],[348,125]]),WN(2,308,0,388,26,FULL)],
  L2:c=>[...stripCpd(c),ST(1,628,116,708,390,'N',12),D(1,628,390,708,400),WL(1,[[668,395],[668,125]]),
-   R(2,628,26,708,116,'ci'),ST(2,628,116,708,390,'N',12),WL(2,[[668,385],[668,125]]),WN(2,628,0,708,26,FULL)],
+   R(2,628,26,708,116,'ci'),ST(2,628,116,708,352,'N',11),R(2,628,352,708,390,'ci'),WL(2,[[668,347],[668,125]]),WN(2,628,0,708,26,FULL)],
  L3:c=>[R(1,209,26,289,116,'ci'),ST(1,209,116,289,390,'N',12),D(1,210,390,288,400),WL(1,[[249,395],[249,130]]),D(1,199,36,209,106),D(1,289,36,299,106),
-   R(2,209,26,289,116,'ci'),ST(2,209,116,289,360,'N',11),WL(2,[[249,355],[249,125]]),WN(2,209,0,289,26,FULL)],
+   R(2,209,26,289,116,'ci'),ST(2,209,116,289,352,'N',11),WL(2,[[249,347],[249,125]]),WN(2,209,0,289,26,FULL)],
  M1:c=>{const x=b3w(c);return [R(1,26,26,295,246,'be','Dressing','2.7 × 2.2'),R(1,26,256,295,390,'we','Ensuite','2.7 × 1.3',{lab:!c._fit}),R(1,295,26,x,110,'be'),
    R(1,x,26,708,390,'be','Master',((708-x)/100).toFixed(1)+' × 3.6'),RS(1,x-10,40,x,100),c.EL==='M1B'?D(1,40,246,110,256):D(1,200,246,270,256),D(1,575,390,655,400),
    WE(1,101,0,286,26),WE(1,418,0,661,26),...eastBlock()];},
@@ -686,7 +686,7 @@ const GEO={
    D(2,298,40,308,100),D(2,388,40,398,100),D(2,70,220,150,230),WN(2,80,0,240,26),WN(2,480,0,720,26),WN(2,820,0,1000,26),TX(2,555,-16,'Full-width rear dormer')],
  LO8:c=>[R(2,26,26,298,433,'of','Office','2.7 × 4.1*'),R(2,398,26,800,433,'be','Bedroom','4.0 × 4.1*'),R(2,810,26,1084,433,'rs','Roof store','under the slope'),
    D(2,298,40,308,100),D(2,388,40,398,100),D(2,800,300,810,380),WN(2,80,0,240,26),WN(2,480,0,720,26),TX(2,413,-16,'Shorter dormer, about 7.7 m')],
- LO10:c=>[R(2,26,26,199,433,'rs','Store','under the slope'),R(2,299,26,640,433,'of','Office','3.4 × 4.1*'),R(2,209,360,299,433,'of'),R(2,650,26,1084,433,'be','Bedroom','4.3 × 4.1*'),
+ LO10:c=>[R(2,26,26,199,433,'rs','Store','under the slope'),R(2,299,26,640,433,'of','Office','3.4 × 4.1*'),R(2,209,352,299,433,'of'),R(2,650,26,1084,433,'be','Bedroom','4.3 × 4.1*'),
    D(2,199,368,209,428),D(2,289,40,299,110),D(2,640,60,650,140),WN(2,380,0,600,26),WN(2,760,0,1000,26),TX(2,640,-16,'Dormer about 8.9 m · bedroom through the office')],
  LO9:c=>[R(2,26,26,298,220,'of','Office','2.7 × 1.9'),R(2,26,230,298,433,'ut','Store','2.7 × 2.0*'),R(2,398,26,800,433,'be','Bedroom','4.0 × 4.1*'),
    R(2,810,26,1084,433,'rs','Roof store','under the slope'),D(2,298,40,308,100),D(2,388,40,398,100),D(2,70,220,150,230),D(2,800,300,810,380),
@@ -1057,8 +1057,9 @@ function roomAt(rooms,x,y){ let best=null; rooms.forEach(e=>{ if(x>=e.x1&&x<=e.x
 function paintMap(els,f,list){ const m=new Map(), rooms=paintRooms(els,f);
   (list||PAINT).filter(q=>q.f===f).forEach(q=>{ const e=roomAt(rooms,q.x,q.y); if(!e) return; const v=m.get(e)||{}; v[q.k]=q.col; m.set(e,v); }); return m; }
 const isz=it=>[it.w||CAT[it.t][3], it.d||CAT[it.t][4]];
-const SCREENS=['Screen: full front','Screen: walk-in, open right','Screen: walk-in, open left','No screen'];
-const screenSpan=(it,w)=>[[0,w],[0,w*0.65],[w*0.35,w],null][it.sc||0];
+const SCREENS=['Screen: full front','Screen: walk-in, open right','Screen: walk-in, open left','No screen','Screen: open in the middle'];
+const SCR_ORDER=[0,1,2,4,3];
+const screenSpan=(it,w)=>[[[0,w]],[[0,w*0.65]],[[w*0.35,w]],[],[[0,w*0.3],[w*0.7,w]]][it.sc||0]||[];
 
 /* ---------- drawing (local frame: w across, d deep, back edge at the top) ---------- */
 function itemBody(it){
@@ -1093,7 +1094,7 @@ function itemBody(it){
    case 'bar': return R(0,0,w,d,it.c2||col,'stroke="#6F6A60" stroke-width="2"')+R(0,0,5,d,'#6F6A60')+R(w-5,0,5,d,'#6F6A60');
    case 'books': { let o=R(0,0,w,d,col,S); const n=Math.max(1,Math.round(w/40)); for(let i=1;i<n;i++) o+=`<line x1="${w*i/n}" y1="2" x2="${w*i/n}" y2="${d-2}" stroke="${line}" stroke-width="1.5"/>`; return o+`<line x1="0" y1="${d-3}" x2="${w}" y2="${d-3}" stroke="${line}" stroke-width="1"/>`; }
    case 'sink': return R(0,0,w,d,'#fff','rx="4" '+B)+R(6,6,w-12,d-12,'#EAF4F8','rx="6" '+B);
-   case 'shw': { const sp=screenSpan(it,w); return fx({k:k,x1:0,y1:0,x2:w,y2:d,dir:'N'}).replace(/fill="#fff"/,`fill="${it.col||'#fff'}"`)+(sp?R(sp[0],d-4,sp[1]-sp[0],4,'#2F78B5'):''); }
+   case 'shw': { const sp=screenSpan(it,w); return fx({k:k,x1:0,y1:0,x2:w,y2:d,dir:'N'}).replace(/fill="#fff"/,`fill="${it.col||'#fff'}"`)+sp.map(q=>R(q[0],d-4,q[1]-q[0],4,'#2F78B5')).join(''); }
    case 'plant': case 'lamp': case 'hob': case 'wc': case 'bas': case 'bath':
      return fx({k:k,x1:0,y1:0,x2:w,y2:d,dir:'N'}).replace(/fill="#fff"/,`fill="${it.col||'#fff'}"`);
   } return R(0,0,w,d,col,S);
@@ -1256,7 +1257,7 @@ function mergeScreens(list){ const sh=list.filter(it=>CAT[it.t][6]==='shw');
 function sized(it,w,d){ const C=CAT[it.t]; w=Math.round(w); d=Math.round(d); if(w!==C[3]) it.w=w; if(d!==C[4]) it.d=d; if(it.w&&!it.d) it.d=C[4]; if(it.d&&!it.w) it.w=C[3]; return it; }
 
 /* ================= state ================= */
-let sumOpen=false, picks={}, openSlot=null, groupOpen={gf:true,ff:true,lo:true,fit:true};
+let sumOpen=false, picks={}, openSlot=null, focusG=null, groupOpen={gf:true,ff:true,lo:true,fit:true};
 const KEY='lindens-picker-v2';
 function save(){ try{ localStorage.setItem(KEY,JSON.stringify(picks)); }catch(e){} }
 const fits=(v,p)=>STRUCT.every(k=>!p[k]||v[k]===p[k]);
@@ -1538,7 +1539,8 @@ function render(){
   $('sumwrap').innerHTML=`<button type="button" class="sumline" id="sumtog" aria-expanded="${sumOpen}"><span>${line}</span><span aria-hidden="true">${sumOpen?'▾':'▸'}</span></button>`+(sumOpen?`<div class="cards" style="margin-top:8px">${cardsHtml}</div>`:'');
   const isPicked=s=>!!picks[s]||(!SLOTS[s].fit&&st.av[s].size===1);
   /* while picking, the floor being worked on is the big plan; once the structure is complete the ground floor goes back on top */
-  const topF=st.complete?0:(openSlot?({gf:0,ff:1,lo:2,fit:0})[groupOf(openSlot)]:0)||0;
+  /* the floor being worked on (open part, else the section just opened) is the big plan; with nothing open the ground floor is on top */
+  const topF=({gf:0,ff:1,lo:2,fit:0})[focusG||(openSlot?groupOf(openSlot):'gf')]||0;
   const secs=[['Ground floor',0,gfBox(c).vb,'G','pGF'],['First floor',1,'-30 -60 1200 800','F','pFF'],['Loft',2,'-30 -60 1200 720','L','pLO']];
   const sec=([n,f,vb,id,dom])=>`<section class="plan"><h2>${n}</h2><div id="${dom}">${floorSvg(f,c,isPicked,vb,id)}</div></section>`;
   document.querySelector('.plans').innerHTML=sec(secs[topF])+`<div class="duo">${secs.filter(q=>q[1]!==topF).map(sec).join('')}</div>`;
@@ -1548,14 +1550,14 @@ function focusSlot(s){ const b=document.querySelector(`[data-toggle="${s}"]`); i
 
 $('slots').addEventListener('click',e=>{
   const gt=e.target.closest('[data-group-toggle]');
-  if(gt){ const g=gt.dataset.groupToggle; groupOpen[g]=!groupOpen[g]; render(); const b=document.querySelector(`[data-group-toggle="${g}"]`); if(b) b.focus({preventScroll:true}); return; }
+  if(gt){ const g=gt.dataset.groupToggle; groupOpen[g]=!groupOpen[g]; focusG=groupOpen[g]?g:(focusG===g?null:focusG); if(!groupOpen[g]&&openSlot&&groupOf(openSlot)===g) openSlot=null; render(); const b=document.querySelector(`[data-group-toggle="${g}"]`); if(b) b.focus({preventScroll:true}); return; }
   const tg=e.target.closest('[data-toggle]');
-  if(tg){ const s=tg.dataset.toggle; openSlot=openSlot===s?null:s; render(); focusSlot(s); return; }
+  if(tg){ const s=tg.dataset.toggle; openSlot=openSlot===s?null:s; focusG=groupOf(s); render(); focusSlot(s); return; }
   const dn=e.target.closest('[data-done]');
   if(dn){
     const s=dn.dataset.done, st=state(), t=nextSlot(s,st);
     const g=groupOf(s);
-    openSlot=t;
+    openSlot=t; focusG=t?groupOf(t):null;
     if(t){ const tg2=groupOf(t); if(tg2!==g){ const gd=GROUPS.find(x=>x.id===g); if(gd.slots.every(k=>st.resolved(k))) groupOpen[g]=false; } groupOpen[tg2]=true; }
     render(); if(t) focusSlot(t); return; }
   const b=e.target.closest('.opt'); if(!b) return;
@@ -1591,7 +1593,7 @@ function applyPicks(p,collapse,items){
   const st=state();
   if(st.complete&&collapse){ groupOpen={gf:false,ff:false,lo:false,fit:true}; }
   else groupOpen={gf:true,ff:true,lo:true,fit:true};
-  openSlot=nextOpen(null,st); if(openSlot) groupOpen[groupOf(openSlot)]=true;
+  openSlot=nextOpen(null,st); focusG=null; if(openSlot) groupOpen[groupOf(openSlot)]=true;
   if(PAGE===2&&st.complete) renderFit(true); else { if(PAGE===2) setPage(1); else render(); }
   if(PAGE===3&&W3.src==='cur') w3Start();
 }
@@ -1780,7 +1782,7 @@ function zoom(k,cx,cy){ const [x,y,w,h]=getVb(); if(cx==null){cx=x+w/2;cy=y+h/2;
       case 'col': case 'col2': { const t=b.dataset.a==='col2'?'c2':'col', p=$('fcol'); p.hidden=!(p.hidden||COLT!==t); COLT=t; if(!p.hidden) p.innerHTML=`<div class="note" style="margin-top:6px">${t==='c2'?'Worktop':'Body'} colour</div>`+colPanel(); return; }
       case 'hex': { const v=($('fhex').value||'').trim().replace(/^#?/,'#').toUpperCase(); if(!/^#[0-9A-F]{6}$/.test(v)){ $('fhex').style.borderColor='var(--warn)'; return; } it[COLT]=v; break; }
       case 'nocol': it[COLT]=null; break;
-      case 'scr': it.sc=((it.sc||0)+1)%4; break;
+      case 'scr': it.sc=SCR_ORDER[(SCR_ORDER.indexOf(it.sc||0)+1)%SCR_ORDER.length]; break;
       case 'e-': case 'e+': it.e=Math.max(40,Math.min(220,(it.e||110)+(b.dataset.a==='e+'?5:-5))); break;
       case 'dup': { const n=Object.assign({},it); n.x+=20; n.y+=20; ITEMS.push(n); SEL=n; break; }
       case 'del': ITEMS.splice(ITEMS.indexOf(it),1); SEL=null; break;
@@ -1913,7 +1915,7 @@ function gen3d(c,items,paint){
   const holes1=els.filter(e=>e.f===1&&e.t==='r'&&e.cls==='void').map(e=>[e.x1,e.y1,e.x2,e.y2]).concat(s1view.map(e=>[e.x1,e.y1,e.x2,e.y2]));
   holed('slab','f',holes1,240.3,264.3);
   [0,1,2].forEach(f=>paintMap(els,f,paint).forEach((v,e)=>{ if(v.floor&&!(f===2&&LO0)) box('floorpaint',LAY[f],'slab',e.x1,e.y1,FB3[f],e.x2,e.y2,FB3[f]+1,v.floor); }));
-  const holes2=els.filter(e=>e.f===2&&e.t==='s').map(e=>[e.x1,e.y1,e.x2,e.y2]).concat(s1own.map(e=>[e.x1,e.y1,e.x2,e.y2]));
+  const own2=els.filter(e=>e.f===2&&e.t==='s'), holes2=(own2.length?own2:s1own).map(e=>[e.x1,e.y1,e.x2,e.y2]);
   holed('slab','l',LO0?[]:holes2,500,517.8);
   els.filter(e=>e.f===0&&e.t==='sh'&&e.x1<1110).forEach(e=>{
     if(e.x2<=0) box('roof','g','roof',e.x1-10,e.y1-10,240,0,e.y2+10,255);
@@ -2017,7 +2019,7 @@ function gen3d(c,items,paint){
     else if(k==='wc'){ R(0,0,w,18,0,80,'san',null); R(w*.1,10,w*.9,d,0,40,'san',null); }
     else if(k==='bas'){ R(0,0,w,d,78,88,'san',null); R(w/2-8,4,w/2+8,20,0,78,'san',null); }
     else if(k==='vanity'||k==='vanity2'){ R(0,0,w,d,0,80,'unit'); R(0,0,w,d,80,88,'san',null); }
-    else if(k==='shw'){ R(0,0,w,d,0,5,'san',null); const sp=screenSpan(it,w); if(sp) R(sp[0],d-2,sp[1],d,5,200,'glass',null); }
+    else if(k==='shw'){ R(0,0,w,d,0,5,'san',null); screenSpan(it,w).forEach(q=>R(q[0],d-2,q[1],d,5,200,'glass',null)); }
     else if(k==='bath') R(0,0,w,d,0,55,'san',null);
     else if(k==='glass') R(0,0,w,Math.max(d,2),0,200,'glass',null);
     else if(k==='plant'){ R(w*.2,d*.2,w*.8,d*.8,0,30,'stone',null); R(0,0,w,d,30,h,'plant',null); }
