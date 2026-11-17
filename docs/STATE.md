@@ -1,10 +1,12 @@
 # Lindens Planner — state
 
-_Last updated: 17 Nov 2026 · app version v42_
+_Last updated: 17 Nov 2026 · app version v43_
 
 ## Current state
 - Single-file app: `index.html` (~2,320 lines). Plus `.nojekyll`. No build step.
-- Latest release **v42**: L4 loft stair over the landing (flipped stairs) with LO11 loft — added to check the architect's loft-stair idea in 3D.
+- Latest release **v43**: new ground-floor option **W10** (utility under the stair, 0.8 m corridor west to the garage door, WC 1.7 × 1.5 m off the corridor's south side via a slider). W5 was already taken, so it is W10; it is last in the W list so saved share codes are unaffected. Rules: needs a flipped stair (S4/S5) like W5, must pair with A3 (door at y 410–480), not with H4. Layout is `GEO.W10` (~line 575).
+- v42: L4 loft stair over the landing (flipped stairs) with LO11 loft.
+- Gotcha: share codes store each option's list position, so append new options to the END of a slot's `opts`.
 - Three pages work: structure (1), fittings (2, unlocked once every structure slot is picked), 3D walk-through (3).
 - Shared boards live on Supabase "lindens" (`boards`, `board_versions`, RPCs `save_board` / `delete_board`). Publishable key is in the page (fine — RLS/RPC guarded).
 - Share codes: structure code + fittings code (base64url per item), both synced to the URL hash.
@@ -29,6 +31,7 @@ _Last updated: 17 Nov 2026 · app version v42_
 | ~2311 | `init` |
 
 ## Next steps
+- Check W10 in the 3D walk-through (corridor, slider, WC) and confirm dimensions/fixtures look right.
 - Review v42 loft stair (L4 + LO11) with the family/architect in the 3D walk-through.
 - Continue defining and refining the fittings list.
 - Keep this file and the section map current after each change.
