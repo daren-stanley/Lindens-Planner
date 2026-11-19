@@ -41,7 +41,12 @@ body.p3 #w3page{display:block}
 body.p3 .layout,body.p3 #fitPage,body.p3 #sb,body.p3 #fill,body.p3 #clear,body.p3 #orig{display:none}
 #w3wrap{background:#DCE6EC;border:1px solid var(--line);border-radius:8px;overflow:hidden}
 #w3view{position:relative;height:min(76vh,860px);touch-action:none;user-select:none;-webkit-user-select:none}
-#w3wrap:fullscreen #w3view{height:100vh}
+#w3wrap:fullscreen{display:flex;flex-direction:column;height:100vh}#w3wrap:fullscreen #w3view{height:auto;flex:1;min-height:0}
+body.sunon #w3view{height:min(60vh,720px)}body.sunon #w3wrap:fullscreen #w3view{height:auto}
+#w3sun{padding:8px 10px;background:#FFFBF0;border-top:1px solid var(--line);display:grid;gap:6px}#w3sun[hidden]{display:none}
+#w3sun .r{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}#w3sun input[type=range]{flex:1;min-width:150px}
+#w3st{font-variant-numeric:tabular-nums;min-width:5.6em;font-weight:600}#w3sr{font-size:12.5px;color:#3D3A35}
+.w3cmp{position:absolute;right:10px;top:8px;width:46px;height:46px;pointer-events:none;display:none}body.sunon .w3cmp{display:block}
 #w3view canvas{display:block;width:100%;height:100%}
 .w3help{position:absolute;top:8px;left:10px;right:10px;font-size:12px;color:#3D3A35;background:rgba(255,255,255,.7);padding:4px 8px;border-radius:5px;pointer-events:none;width:max-content;max-width:calc(100% - 20px)}
 .w3o{display:none}#w3view[data-mode="orbit"] .w3o{display:inline}
@@ -50,7 +55,7 @@ body.p3 .layout,body.p3 #fitPage,body.p3 #sb,body.p3 #fill,body.p3 #clear,body.p
 .w3ud{position:absolute;right:18px;bottom:18px;display:none;flex-direction:column;gap:10px}
 .w3ud button{width:56px;height:56px;border-radius:50%;border:2px solid rgba(60,55,50,.35);background:rgba(255,255,255,.5);font-size:20px}
 #w3view[data-mode="fly"] .w3ud{display:flex}
-#w3page .seg .btn[aria-pressed="true"],#w3page [data-w3a="fit"][aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}</style></head><body>
+#w3page .seg .btn[aria-pressed="true"],#w3page [data-w3a="fit"][aria-pressed="true"],#w3page [data-w3a="sun"][aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}</style></head><body>
 <title>Lindens house picker</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -172,9 +177,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v46 · 17 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v47 · 19 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v46';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v47';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -223,12 +228,20 @@ body.nosteel .rsj{display:none}
     <span class="seg"><button type="button" class="btn" data-w3m="walk" aria-pressed="true">Walk</button><button type="button" class="btn" data-w3m="orbit" aria-pressed="false">Orbit</button><button type="button" class="btn" data-w3m="fly" aria-pressed="false">Fly</button></span>
     <span class="seg"><button type="button" class="btn" data-w3f="0">Ground</button><button type="button" class="btn" data-w3f="1">First</button><button type="button" class="btn" data-w3f="2">Loft</button><button type="button" class="btn w3notwalk" data-w3f="3">Roof</button></span>
     <button type="button" class="btn" data-w3a="fit" aria-pressed="true">Fittings</button>
+    <button type="button" class="btn" data-w3a="sun" aria-pressed="false">☀ Sun</button>
     <button type="button" class="btn" data-w3a="full">Full screen</button>
   </div>
   <div id="w3wrap"><div id="w3view" data-mode="walk">
     <div class="w3help">Drag to look · joystick or W A S D to move · Shift runs<span class="w3o"> · in Orbit drag turns the house, pinch or wheel zooms</span></div>
     <div class="w3joy" aria-label="Move"><i></i></div>
     <div class="w3ud"><button type="button" data-ud="up" aria-label="Up">▲</button><button type="button" data-ud="down" aria-label="Down">▼</button></div>
+    <svg class="w3cmp" viewBox="-23 -23 46 46" aria-label="North"><circle r="21" fill="rgba(255,255,255,.78)" stroke="#6B645B"/><g id="w3cg"><path d="M0-3L5 14L0 10L-5 14Z" fill="#C0392B"/><text y="-8" text-anchor="middle" font-size="11" font-weight="700" fill="#3D3A35">N</text></g></svg>
+  </div>
+  <div id="w3sun" hidden>
+    <div class="r"><b id="w3st">12:00</b><input id="w3t" type="range" min="240" max="1320" step="5" value="780" aria-label="Time of day"></div>
+    <div class="r"><span class="seg"><button type="button" class="btn" data-w3d="355">21 Dec</button><button type="button" class="btn" data-w3d="80">21 Mar</button><button type="button" class="btn" data-w3d="172">21 Jun</button></span>
+      <label class="note" style="margin:0"><input type="checkbox" id="w3tr" checked> Trees &amp; neighbours</label></div>
+    <div id="w3sr"></div>
   </div></div>
   <p id="w3msg" class="note"></p>
 </div>
@@ -1891,7 +1904,8 @@ function zoom(k,cx,cy){ const [x,y,w,h]=getVb(); if(cx==null){cx=x+w/2;cy=y+h/2;
 /* Plan coordinates in cm: x east, y south (0 = rear face), z up. three.js: (x, z, y). */
 const W3={scene:null,renderer:null,camera:null,groups:null,key:'',mode:'walk',boxes:[],walk:[],polys:[],hash:null,
   pos:{x:555,y:900,z:0},yaw:0,pitch:0,feet:0,eye:160,orb:{tx:555,ty:331,tz:150,r:1700,th:0.6,ph:1.0},
-  joy:{x:0,y:0},keys:{},showUpTo:3,fit:true,running:false,last:0,spots:{},src:'cur',srcCode:null,srcItems:null};
+  joy:{x:0,y:0},keys:{},showUpTo:3,fit:true,running:false,last:0,spots:{},src:'cur',srcCode:null,srcItems:null,
+  sun:{on:false,doy:80,min:780,trees:true},sunL:null,sunD:null,hemi:null,dl:null,dl2:null,env:null};
 const FB3={0:0,1:264.3,2:517.8}, FT3={0:240.3,1:500,2:752.8}, DX3=246;
 const MCOL={wall:0xECE4D6,slab:0xBEBAB2,roof:0x5C5450,glass:0x96C8EB,door:0x6E482C,stair:0xC49668,unit:0xF5F5F0,worktop:0x3C3C3C,san:0xFFFFFF,brick:0xA0523C,stone:0xCDC8C0,flame:0xF0823C,plant:0x608C50,rail:0x6E482C,ground:0xB9C7A5};
 
@@ -2129,19 +2143,86 @@ function gen3d(c,items,paint){
   return {boxes,prisms,spots,stairs:[run0&&run0.stat,run1&&run1.stat]};
 }
 
+/* ---------- sun simulator ---------- */
+/* Site: Woking GU22. SITE.bx = true bearing of the model's +x axis, measured from the E1000 survey drawing
+   (long axis runs NNW-SSE, road/front on the ENE side, model y runs south = towards the road). */
+const SITE={lat:51.32,lon:-0.56,bx:333.2};
+const SUNK={ux:[Math.sin(SITE.bx*Math.PI/180),Math.cos(SITE.bx*Math.PI/180)],uy:[Math.sin((SITE.bx+90)*Math.PI/180),Math.cos((SITE.bx+90)*Math.PI/180)]};
+/* Trees and neighbours scaled off the survey; positions in model metres (x along the house, y towards the road).
+   Tree heights are estimates only - the survey is 2D. [x, y, canopy radius, height] */
+const SUN_ENV={
+  trees:[[15.9,-4.9,5.6,14],[19.5,3.4,3.9,12],[17,11.9,4.8,13],[12.9,16.9,3.5,11],[5.1,-18.9,6.2,13],[1.5,-31.1,7.6,15],[-4,-4.4,1.8,5],
+         [17.9,27.6,6.5,14],[7.7,31.3,4.8,12],[0.3,29.6,6.9,14],[-10,29.1,6,12]],
+  blocks:[[7.5,[[-7.7,0.5],[-8.1,7.8],[-18.7,7.9],[-18.9,-2.6]]],[3,[[-1.2,1.1],[-0.9,7.2],[-7.3,7.2],[-4.1,1.2]]]]
+};
+function sunPos(doy,min){
+  const R=Math.PI/180, bst=(doy>=86&&doy<=299)?1:0, utc=min/60-bst;
+  const B=360/365*(doy-81)*R, eot=9.87*Math.sin(2*B)-7.53*Math.cos(B)-1.5*Math.sin(B), dec=23.44*Math.sin(B)*R;
+  const H=(utc+SITE.lon/15+eot/60-12)*15*R, la=SITE.lat*R;
+  const alt=Math.asin(Math.sin(la)*Math.sin(dec)+Math.cos(la)*Math.cos(dec)*Math.cos(H));
+  const az=(Math.atan2(Math.sin(H),Math.cos(H)*Math.sin(la)-Math.tan(dec)*Math.cos(la))/R+180+360)%360;
+  return {alt:alt/R,az,bst};
+}
+function w3SunRig(T,sc){
+  const sl=new T.DirectionalLight(0xFFFFFF,0.8); sl.castShadow=true; sl.visible=false;
+  const ms=Math.min(4096,W3.renderer.capabilities.maxTextureSize||2048); sl.shadow.mapSize.set(ms,ms);
+  const c=sl.shadow.camera; c.left=-4500; c.right=4500; c.top=4500; c.bottom=-4500; c.near=100; c.far=13000; c.updateProjectionMatrix();
+  sl.shadow.bias=-0.0004; sl.shadow.normalBias=1.5; sl.target.position.set(555,0,331); sc.add(sl,sl.target); W3.sunL=sl;
+  const d=new T.Mesh(new T.SphereGeometry(350,16,12),new T.MeshBasicMaterial({color:0xFFE9A8,fog:false})); d.visible=false; sc.add(d); W3.sunD=d;
+  /* trees and neighbouring buildings */
+  const g=new T.Group(), tm=new T.MeshLambertMaterial({color:0x5F7F4B}), km=new T.MeshLambertMaterial({color:0x6B5A47}), bm=new T.MeshLambertMaterial({color:0xD9D2C6});
+  SUN_ENV.trees.forEach(([x,y,r,h])=>{ x*=100; y*=100; r*=100; h*=100;
+    const tk=new T.Mesh(new T.CylinderGeometry(r*0.07,r*0.1,h*0.45,8),km); tk.position.set(x,h*0.225,y); tk.castShadow=true; g.add(tk);
+    const cn=new T.Mesh(new T.SphereGeometry(1,20,14),tm); cn.scale.set(r,h*0.32,r); cn.position.set(x,h*0.68,y); cn.castShadow=true; g.add(cn); });
+  SUN_ENV.blocks.forEach(([h,pts])=>{ const geo=new T.ExtrudeGeometry(new T.Shape(pts.map(q=>new T.Vector2(q[0]*100,-q[1]*100))),{depth:h*100,bevelEnabled:false}); geo.rotateX(-Math.PI/2);
+    const m=new T.Mesh(geo,bm); m.castShadow=true; m.receiveShadow=true; g.add(m); });
+  g.visible=false; sc.add(g); W3.env=g;
+}
+function w3SunApply(){
+  const S=W3.sun, T=window.THREE; const hm=Math.floor(S.min/60), mm=S.min%60;
+  const p=sunPos(S.doy,S.min);
+  const tl=$('w3st'); if(tl) tl.textContent=String(hm).padStart(2,'0')+':'+String(mm).padStart(2,'0')+(p.bst?' BST':' GMT');
+  const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  const sr=$('w3sr'); if(sr) sr.textContent=p.alt>0.3?('Sun '+Math.round(p.alt)+'° up, in the '+dirs[Math.round(p.az/22.5)%16]+' ('+Math.round(p.az)+'°). Tree heights are estimates, shown in full leaf.'):'The sun is below the horizon.';
+  if(!T||!W3.sunL) return;
+  const on=S.on, up=on&&p.alt>0.3, R=Math.PI/180;
+  const E=Math.cos(p.alt*R)*Math.sin(p.az*R), N=Math.cos(p.alt*R)*Math.cos(p.az*R), sz=Math.sin(p.alt*R);
+  const sx=E*SUNK.ux[0]+N*SUNK.ux[1], sy=E*SUNK.uy[0]+N*SUNK.uy[1];   /* model x, model y (south), up */
+  const day=Math.max(0,Math.min(1,(p.alt+6)/16)), fade=Math.max(0,Math.min(1,p.alt/6)), warm=Math.max(0,Math.min(1,p.alt/25));
+  W3.sunL.visible=up; W3.sunL.intensity=0.9*fade; W3.sunL.color.setRGB(1,0.82+0.18*warm,0.62+0.38*warm);
+  W3.sunL.position.set(555+sx*6000,sz*6000,331+sy*6000);
+  W3.sunD.visible=up; W3.sunD.position.set(555+sx*12000,sz*12000,331+sy*12000);
+  W3.dl.visible=!on; W3.dl2.visible=!on; W3.hemi.intensity=on?0.2+0.46*day:0.72;
+  W3.scene.background.setHex(0xDCE6EC); if(on) W3.scene.background.lerp(new T.Color(0x1B2431),1-day);
+  W3.env.visible=on&&S.trees;
+}
+function w3Compass(){
+  const g=$('w3cg'); if(!g||!W3.camera) return; const d=W3.camera.getWorldDirection(W3._wd||(W3._wd=new THREE.Vector3()));
+  const E=d.x*SUNK.ux[0]+d.z*SUNK.uy[0], N=d.x*SUNK.ux[1]+d.z*SUNK.uy[1];
+  g.setAttribute('transform','rotate('+(-Math.atan2(E,N)*180/Math.PI).toFixed(1)+')');
+}
+function w3SunUI(){
+  const S=W3.sun; document.body.classList.toggle('sunon',S.on); $('w3sun').hidden=!S.on;
+  document.querySelector('[data-w3a="sun"]').setAttribute('aria-pressed',S.on);
+  document.querySelectorAll('[data-w3d]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.w3d===S.doy)); $('w3t').value=S.min; $('w3tr').checked=S.trees;
+  if(S.on&&W3.showUpTo<3){ W3.showUpTo=3; w3Visibility(); }
+  w3SunApply();
+}
+
 /* ---------- three.js scene ---------- */
 function w3Build(c,items,paint){
   const T=THREE, M=gen3d(c,items,paint);
   W3.boxes=M.boxes; W3.prisms=M.prisms; W3.spots=M.spots;
   if(!W3.renderer){
-    const r=new T.WebGLRenderer({antialias:true}); r.setPixelRatio(Math.min(devicePixelRatio||1,2)); W3.renderer=r; $('w3view').appendChild(r.domElement);
+    const r=new T.WebGLRenderer({antialias:true}); r.setPixelRatio(Math.min(devicePixelRatio||1,2)); W3.renderer=r; r.shadowMap.enabled=true; r.shadowMap.type=T.PCFSoftShadowMap; $('w3view').appendChild(r.domElement);
     W3.camera=new T.PerspectiveCamera(70,1,5,20000);
     new ResizeObserver(w3Resize).observe($('w3view'));
   }
   const sc=new T.Scene(); sc.background=new T.Color(0xDCE6EC); W3.scene=sc;
-  sc.add(new T.HemisphereLight(0xFFFFFF,0xD6CFC2,0.72)); const dl=new T.DirectionalLight(0xFFFFFF,0.4); dl.position.set(-600,1500,1400); sc.add(dl);
+  const hemi=new T.HemisphereLight(0xFFFFFF,0xD6CFC2,0.72); sc.add(hemi); const dl=new T.DirectionalLight(0xFFFFFF,0.4); dl.position.set(-600,1500,1400); sc.add(dl);
   const dl2=new T.DirectionalLight(0xFFFFFF,0.18); dl2.position.set(900,800,-1200); sc.add(dl2);
-  const gnd=new T.Mesh(new T.PlaneGeometry(6000,6000),new T.MeshLambertMaterial({color:MCOL.ground})); gnd.rotation.x=-Math.PI/2; gnd.position.set(555,-16,331); sc.add(gnd);
+  W3.hemi=hemi; W3.dl=dl; W3.dl2=dl2; w3SunRig(T,sc);
+  const gnd=new T.Mesh(new T.PlaneGeometry(12000,12000),new T.MeshLambertMaterial({color:MCOL.ground})); gnd.rotation.x=-Math.PI/2; gnd.position.set(555,-16,331); gnd.receiveShadow=true; sc.add(gnd);
   const groups={}; ['g','gF','f','fF','l','lF','r'].forEach(k=>{ groups[k]=new T.Group(); sc.add(groups[k]); }); W3.groups=groups;
   /* merge everything per layer and colour */
   const buckets={};
@@ -2166,7 +2247,7 @@ function w3Build(c,items,paint){
     const col=B.col?new T.Color(B.col):new T.Color(MCOL[B.m]||0xCCCCCC);
     const glass=B.m==='glass';
     const mat=new T.MeshLambertMaterial({color:col,side:T.DoubleSide,transparent:glass,opacity:glass?0.28:1,depthWrite:!glass});
-    const mesh=new T.Mesh(g,mat); groups[B.lay].add(mesh);
+    const mesh=new T.Mesh(g,mat); mesh.castShadow=!glass; mesh.receiveShadow=!glass; groups[B.lay].add(mesh);
     if(!glass){ const eg=new T.EdgesGeometry(g,25); const ln=new T.LineSegments(eg,new T.LineBasicMaterial({color:0x4A4540,transparent:true,opacity:0.35})); groups[B.lay].add(ln); } });
   /* collision: solid boxes and walkable tops, hashed in 1 m cells */
   const hash=new Map(); const add=(o,x1,y1,x2,y2)=>{ for(let i=Math.floor(x1/100);i<=Math.floor(x2/100);i++) for(let j=Math.floor(y1/100);j<=Math.floor(y2/100);j++){ const k=i+','+j; (hash.get(k)||hash.set(k,[]).get(k)).push(o); } };
@@ -2176,7 +2257,7 @@ function w3Build(c,items,paint){
     const o={p,walk:!!p.walk,solid:!p.walk&&p.n!=='rug'&&p.n!=='top',b:{x1:Math.min(...xs),y1:Math.min(...ys),x2:Math.max(...xs),y2:Math.max(...ys),z1:p.a0,z2:p.a1}};
     add(o,o.b.x1,o.b.y1,o.b.x2,o.b.y2); });
   W3.hash=hash;
-  w3Visibility(); w3Goto(0); w3Resize();
+  w3Visibility(); w3Goto(0); w3Resize(); w3SunApply();
 }
 function w3Near(x,y){ const k=Math.floor(x/100)+','+Math.floor(y/100); return W3.hash.get(k)||[]; }
 function w3Ground(x,y,feet){ let best=-1; /* the outside ground is at -1 */
@@ -2214,7 +2295,7 @@ function w3Frame(t){
       p.z+=(W3.feet+W3.eye-p.z)*Math.min(1,dt*12); }
     cam.position.set(W3.pos.x,W3.pos.z,W3.pos.y);
     const cp=Math.cos(W3.pitch); cam.lookAt(W3.pos.x+Math.sin(W3.yaw)*cp*100,W3.pos.z+Math.sin(W3.pitch)*100,W3.pos.y-Math.cos(W3.yaw)*cp*100); }
-  W3.renderer.render(W3.scene,cam);
+  W3.renderer.render(W3.scene,cam); if(W3.sun.on) w3Compass();
 }
 function w3Source(){
   if(W3.src==='link'&&W3.srcCode) return {c:W3.srcCode,items:W3.srcItems||[],paint:(W3.srcItems&&W3.srcItems.paint)||[]};
@@ -2263,8 +2344,13 @@ function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b
     else if(b.dataset.w3f!=null){ const f=+b.dataset.w3f; if(W3.mode==='walk'){ w3Goto(f); } else { W3.showUpTo=f===0?0:f===1?1:f===2?2:3; w3Visibility(); } }
     else if(b.dataset.w3a==='fit'){ W3.fit=!W3.fit; b.setAttribute('aria-pressed',W3.fit); w3Visibility(); }
     else if(b.dataset.w3a==='all'){ W3.showUpTo=3; w3Visibility(); }
+    else if(b.dataset.w3a==='sun'){ W3.sun.on=!W3.sun.on; w3SunUI(); }
     else if(b.dataset.w3a==='full'){ const el=$('w3wrap'); try{ if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el).catch(()=>{}); }catch(e){} }
   });
+  $('w3sun').addEventListener('click',ev=>{ const b=ev.target.closest('[data-w3d]'); if(!b) return; W3.sun.doy=+b.dataset.w3d; w3SunUI(); });
+  $('w3t').addEventListener('input',()=>{ W3.sun.min=+$('w3t').value; w3SunApply(); });
+  $('w3tr').addEventListener('change',()=>{ W3.sun.trees=$('w3tr').checked; w3SunApply(); });
+  w3SunUI();
   $('w3src').addEventListener('change',()=>{ W3.src=$('w3src').value; $('w3paste').hidden=W3.src!=='link'; if(W3.src==='cur') w3Start(); });
   $('w3load').addEventListener('click',()=>{ let raw=$('w3in').value.trim(); if(raw.includes('#')) raw=decodeURIComponent(raw.slice(raw.indexOf('#')+1));
     const [sc,fc]=raw.split('~'), c=readCode(sc), fi=fc!=null?readFit(fc):[];
