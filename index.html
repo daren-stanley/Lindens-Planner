@@ -43,7 +43,9 @@ body.p3 .layout,body.p3 #fitPage,body.p3 #sb,body.p3 #fill,body.p3 #clear,body.p
 #w3view{position:relative;height:min(76vh,860px);touch-action:none;user-select:none;-webkit-user-select:none}
 #w3wrap:fullscreen{display:flex;flex-direction:column;height:100vh}#w3wrap:fullscreen #w3view{height:auto;flex:1;min-height:0}
 body.sunon #w3view{height:min(60vh,720px)}body.sunon #w3wrap:fullscreen #w3view{height:auto}
-#w3sun{padding:8px 10px;background:#FFFBF0;border-top:1px solid var(--line);display:grid;gap:6px}#w3sun[hidden]{display:none}
+#w3sun,#w3dl{padding:8px 10px;background:#FFFBF0;border-top:1px solid var(--line);display:grid;gap:6px}#w3sun[hidden],#w3dl[hidden]{display:none}
+#w3dl table{border-collapse:collapse;font-size:12px;width:100%}#w3dl td,#w3dl th{padding:2px 6px 2px 0;text-align:left;font-weight:400;border-bottom:1px solid var(--line)}#w3dl th{font-weight:600}#w3dl td.n,#w3dl th.n{text-align:right}#w3dl .lg{height:10px;border-radius:5px;background:linear-gradient(90deg,#1a2a6c,#1f6fb5 20%,#22b3a6 40%,#7fcf4a 60%,#f2d035 80%,#f08a24)}#w3dl .lgl{display:flex;justify-content:space-between;font-size:11px;opacity:.8}
+#w3dl .up{color:#1B7F3B;font-weight:600}
 #w3sun .r{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center}#w3sun input[type=range]{flex:1;min-width:150px}
 #w3st{font-variant-numeric:tabular-nums;min-width:5.6em;font-weight:600}#w3sr{font-size:12.5px;color:#3D3A35}
 .w3cmp{position:absolute;right:10px;top:8px;width:46px;height:46px;pointer-events:none;display:none}body.sunon .w3cmp{display:block}
@@ -177,9 +179,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v47 · 19 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v48 · 20 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v47';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v48';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -228,7 +230,8 @@ body.nosteel .rsj{display:none}
     <span class="seg"><button type="button" class="btn" data-w3m="walk" aria-pressed="true">Walk</button><button type="button" class="btn" data-w3m="orbit" aria-pressed="false">Orbit</button><button type="button" class="btn" data-w3m="fly" aria-pressed="false">Fly</button></span>
     <span class="seg"><button type="button" class="btn" data-w3f="0">Ground</button><button type="button" class="btn" data-w3f="1">First</button><button type="button" class="btn" data-w3f="2">Loft</button><button type="button" class="btn w3notwalk" data-w3f="3">Roof</button></span>
     <button type="button" class="btn" data-w3a="fit" aria-pressed="true">Fittings</button>
-    <button type="button" class="btn" data-w3a="sun" aria-pressed="false">☀ Sun</button>
+    <button type="button" class="btn" data-w3a="sun" aria-pressed="false">☀ Sun</button><button type="button" class="btn" data-w3a="dl" aria-pressed="false">Daylight map</button>
+    <span class="seg" id="w3vx"><span class="btn" id="w3vxl" style="pointer-events:none;opacity:.75">Velux</span><button type="button" class="btn" data-w3v="all" aria-pressed="false">All</button><button type="button" class="btn" data-w3v="p" aria-pressed="false">Porch</button><button type="button" class="btn" data-w3v="e" aria-pressed="false">Extension</button><button type="button" class="btn" data-w3v="r" aria-pressed="false">Roof rooms</button></span>
     <button type="button" class="btn" data-w3a="full">Full screen</button>
   </div>
   <div id="w3wrap"><div id="w3view" data-mode="walk">
@@ -243,6 +246,11 @@ body.nosteel .rsj{display:none}
       <label class="note" style="margin:0"><input type="checkbox" id="w3tr" checked> Trees &amp; neighbours</label></div>
     <div id="w3sr"></div>
   </div></div>
+  <div id="w3dl" hidden>
+    <div><b>Daylight factor</b> <span class="note" style="margin:0">(estimate: sky light through windows and Velux, plus a flat allowance for light bouncing round the room; no trees or neighbours)</span></div>
+    <div><div class="lg"></div><div class="lgl"><span>0%</span><span>1%</span><span>2%</span><span>3%</span><span>4%</span><span>6%+</span></div></div>
+    <div id="w3dlt"></div>
+  </div>
   <p id="w3msg" class="note"></p>
 </div>
 <div id="fitPage">
@@ -1500,7 +1508,7 @@ function totals(c){
   const dorm={LO4:'about 8.3 m',LO6:'about 8.3 m',LO10:'about 8.9 m',LO11:'about 8.1 m',LO8:'about 7.7 m',LO9:'about 7.7 m'}[c.LO]||'full width, about 10.6 m';
   const plan=[]; if(c.P!=='P0') plan.push('Porch over 3 m²: planning needed'); if(c.LO!=='LO0') plan.push(`Rear dormer ${dorm}: usually permitted development`);
   if(c.LO==='LO4') plan.push('Balcony: full planning needed');
-  if(inn(c.M,['M2','M9'])) plan.push('Full-height master window: needs a Juliet balcony or glass guard to 1.1 m');
+  if(inn(c.M,['M2','M9'])) plan.push('Full-height master window: needs a Juliet balcony or glass guard to 1.1 m'+(extSillOf(c)?`; over the extension lean-to its sill is raised ${extSillOf(c)} cm to clear the roof`:''));
   if(inn(c.G,['G2','G5'])) plan.push('Garage extended 0.8 m at the rear');
   if(c.S==='S6') plan.push('New first-floor stair window (front elevation change)');
   if(extD(c)) plan.push(`Single-storey rear extension 7 × ${extD(c)/100} m: usually permitted development (check the eaves height near the boundary)`);
@@ -1905,8 +1913,11 @@ function zoom(k,cx,cy){ const [x,y,w,h]=getVb(); if(cx==null){cx=x+w/2;cy=y+h/2;
 const W3={scene:null,renderer:null,camera:null,groups:null,key:'',mode:'walk',boxes:[],walk:[],polys:[],hash:null,
   pos:{x:555,y:900,z:0},yaw:0,pitch:0,feet:0,eye:160,orb:{tx:555,ty:331,tz:150,r:1700,th:0.6,ph:1.0},
   joy:{x:0,y:0},keys:{},showUpTo:3,fit:true,running:false,last:0,spots:{},src:'cur',srcCode:null,srcItems:null,
-  sun:{on:false,doy:80,min:780,trees:true},sunL:null,sunD:null,hemi:null,dl:null,dl2:null,env:null};
+  sun:{on:false,doy:80,min:780,trees:true},vx:{p:false,e:false,r:false},vxn:{p:0,e:0,r:0},vxInfo:null,D:null,dl:{on:false,data:null,mesh:{}},sunL:null,sunD:null,hemi:null,dl:null,dl2:null,env:null};
 const FB3={0:0,1:264.3,2:517.8}, FT3={0:240.3,1:500,2:752.8}, DX3=246;
+/* v48 Velux: porch gable and shallow rear-extension lean-to. Eave tops sit at 252 cm; the lean-to rises towards the house wall, so the first-floor full-height windows over it get a sill 15 cm above the roof there */
+const EXT_DEG=10, PORCH_DEG=30;
+const extSillOf=c=>extD(c)?Math.ceil(252+(extD(c)+12)*Math.tan(EXT_DEG*Math.PI/180)+15-FB3[1]):0;
 const MCOL={wall:0xECE4D6,slab:0xBEBAB2,roof:0x5C5450,glass:0x96C8EB,door:0x6E482C,stair:0xC49668,unit:0xF5F5F0,worktop:0x3C3C3C,san:0xFFFFFF,brick:0xA0523C,stone:0xCDC8C0,flame:0xF0823C,plant:0x608C50,rail:0x6E482C,ground:0xB9C7A5};
 
 function load3js(cb){
@@ -1925,6 +1936,7 @@ function gen3d(c,items,paint){
   let els=[]; for(let f=0;f<3;f++) els=els.concat(structEls(c,f));
   els=els.map(e=>Object.assign({x1:0,y1:0,x2:0,y2:0,f:0},e));
   const boxes=[], prisms=[];
+  const extSill=extSillOf(c);
   const box=(n,lay,m,x1,y1,z1,x2,y2,z2,col)=>{ if(x2>x1&&y2>y1&&z2>z1+0.5) boxes.push({n,lay,m,x1,y1,z1,x2,y2,z2,col}); };
   const LAY={0:'g',1:'f',2:'l'}, FITL={0:'gF',1:'fF',2:'lF'};
   /* --- walls from a 1 cm mask --- */
@@ -1938,7 +1950,7 @@ function gen3d(c,items,paint){
       for(let yy=y;yy<y2;yy++) used.fill(1,yy*Wd+x,yy*Wd+x2); out.push([L,x+ox,y+oy,x2+ox,y2+oy]); x=x2; } }
     return out; }
   const inPolyP=(x,y,P)=>inPoly(x,y,P);
-  function wspec(f,e){ const {x1,y1,x2,y2}=e, k=e.k; if(e.full) return ['win',0,210];
+  function wspec(f,e){ const {x1,y1,x2,y2}=e, k=e.k; if(e.full) return ['win',(f===1&&extSill&&x2>0&&x1<700&&y2<=26)?extSill:0,210];
     if(f===0&&x2<=0){ if(y2<=26) return (x2-x1)<=90?['door',0,210]:['win',90,202]; return ['door',0,210]; }
     if(f===0){ if(y1>=636) return ['win',x2<=330?113:(x2<=707&&x1>=524?10:50),202];
       if(y2<=26) return (k==='n'&&x2-x1>=300)?(x1<700?['win',0,210]:['win',40,210]):((k==='n'&&y1<0&&x2-x1>200)?['win',90,210]:['win',x2<=290?97:51,202]);
@@ -2004,10 +2016,41 @@ function gen3d(c,items,paint){
   [0,1,2].forEach(f=>paintMap(els,f,paint).forEach((v,e)=>{ if(v.floor&&!(f===2&&LO0)) box('floorpaint',LAY[f],'slab',e.x1,e.y1,FB3[f],e.x2,e.y2,FB3[f]+1,v.floor); }));
   const own2=els.filter(e=>e.f===2&&(e.t==='s'||e.t==='wn')), holes2=(own2.length?own2:s1own).map(e=>[e.x1,e.y1,e.x2,e.y2]);
   holed('slab','l',LO0?[]:holes2,500,517.8);
+  /* --- Velux (v48): sloped roof slabs with rectangular openings. Each opening is filled by a roof-coloured plug (view off) or a glass pane (view on) --- */
+  const VXON={p:'pOn',e:'eOn',r:'rOn'}, VXOFF={p:'pOff',e:'eOff',r:'rOff'}, vxList=[], vxMeta={}, RAD=Math.PI/180;
+  const slabP=(sl,xa,xb,ya,yb,zt,th,lay,m,n,dz)=>{ dz=dz||0; if(xb-xa<0.5||yb-ya<0.5) return;
+    if(sl==='y') prisms.push({n,lay,m,ax:'x',pts:[[ya,zt(ya)-dz],[yb,zt(yb)-dz],[yb,zt(yb)-dz-th],[ya,zt(ya)-dz-th]],a0:xa,a1:xb});
+    else prisms.push({n,lay,m,ax:'y',pts:[[xa,zt(xa)-dz],[xb,zt(xb)-dz],[xb,zt(xb)-dz-th],[xa,zt(xa)-dz-th]],a0:ya,a1:yb}); };
+  /* a slab X0..X1 by Y0..Y1 sloping along y ('y') or along x ('x'); holes are {xa,xb,ya,yb} plan rectangles */
+  const slabHoles=(sl,X0,X1,Y0,Y1,zt,th,lay,z,holes)=>{
+    const hs=holes.slice().sort((a,b)=>a.xa-b.xa), xs=[X0]; hs.forEach(h=>xs.push(h.xa,h.xb)); xs.push(X1);
+    for(let i=0;i<xs.length-1;i++){ const xa=xs[i], xb=xs[i+1]; if(xb-xa<0.5) continue; const h=hs.find(q=>q.xa<=xa+0.01&&q.xb>=xb-0.01);
+      if(!h){ slabP(sl,xa,xb,Y0,Y1,zt,th,lay,'roof','roof'); continue; }
+      slabP(sl,xa,xb,Y0,h.ya,zt,th,lay,'roof','roof'); slabP(sl,xa,xb,h.yb,Y1,zt,th,lay,'roof','roof');
+      slabP(sl,xa,xb,h.ya,h.yb,zt,th,VXOFF[z],'roof','roof');
+      slabP(sl,xa,xb,h.ya,h.yb,zt,3,VXON[z],'glass','glassX',6); } };
+  const vxPane=(z,label,cx,cy,cz,w,L,nx,ny,nz)=>{ const l=Math.hypot(nx,ny,nz); vxList.push({z,label,cx,cy,cz,w,L,nx:nx/l,ny:ny/l,nz:nz/l}); };
+  /* porch: gable with the ridge running front to back, one pane on each slope; ridge kept clear of the first-floor front window sills */
+  const porchRoof=e=>{ const x1=e.x1-8, x2=e.x2+8, xm=(e.x1+e.x2)/2, hs=xm-x1, y1=e.y1, y2=e.y2+8, TH=14, w=78, L=98;
+    const sills=openings.filter(([f,q,sp])=>f===1&&sp[0]==='win'&&q.y1>=636&&q.x2>x1&&q.x1<x2).map(([f,q,sp])=>FB3[1]+sp[1]);
+    const want=hs*Math.tan(PORCH_DEG*RAD), lim=(sills.length?Math.min(...sills)-12:1e9)-252, rise=Math.max(20,Math.min(want,lim)), deg=Math.atan(rise/hs)/RAD;
+    const zt=x=>252+rise*(1-Math.abs(x-xm)/hs), Lh=L*Math.cos(deg*RAD), yc=(e.y1+e.y2)/2, hw=Math.min(w,e.y2-e.y1-30)/2;
+    [-1,1].forEach(sg=>{ const xc=xm+sg*0.5*hs, ho={xa:xc-Lh/2,xb:xc+Lh/2,ya:yc-hw,yb:yc+hw};
+      slabHoles('x',sg<0?x1:xm,sg<0?xm:x2,y1,y2,zt,TH,'g','p',[ho]);
+      vxPane('p',sg<0?'Porch, west slope':'Porch, east slope',xc,yc,zt(xc)-7,hw*2,L,-sg*Math.tan(deg*RAD),0,1); });
+    prisms.push({n:'gable',lay:'g',m:'wall',ax:'y',pts:[[e.x1,240],[e.x1,zt(e.x1)-TH],[xm,zt(xm)-TH],[e.x2,zt(e.x2)-TH],[e.x2,240]],a0:e.y2-12,a1:e.y2});
+    vxMeta.porch={deg:Math.round(deg),ridge:Math.round(252+rise),capped:rise<want-0.5}; };
+  /* rear extension: shallow lean-to falling away from the house, two small fixed panes */
+  const extRoof=e=>{ const d=-e.y1, X0=e.x1-8, X1=e.x2+8, Y0=e.y1-12, TH=14, big=d>=200, w=big?78:55, L=big?98:78, Lh=L*Math.cos(EXT_DEG*RAD), yc=-d/2, tn=Math.tan(EXT_DEG*RAD);
+    const zt=y=>252+(y-Y0)*tn, holes=[195,505].map(xc=>({xa:xc-w/2,xb:xc+w/2,ya:yc-Lh/2,yb:yc+Lh/2}));
+    slabHoles('y',X0,X1,Y0,0,zt,TH,'g','e',holes);
+    [[e.x1,e.x1+26],[e.x2-26,e.x2]].forEach(([a,b])=>prisms.push({n:'gable',lay:'g',m:'wall',ax:'x',pts:[[-d,240],[-d,zt(-d)-TH],[0,zt(0)-TH],[0,240]],a0:a,a1:b}));
+    holes.forEach((h,i)=>vxPane('e','Extension, pane '+(i+1),(h.xa+h.xb)/2,yc,zt(yc)-7,w,L,0,-tn,1));
+    vxMeta.ext={deg:EXT_DEG,wall:Math.round(zt(0)),sill:extSill}; };
   els.filter(e=>e.f===0&&e.t==='sh'&&e.x1<1110).forEach(e=>{
     if(e.x2<=0) box('roof','g','roof',e.x1-10,e.y1-10,240,0,e.y2+10,255);
-    else if(e.y1>=662) box('roof','g','roof',e.x1-8,e.y1,240,e.x2+8,e.y2,256);
-    else if(e.y1<0) box('roof','g','roof',e.x1-8,e.y1-12,240.3,e.x2+8,0,252); });
+    else if(e.y1>=662) porchRoof(e);
+    else if(e.y1<0) extRoof(e); });
   /* --- stairs: chain the flights and winders, then share the rise equally --- */
   const spots={};
   function stairRun(pieces,zBase,zTop,lay,ceilAt){
@@ -2137,10 +2180,17 @@ function gen3d(c,items,paint){
     [[0,26],[1084,1110]].forEach(([a,b])=>prisms.push({n:'gable',lay:'r',m:'wall',ax:'x',pts:[[0,517.8],[662,517.8],[331,779.5]],a0:a,a1:b}));
     box('chimney','r','brick',330,296,517.8,380,366,900); }
   else { box('roof','r','roof',Math.max(DSP[0],-10),-10,752.8,Math.min(DSP[1],1120),331,779.5);
-    prisms.push({n:'roof',lay:'r',m:'roof',ax:'x',pts:[[331,799.5],[697,495],[697,475],[331,779.5]],a0:-25,a1:1135});
+    { const FZ=y=>799.5-(y-331)*0.832, sn=Math.atan(0.832), Lh=98*Math.cos(sn), holes=[];
+      els.filter(q=>q.f===2&&q.t==='r'&&(q.cls==='of'||q.cls==='be')&&q.x2-q.x1>=150).forEach(q=>{ const xc=(q.x1+q.x2)/2; let ya=353, yb=ya+Lh; if(yb>q.y2-5){ yb=q.y2-5; ya=yb-Lh; }
+        holes.push({xa:xc-39,xb:xc+39,ya,yb}); vxPane('r','Loft, '+(q.name||(q.cls==='of'?'office':'bedroom')).toLowerCase(),xc,(ya+yb)/2,FZ((ya+yb)/2)-7,78,98,0,Math.tan(sn),1); });
+      slabHoles('y',-25,1135,331,697,FZ,20,'r','r',holes); }
     [[-25,DSP[0]],[DSP[1],1135]].forEach(([a,b])=>{ if(b-a>1) prisms.push({n:'roof',lay:'r',m:'roof',ax:'x',pts:[[-35,495],[331,799.5],[331,779.5],[-35,475]],a0:a,a1:b}); });
     [[0,26],[1084,1110]].forEach(([a,b])=>prisms.push({n:'gable',lay:'r',m:'wall',ax:'x',pts:[[331,517.8],[662,517.8],[331,779.5]],a0:a,a1:b})); }
-  return {boxes,prisms,spots,stairs:[run0&&run0.stat,run1&&run1.stat]};
+  return {boxes,prisms,spots,stairs:[run0&&run0.stat,run1&&run1.stat],vx:{list:vxList,porch:vxMeta.porch,ext:vxMeta.ext},
+    dl:{mask:wallMask,X0,Y0,W,H,hasLoft:!LO0,
+      win:openings.filter(o=>o[2][0]==='win').map(([f,e,sp])=>({f,x1:e.x1,y1:e.y1,x2:e.x2,y2:e.y2,z1:FB3[f]+sp[1],z2:FB3[f]+sp[2]})),
+      rooms:els.filter(e=>e.t==='r'&&e.f<=2&&e.cls!=='void'&&!(e.f===2&&LO0)).map(e=>({f:e.f,x1:e.x1,y1:e.y1,x2:e.x2,y2:e.y2,cls:e.cls,name:e.name||'',dims:e.dims||''})),
+      shells:els.filter(e=>e.f===0&&e.t==='sh'&&e.x1<1110).map(e=>({x1:e.x1,y1:e.y1,x2:e.x2,y2:e.y2})).concat([{x1:0,y1:0,x2:1110,y2:662}])}};
 }
 
 /* ---------- sun simulator ---------- */
@@ -2196,6 +2246,81 @@ function w3SunApply(){
   W3.scene.background.setHex(0xDCE6EC); if(on) W3.scene.background.lerp(new T.Color(0x1B2431),1-day);
   W3.env.visible=on&&S.trees;
 }
+/* ---------- daylight map (v48) ----------
+   Sky component on a work plane 85 cm up: CIE overcast sky, summed over sample points on each window / Velux pane (illuminance from a patch = L x cos(plane) x cos(opening) x area / r²),
+   straight-line sight through the plan wall mask, glass 0.7 x maintenance 0.9 x frame factor. Plus a flat internal-reflected allowance per room (BRE split-flux).
+   Windows and each Velux zone are summed separately, so switching a zone on or off only re-adds arrays. */
+const DLG={x0:-434,y0:-215,x1:1126,y1:880,s:20}, DL_WP=85, DL_K=100*9/(7*Math.PI);
+function dlCompute(D,vxl){
+  const G=DLG, cols=Math.ceil((G.x1-G.x0)/G.s), rows=Math.ceil((G.y1-G.y0)/G.s), n=cols*rows, out={cols,rows,floors:{},rooms:[]}, ZF={p:0,e:0,r:2};
+  const inside=(f,x,y)=>f===0?D.shells.some(q=>x>=q.x1&&x<=q.x2&&y>=q.y1&&y<=q.y2):(x>=0&&x<=1110&&y>=0&&y<=662);
+  const blocked=(f,ax,ay,bx,by)=>{ const m=D.mask[f]; if(!m) return false; const L=Math.hypot(bx-ax,by-ay), k=Math.max(2,Math.ceil((L-12)/6));
+    for(let i=1;i<k;i++){ const t=i/k, x=Math.round(ax+(bx-ax)*t-D.X0), y=Math.round(ay+(by-ay)*t-D.Y0); if(x<0||y<0||x>=D.W||y>=D.H) continue; if(m[y*D.W+x]===1) return true; } return false; };
+  D.rooms.forEach((r,i)=>{ r.idx=i; r.area=(r.x2-r.x1)*(r.y2-r.y1)/1e4; r.Wb=0; r.Wz={p:0,e:0,r:0}; r.target=r.cls==='so'?(/kitchen/i.test(r.name)?2:1.5):r.cls==='be'?1:r.cls==='of'?1.5:null; out.rooms.push(r); });
+  const floors=D.hasLoft?[0,1,2]:[0,1];
+  floors.forEach(f=>{
+    const rooms=D.rooms.filter(r=>r.f===f).sort((a,b)=>b.area-a.area), cr=new Int16Array(n).fill(-1);
+    rooms.forEach(r=>{ for(let cy=0;cy<rows;cy++){ const y=G.y0+(cy+.5)*G.s; if(y<r.y1||y>=r.y2) continue; for(let cx=0;cx<cols;cx++){ const x=G.x0+(cx+.5)*G.s; if(x>=r.x1&&x<r.x2) cr[cy*cols+cx]=r.idx; } } });
+    const roomAt=(x,y)=>{ const cx=Math.floor((x-G.x0)/G.s), cy=Math.floor((y-G.y0)/G.s); return cx<0||cy<0||cx>=cols||cy>=rows?-1:cr[cy*cols+cx]; };
+    const srcs=[];
+    D.win.filter(w=>w.f===f).forEach(w=>{ const horiz=(w.x2-w.x1)>(w.y2-w.y1), cx=(w.x1+w.x2)/2, cy=(w.y1+w.y2)/2, len=horiz?w.x2-w.x1:w.y2-w.y1, th=26, hz=w.z2-w.z1; if(hz<20||len<20) return;
+      let nx=0, ny=0; const a=horiz?[0,1]:[1,0], pa=[cx+a[0]*(th/2+30),cy+a[1]*(th/2+30)], pb=[cx-a[0]*(th/2+30),cy-a[1]*(th/2+30)], ia=inside(f,pa[0],pa[1]), ib=inside(f,pb[0],pb[1]);
+      if(ia&&!ib){ nx=-a[0]; ny=-a[1]; } else if(ib&&!ia){ nx=a[0]; ny=a[1]; } else return;   /* faces the outside only */
+      const nU=Math.min(8,Math.max(2,Math.ceil(len/35))), nV=Math.max(2,Math.ceil(hz/60)), pts=[], dA=(len/nU)*(hz/nV);
+      for(let i=0;i<nU;i++) for(let j=0;j<nV;j++){ const u=(i+.5)/nU-.5; pts.push([horiz?cx+u*len:cx,horiz?cy:cy+u*len,w.z1+(j+.5)*hz/nV]); }
+      const rid=roomAt(cx-nx*30,cy-ny*30); if(rid>=0) D.rooms[rid].Wb+=0.8*len*hz/1e4;
+      srcs.push({z:'b',cx,cy,pts,dA,nx,ny,nz:0,eff:0.7*0.9*0.8,sx:cx,sy:cy}); });
+    (vxl||[]).filter(q=>ZF[q.z]===f).forEach(q=>{ const u=q.z==='p'?[0,1,0]:[1,0,0], nrm=[q.nx,q.ny,q.nz], v=[nrm[1]*u[2]-nrm[2]*u[1],nrm[2]*u[0]-nrm[0]*u[2],nrm[0]*u[1]-nrm[1]*u[0]], nU=4, nV=4, pts=[];
+      for(let i=0;i<nU;i++) for(let j=0;j<nV;j++){ const a=((i+.5)/nU-.5)*q.w, b=((j+.5)/nV-.5)*q.L; pts.push([q.cx+u[0]*a+v[0]*b,q.cy+u[1]*a+v[1]*b,q.cz+u[2]*a+v[2]*b]); }
+      const rid=roomAt(q.cx,q.cy); if(rid>=0) D.rooms[rid].Wz[q.z]+=0.85*q.w*q.L/1e4;
+      srcs.push({z:q.z,cx:q.cx,cy:q.cy,pts,dA:(q.w/nU)*(q.L/nV),nx:q.nx,ny:q.ny,nz:q.nz,eff:0.7*0.9*0.85,sx:q.cx,sy:q.cy}); });
+    const A={b:new Float32Array(n),p:new Float32Array(n),e:new Float32Array(n),r:new Float32Array(n)}, pz=FB3[f]+DL_WP;
+    for(let cy=0;cy<rows;cy++) for(let cx=0;cx<cols;cx++){ const i=cy*cols+cx; if(cr[i]<0) continue; const px=G.x0+(cx+.5)*G.s, py=G.y0+(cy+.5)*G.s;
+      for(const sr of srcs){ if(blocked(f,px,py,sr.sx,sr.sy)) continue; let E=0;
+        for(const q of sr.pts){ const vx=q[0]-px, vy=q[1]-py, vz=q[2]-pz, r2=vx*vx+vy*vy+vz*vz, r=Math.sqrt(r2); if(vz<=0) continue;
+          const dx=vx/r, dy=vy/r, dz=vz/r, cO=dx*sr.nx+dy*sr.ny+dz*sr.nz; if(cO<=0) continue; E+=(1+2*dz)/3*dz*cO*sr.dA/r2; }
+        A[sr.z][i]+=E*DL_K*sr.eff; } }
+    out.floors[f]={cr,A};
+  });
+  return out; }
+/* daylight factor per cell and per-room stats for the current Velux switches */
+function dlEval(data,V){
+  const res={floors:{},rooms:[]}, irc=(r,on)=>{ const W=r.Wb+(on?(V.p?r.Wz.p:0)+(V.e?r.Wz.e:0)+(V.r?r.Wz.r:0):0); const per=2*(r.x2-r.x1+r.y2-r.y1)/100, A=2*r.area+per*2.4; return A>0?0.85*W/(A*0.5)*(39*0.4+5*0.6):0; };
+  const stat=new Map(); data.rooms.forEach(r=>stat.set(r.idx,{r,sum:0,sumOff:0,n:0,ok:0,okOff:0}));
+  Object.keys(data.floors).forEach(f=>{ const {cr,A}=data.floors[f], now=new Float32Array(cr.length), off=new Float32Array(cr.length);
+    for(let i=0;i<cr.length;i++){ if(cr[i]<0) continue; const r=data.rooms[cr[i]], st=stat.get(cr[i]);
+      now[i]=A.b[i]+(V.p?A.p[i]:0)+(V.e?A.e[i]:0)+(V.r?A.r[i]:0)+irc(r,1); off[i]=A.b[i]+irc(r,0);
+      st.sum+=now[i]; st.sumOff+=off[i]; st.n++; if(r.target!=null){ if(now[i]>=r.target) st.ok++; if(off[i]>=r.target) st.okOff++; } }
+    res.floors[f]=now; });
+  stat.forEach(st=>{ if(st.n&&st.r.target!=null&&st.r.name) res.rooms.push({r:st.r,mean:st.sum/st.n,off:st.sumOff/st.n,pct:100*st.ok/st.n,pctOff:100*st.okOff/st.n}); });
+  return res; }
+const DL_RAMP=[[0,[26,42,108]],[1,[31,111,181]],[2,[34,179,166]],[3,[127,207,74]],[4,[242,208,53]],[6,[240,138,36]]];
+function dlColour(v){ let a=DL_RAMP[0],b=DL_RAMP[DL_RAMP.length-1]; for(let i=0;i<DL_RAMP.length-1;i++) if(v<=DL_RAMP[i+1][0]){ a=DL_RAMP[i]; b=DL_RAMP[i+1]; break; }
+  const t=b[0]===a[0]?1:Math.max(0,Math.min(1,(v-a[0])/(b[0]-a[0]))); return a[1].map((c,i)=>Math.round(c+(b[1][i]-c)*t)); }
+function w3DlRefresh(){
+  const T=window.THREE, st=W3.dl, panel=$('w3dl'); if(!panel) return; const grp={0:'g',1:'f',2:'l'};
+  panel.hidden=!st.on; Object.values(st.mesh).forEach(m=>m.visible=st.on);
+  if(!st.on||!W3.D||!T||!W3.groups) return;
+  if(!st.data){ try{ st.data=dlCompute(W3.D,(W3.vxInfo||{}).list||[]); }catch(e){ $('w3dlt').textContent='Could not work out the daylight map: '+e.message; console.error(e); return; } }
+  const R=dlEval(st.data,W3.vx), G=DLG, d=st.data;
+  Object.keys(R.floors).forEach(f=>{ const now=R.floors[f], cv=document.createElement('canvas'); cv.width=d.cols; cv.height=d.rows; const ctx=cv.getContext('2d'), im=ctx.createImageData(d.cols,d.rows), cr=d.floors[f].cr;
+    for(let i=0;i<cr.length;i++){ if(cr[i]<0) continue; const c=dlColour(now[i]); im.data[i*4]=c[0]; im.data[i*4+1]=c[1]; im.data[i*4+2]=c[2]; im.data[i*4+3]=170; }
+    ctx.putImageData(im,0,0);
+    let m=st.mesh[f]; if(!m){ const g=new T.PlaneGeometry(d.cols*G.s,d.rows*G.s); g.rotateX(-Math.PI/2); m=new T.Mesh(g,new T.MeshBasicMaterial({transparent:true,depthWrite:false,side:T.DoubleSide})); m.renderOrder=3;
+      m.position.set(G.x0+d.cols*G.s/2,FB3[f]+2.2,G.y0+d.rows*G.s/2); W3.groups[grp[f]].add(m); st.mesh[f]=m; }
+    const tx=new T.CanvasTexture(cv); tx.magFilter=T.LinearFilter; tx.minFilter=T.LinearFilter; if(m.material.map) m.material.map.dispose(); m.material.map=tx; m.material.needsUpdate=true; m.visible=true; });
+  const fl=['Ground','First','Loft'], f1=x=>x.toFixed(1), any=W3.vx.p||W3.vx.e||W3.vx.r; let h='<table><tr><th>Room</th><th class="n">Now</th><th class="n">Velux gain</th><th class="n">Above target</th></tr>', last=-1;
+  R.rooms.sort((a,b)=>a.r.f-b.r.f||b.r.area-a.r.area).forEach(q=>{ if(q.r.f!==last){ h+='<tr><th colspan="4" style="padding-top:6px">'+fl[q.r.f]+' floor</th></tr>'; last=q.r.f; }
+    const g=q.mean-q.off, gp=q.pct-q.pctOff;
+    h+='<tr><td>'+q.r.name+' <span class="note" style="margin:0">'+q.r.dims.replace(/\*/g,'')+'</span></td><td class="n">'+f1(q.mean)+'%</td><td class="n">'+(any&&g>0.04?'<span class="up">+'+f1(g)+'</span>':'–')+'</td><td class="n">'+Math.round(q.pct)+'%'+(any&&gp>=1?' <span class="up">(+'+Math.round(gp)+')</span>':'')+'</td></tr>'; });
+  h+='</table><div class="note" style="margin:0">Targets used: kitchen 2%, living, dining, extension and office 1.5%, bedrooms 1% (the older BRE rule of thumb). "Above target" is the share of the room floor meeting it.</div>';
+  $('w3dlt').innerHTML=h; }
+function w3VxUI(){
+  const n=W3.vxn, any=n.p+n.e+n.r>0, V=W3.vx;
+  document.querySelectorAll('[data-w3v]').forEach(b=>{ const k=b.dataset.w3v;
+    b.hidden=k==='all'?!any:!n[k]; b.setAttribute('aria-pressed',k==='all'?['p','e','r'].every(z=>!n[z]||V[z]):V[k]); });
+  const vb=$('w3vxl'); if(vb) vb.hidden=!any;
+  w3Visibility(); if(W3.dl.on) w3DlRefresh(); }
 function w3Compass(){
   const g=$('w3cg'); if(!g||!W3.camera) return; const d=W3.camera.getWorldDirection(W3._wd||(W3._wd=new THREE.Vector3()));
   const E=d.x*SUNK.ux[0]+d.z*SUNK.uy[0], N=d.x*SUNK.ux[1]+d.z*SUNK.uy[1];
@@ -2223,7 +2348,7 @@ function w3Build(c,items,paint){
   const dl2=new T.DirectionalLight(0xFFFFFF,0.18); dl2.position.set(900,800,-1200); sc.add(dl2);
   W3.hemi=hemi; W3.dl=dl; W3.dl2=dl2; w3SunRig(T,sc);
   const gnd=new T.Mesh(new T.PlaneGeometry(12000,12000),new T.MeshLambertMaterial({color:MCOL.ground})); gnd.rotation.x=-Math.PI/2; gnd.position.set(555,-16,331); gnd.receiveShadow=true; sc.add(gnd);
-  const groups={}; ['g','gF','f','fF','l','lF','r'].forEach(k=>{ groups[k]=new T.Group(); sc.add(groups[k]); }); W3.groups=groups;
+  const groups={}; ['g','gF','f','fF','l','lF','r','pOn','pOff','eOn','eOff','rOn','rOff'].forEach(k=>{ groups[k]=new T.Group(); sc.add(groups[k]); }); W3.groups=groups;
   /* merge everything per layer and colour */
   const buckets={};
   const bucket=(lay,m,col)=>{ const key=lay+'|'+m+'|'+(col||''); return buckets[key]||(buckets[key]={lay,m,col,p:[],n:[]}); };
@@ -2235,12 +2360,12 @@ function w3Build(c,items,paint){
   M.boxes.forEach(b=>{ const B=bucket(b.lay,b.m,b.col), x1=b.x1,x2=b.x2,y1=b.y1,y2=b.y2,z1=b.z1,z2=b.z2;
     const v=[P3(x1,y1,z1),P3(x2,y1,z1),P3(x2,y2,z1),P3(x1,y2,z1),P3(x1,y1,z2),P3(x2,y1,z2),P3(x2,y2,z2),P3(x1,y2,z2)];
     quad(B,v[4],v[7],v[6],v[5]); quad(B,v[0],v[1],v[2],v[3]); quad(B,v[0],v[4],v[5],v[1]); quad(B,v[2],v[6],v[7],v[3]); quad(B,v[1],v[5],v[6],v[2]); quad(B,v[3],v[7],v[4],v[0]); });
-  M.prisms.forEach(p=>{ const B=bucket(p.lay,p.m,p.col), k=p.pts.length;
-    const at=(pt,a)=>p.ax==='z'?P3(pt[0],pt[1],a):P3(a,pt[0],pt[1]);
-    const ctr=T.ShapeUtils.isClockWise(p.pts.map(q=>new T.Vector2(q[0],q[1])));
-    const faces=T.ShapeUtils.triangulateShape(p.pts.map(q=>new T.Vector2(q[0],q[1])),[]);
-    faces.forEach(([i,j,l])=>{ tri(B,at(p.pts[i],p.a1),at(p.pts[j],p.a1),at(p.pts[l],p.a1)); tri(B,at(p.pts[l],p.a0),at(p.pts[j],p.a0),at(p.pts[i],p.a0)); });
-    for(let i=0;i<k;i++){ const q1=p.pts[i], q2=p.pts[(i+1)%k]; quad(B,at(q1,p.a0),at(q2,p.a0),at(q2,p.a1),at(q1,p.a1)); }
+  M.prisms.forEach(p=>{ const B=bucket(p.lay,p.m,p.col), PT=p.ax==='y'?p.pts.slice().reverse():p.pts, k=PT.length;   /* y-axis prisms: reversed so the normals still point outwards */
+    const at=(pt,a)=>p.ax==='z'?P3(pt[0],pt[1],a):p.ax==='y'?P3(pt[0],a,pt[1]):P3(a,pt[0],pt[1]);
+    const ctr=T.ShapeUtils.isClockWise(PT.map(q=>new T.Vector2(q[0],q[1])));
+    const faces=T.ShapeUtils.triangulateShape(PT.map(q=>new T.Vector2(q[0],q[1])),[]);
+    faces.forEach(([i,j,l])=>{ tri(B,at(PT[i],p.a1),at(PT[j],p.a1),at(PT[l],p.a1)); tri(B,at(PT[l],p.a0),at(PT[j],p.a0),at(PT[i],p.a0)); });
+    for(let i=0;i<k;i++){ const q1=PT[i], q2=PT[(i+1)%k]; quad(B,at(q1,p.a0),at(q2,p.a0),at(q2,p.a1),at(q1,p.a1)); }
     void ctr; });
   Object.values(buckets).forEach(B=>{ const g=new T.BufferGeometry();
     g.setAttribute('position',new T.BufferAttribute(new Float32Array(B.p),3)); g.setAttribute('normal',new T.BufferAttribute(new Float32Array(B.n),3));
@@ -2256,8 +2381,8 @@ function w3Build(c,items,paint){
   M.prisms.forEach(p=>{ if(p.ax!=='z') return; const xs=p.pts.map(q=>q[0]), ys=p.pts.map(q=>q[1]);
     const o={p,walk:!!p.walk,solid:!p.walk&&p.n!=='rug'&&p.n!=='top',b:{x1:Math.min(...xs),y1:Math.min(...ys),x2:Math.max(...xs),y2:Math.max(...ys),z1:p.a0,z2:p.a1}};
     add(o,o.b.x1,o.b.y1,o.b.x2,o.b.y2); });
-  W3.hash=hash;
-  w3Visibility(); w3Goto(0); w3Resize(); w3SunApply();
+  W3.D=M.dl; W3.dl.data=null; W3.dl.mesh={}; W3.hash=hash; W3.vxInfo=M.vx; W3.vxn={p:0,e:0,r:0}; M.vx.list.forEach(q=>W3.vxn[q.z]++);
+  w3VxUI(); w3Goto(0); w3Resize(); w3SunApply();
 }
 function w3Near(x,y){ const k=Math.floor(x/100)+','+Math.floor(y/100); return W3.hash.get(k)||[]; }
 function w3Ground(x,y,feet){ let best=-1; /* the outside ground is at -1 */
@@ -2274,7 +2399,8 @@ function polyDist(x,y,P){ if(inPoly(x,y,P)) return 0; let d=1e9;
 function w3Goto(f){ const s=W3.spots[f]||W3.spots[0]; if(!s) return; W3.pos.x=s.x; W3.pos.y=s.y; W3.yaw=s.yaw; W3.pitch=-0.05;
   W3.feet=w3Ground(s.x,s.y,FB3[f]+5); if(W3.feet<-0.5) W3.feet=f?FB3[f]:-1; W3.pos.z=W3.feet+W3.eye; }
 function w3Visibility(){ const g=W3.groups; if(!g) return; const u=W3.mode==='walk'?3:W3.showUpTo;
-  g.g.visible=true; g.gF.visible=W3.fit; g.f.visible=u>=1; g.fF.visible=u>=1&&W3.fit; g.l.visible=u>=2; g.lF.visible=u>=2&&W3.fit; g.r.visible=u>=3; }
+  g.g.visible=true; g.gF.visible=W3.fit; g.f.visible=u>=1; g.fF.visible=u>=1&&W3.fit; g.l.visible=u>=2; g.lF.visible=u>=2&&W3.fit; g.r.visible=u>=3;
+  const V=W3.vx; if(g.pOn){ g.pOn.visible=V.p; g.pOff.visible=!V.p; g.eOn.visible=V.e; g.eOff.visible=!V.e; g.rOn.visible=V.r&&u>=3; g.rOff.visible=!V.r&&u>=3; } }
 function w3Resize(){ const v=$('w3view'); if(!W3.renderer||!v) return; const w=v.clientWidth, h=v.clientHeight; if(!w||!h) return; W3.renderer.setSize(w,h,false); W3.camera.aspect=w/h; W3.camera.updateProjectionMatrix(); }
 function w3Frame(t){
   if(!W3.running) return; requestAnimationFrame(w3Frame);
@@ -2345,6 +2471,8 @@ function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b
     else if(b.dataset.w3a==='fit'){ W3.fit=!W3.fit; b.setAttribute('aria-pressed',W3.fit); w3Visibility(); }
     else if(b.dataset.w3a==='all'){ W3.showUpTo=3; w3Visibility(); }
     else if(b.dataset.w3a==='sun'){ W3.sun.on=!W3.sun.on; w3SunUI(); }
+    else if(b.dataset.w3a==='dl'){ W3.dl.on=!W3.dl.on; b.setAttribute('aria-pressed',W3.dl.on); w3DlRefresh(); }
+    else if(b.dataset.w3v){ const k=b.dataset.w3v; if(k==='all'){ const zs=['p','e','r'].filter(z=>W3.vxn[z]), on=!zs.every(z=>W3.vx[z]); zs.forEach(z=>W3.vx[z]=on); } else W3.vx[k]=!W3.vx[k]; w3VxUI(); }
     else if(b.dataset.w3a==='full'){ const el=$('w3wrap'); try{ if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el).catch(()=>{}); }catch(e){} }
   });
   $('w3sun').addEventListener('click',ev=>{ const b=ev.target.closest('[data-w3d]'); if(!b) return; W3.sun.doy=+b.dataset.w3d; w3SunUI(); });

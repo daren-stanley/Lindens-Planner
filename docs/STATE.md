@@ -1,10 +1,16 @@
 # Lindens Planner — state
 
-_Last updated: 19 Nov 2026 · app version v47_
+_Last updated: 20 Nov 2026 · app version v48_
 
 ## Current state
-- Single-file app: `index.html` (~2,490 lines). Plus `.nojekyll`. No build step.
-- Latest release **v47**: **sun simulator** on page 3 (`☀ Sun` button in the 3D bar; panel under the view). Time-of-day slider (04:00–22:00, GMT/BST by date) + date presets 21 Dec / 21 Mar / 21 Jun; real sun position for Woking (`sunPos`, NOAA-style, no library); a shadow-casting `DirectionalLight` (4096 map, ±45 m around the house) lights the model; glass doesn't cast, so sun enters through windows. Sun mode adds a north compass (rotates with the camera), a sun disc, sky dimming at night, and trees and neighbouring buildings (checkbox "Trees & neighbours"). With sun off the scene is unchanged. Site orientation comes from the survey drawing E1000: `SITE.bx = 333.2` = true bearing of the model's +x axis (long axis runs NNW–SSE; model +y, the front, faces ENE towards Lytton Road). `SUN_ENV` holds trees (x, y, canopy radius, height, all in model metres) and neighbour blocks (Jordans house 7.5 m, garage 3 m), scaled off the survey; **tree heights are guesses** (survey is 2D) and trees are drawn in full leaf (worst case for winter shade). Ground plane enlarged to 120 m.
+- Single-file app: `index.html` (~2,610 lines). Plus `.nojekyll`. No build step.
+- Latest release **v48**: **Velux + daylight map** on page 3.
+  - Roofs: every porch (P1–P4) now has a **gable roof** (ridge front to back, `PORCH_DEG=30`, ridge capped 12 cm under the first-floor front window sills; `porchRoof` in `gen3d`). The rear extension (R7–R10) has a **10° lean-to** (`EXT_DEG`) rising to the house wall (`extRoof`); because it meets the wall at 272/289 cm, the first-floor FULL-height master windows (M2/M9) over it get a raised sill (`extSillOf`, 23 cm for the 1 m ext, 41 cm for the 2 m ext; also noted in the planning notes). Garage roof unchanged (flat).
+  - Velux: 2 per porch (one per slope, 78×98), 2 fixed panes in the extension (78×98, or 55×78 on the 1 m ext, centres x 195/505), one 78×98 pane on the loft front slope per office/bedroom ≥1.5 m wide (`vxPane` list, `slabHoles`). Every opening is built as roof pieces round a hole plus a roof-coloured **plug** (layers `pOff/eOff/rOff`) and a glass **pane** (`pOn/eOn/rOn`); the 3D bar buttons `Velux: All | Porch | Extension | Roof rooms` (`W3.vx`, `w3VxUI`, `w3Visibility`) just flip group visibility, so shadows and sun patches update with no rebuild. Default: off. Panes are view-only (not in share codes). Prism builder now supports `ax:'y'` (reversed points keep normals outward).
+  - **Daylight map** (`Daylight map` button, panel `#w3dl`, `dlCompute` / `dlEval` / `w3DlRefresh`): CIE-overcast sky component on an 85 cm work plane, 20 cm grid, straight-line sight through the plan wall mask (`gen3d(...).dl`), plus a flat BRE split-flux reflected allowance per room. Windows and each Velux zone are stored as separate arrays so toggling a zone only re-adds them. Heat-map overlay per floor (canvas plane 2 cm above the floor) and a table: room, daylight factor now, Velux gain, share of floor above target (kitchen 2%, living/dining/extension/office 1.5%, bedrooms 1%). No trees or neighbours; absolute figures are estimates, the with/without difference is the useful bit.
+  - Test rig used (not in repo): headless Chrome + local three r149; 260 random valid designs build with no errors or NaNs.
+  - Seen, not mine: two small brick-coloured triangles poke through the front roof with L4 + LO11 (loft stair top?); present in v47 too.
+- v47: **sun simulator** on page 3 (`☀ Sun` button in the 3D bar; panel under the view). Time-of-day slider (04:00–22:00, GMT/BST by date) + date presets 21 Dec / 21 Mar / 21 Jun; real sun position for Woking (`sunPos`, NOAA-style, no library); a shadow-casting `DirectionalLight` (4096 map, ±45 m around the house) lights the model; glass doesn't cast, so sun enters through windows. Sun mode adds a north compass (rotates with the camera), a sun disc, sky dimming at night, and trees and neighbouring buildings (checkbox "Trees & neighbours"). With sun off the scene is unchanged. Site orientation comes from the survey drawing E1000: `SITE.bx = 333.2` = true bearing of the model's +x axis (long axis runs NNW–SSE; model +y, the front, faces ENE towards Lytton Road). `SUN_ENV` holds trees (x, y, canopy radius, height, all in model metres) and neighbour blocks (Jordans house 7.5 m, garage 3 m), scaled off the survey; **tree heights are guesses** (survey is 2D) and trees are drawn in full leaf (worst case for winter shade). Ground plane enlarged to 120 m.
 - v46: internal floor area per floor (`floorAreas`, rasterised rooms + stairs, 12 cm wall gaps closed; garage separate; loft excludes `rs` roof stores; 0 for LO0) shown as a label on each plan image, in the PNG header and in a sidebar "Internal floor area" card with total. Sidebar "Stairs" card (`stairInfo`, uses `gen3d(...).stairs` stats from `stairRun`): risers, step height, going (straight / winder at centre line), pitch, min headroom measured to the floor/roof above using the drawn stairwell opening (every stair currently reads 1.55–1.87 m, i.e. under 2.0 m, because the drawn openings start early; worth checking).
 - v45: sliding door full length with FP5.
 - v44: (1) W10 no longer has built-in WC/basin fixtures (they couldn't be deleted; add them from the fittings page). (2) New fire **FP5**: 1.0 × 0.5 m three-sided fire inside the living room (x 718–768), glass on the long east side + both ends, south end stops at y 420 (hall door y 420–500; y 390 with F2). Drawn as FX `fire3l` (2D in `fx()`, 3D next to `fire3`). (3) New fit slot **DS** (`DS0` none / `DS1` telescopic 6-leaf slider in the dining–living wall line, middle 4 leaves open, FX `tsd`, opening y 36–384 always; with FP5 the fire sits slightly in front of the south leaves, v45). DS1 only with FP0/FP1/FP5; adds a steel if the spine wall is kept. Fit code is now 7 chars (DS last; old 6-char codes still load).
@@ -18,27 +24,28 @@ _Last updated: 19 Nov 2026 · app version v47_
 ## Section map of index.html (approx. line numbers — re-grep if edited)
 | Lines | Section |
 |---|---|
-| 1–170 | CSS (two `<style>` blocks) |
-| 171–262 | HTML shell; `APP_VERSION` at ~182; page-3 bar + sun panel ~225–245 |
-| 264 | catalogue (options per slot) |
-| 391 | rules (clash checks) |
-| 458 | geometry (cm; x east from west outer corner, y south from rear face) |
-| 722 | fit-out layouts |
-| 896 | svg floor plans (`floorSvg`) |
-| 1056 | page 2: fittings (grid, snapping, codes, legacy layouts) |
-| 1338 | state, share codes (`makeCode`, `readCode`) |
-| 1433 / 1487 | cost / totals |
-| 1530 | ui: `render`, slots, page-2 controller (~1728), `setPage` (~1734), events (~1815) |
-| 1920 | page 3: 3D model generator (`gen3d`, walls, slabs, stairs, fittings, roof) |
-| 2146 | sun simulator (`SITE`, `SUN_ENV`, `sunPos`, `w3SunRig`, `w3SunApply`, `w3Compass`, `w3SunUI`) |
-| 2212 | three.js scene (`w3*` functions) |
-| 2363 | shared boards (Supabase: `sbGet`, `sbRpc`, `bd*`) |
-| ~2438 | `init` |
+| 1–180 | CSS (two `<style>` blocks; `#w3sun,#w3dl` panel styles) |
+| 181–272 | HTML shell; `APP_VERSION` ~184; page-3 bar (Sun, Daylight map, Velux buttons) + sun and daylight panels ~225–265 |
+| 273 | catalogue (`SLOTS`, options per slot) |
+| 399 | rules (clash checks) |
+| 466 | geometry (cm; x east from west outer corner, y south from rear face) |
+| 732 | fit-out layouts |
+| 1046 | svg floor plans (`floorSvg`) |
+| 1151–1740 | page 2 fittings, share codes, state, cost (`costHtml`, `totals` ~1496), `render` ~1590, page-2 controller ~1736, `setPage` ~1742, events ~1822 |
+| 1913 | `W3` state; `EXT_DEG`/`PORCH_DEG`/`extSillOf` ~1919 |
+| 1932 | page 3: 3D model generator `gen3d` (walls, slabs, stairs, fittings; Velux roofs ~2019; main roof + loft panes ~2185) |
+| 2196 | sun simulator (`SITE`, `SUN_ENV`, `sunPos`, `w3Sun*`, `w3Compass`) |
+| 2249 | daylight map (`dlCompute`, `dlEval`, `w3DlRefresh`), then `w3VxUI` ~2318 |
+| 2337 | three.js scene (`w3Build`, `w3Visibility`, controls) |
+| 2491 | shared boards (Supabase: `sbGet`, `sbRpc`, `bd*`), then `init` |
 
 ## VR feasibility (Quest 3S) — study only, not built
 - Page 3 is three.js r149 (CDN), served over https, so WebXR in the Quest Browser should work. Needed: `renderer.xr.enabled=true`, an "Enter VR" button (`navigator.xr.requestSession('immersive-vr')`), swap `requestAnimationFrame` loop for `renderer.setAnimationLoop`, thumbstick walking + snap turn (reuse `w3Blocked` / `w3Ground` collision), optional teleport. The scene is in cm, so scale the rig by 0.01 for true 1:1. Pointer/joystick UI doesn't apply in-headset. Sun shadows (4096 map) may need dropping to 2048 on Quest. Can't be tested without a headset; expect one round of fixes after the first try.
 
 ## Next steps
+- Look at v48 on the phone: Velux toggles (All / Porch / Extension / Roof rooms), Sun with Velux on/off (try 21 Dec and 21 Jun, morning for porch and loft panes, afternoon for the extension), the daylight map table. Decide pane positions/sizes, the 10° extension pitch and 30° porch pitch (single constants), and whether Velux/roof-light cost belongs in the structure costs.
+- Loft front-slope panes sit about 2 m up (rooms stop at y=433, ridge at y=331): high-level light, no view. Consider moving the loft rooms/knee wall or using a larger pane if the loft stays dark.
+- Daylight map ignores trees/neighbours and the sun disc; could add `SUN_ENV` obstruction and a sunlight-hours view.
 - Check the sun simulator on the phone (slider drag on a touch screen, compass, performance with shadows). Refine tree heights/positions if the shading looks wrong; consider a "bare winter trees" toggle.
 - Confirm the grey garage-like block next to the SSE end is a neighbour's (it is modelled as a 3 m neighbour block at x −1…−7 m).
 - VR mode (see feasibility above) once a Quest 3S is in hand.
