@@ -182,9 +182,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v52 · 24 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v53 · 24 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v52';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v53';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -509,7 +509,7 @@ function eastBlock(){return [
   WE(1,794,0,977,26),WE(1,779,636,1019,662)];}
 const loftStair=(c,dy,h)=>{ const lf=e=>Object.assign(e,{loft:1}); return [lf(ST(1,460,556,640,636,'W',8)),lf(WD(1,380,556,460,636,460,556,1)),lf(ST(1,380,468,460,556,'N',3)),
    WL(1,[[635,596],[420,596],[420,473]]),TX(1,560,738,'loft stair: 8 up, landing, 3 up · landing corridor clear'),
-   ST(2,380,468,460,556,'N',3),WD(2,380,556,460,636,460,556,1),ST(2,460,556,640,636,'W',8),DA(2,370,dy,590,648,'Front dormer'),TX(2,480,700,'Front dormer 2.2 m wide · '+h+' m at the stair top')]; };
+   ST(2,380,468,460,556,'N',3),WD(2,380,556,460,636,460,556,1),ST(2,460,556,640,636,'W',8),WA(2,370,443,380,648),WA(2,460,443,470,556),DA(2,370,dy,590,648,'Front dormer'),TX(2,480,700,'Front dormer 2.2 m wide · '+h+' m at the stair top')]; };
 const hallExt=c=>c.S!=='S1'?[R(0,202,400,290,499,'ci'),R(0,202,509,282,636,'ut','Store'),D(0,212,499,272,509)]:[];
 const wideDoor=c=>c.S==='S1'?[D(0,430,390,600,400)]:c.S==='S6'?[D(0,480,390,660,400)]:[D(0,486,390,656,400)];
 const wideX=c=>c.S==='S1'?515:c.S==='S6'?570:571;
@@ -2006,7 +2006,7 @@ function gen3d(c,items,paint){
       for(let y=Math.floor(Math.min(...ys));y<Math.max(...ys);y++) for(let x=Math.floor(Math.min(...xs));x<Math.max(...xs);x++) if(inPolyP(x+.5,y+.5,e.pts)&&x>=X0&&x<X1&&y>=Y0&&y<Y1) m[(y-Y0)*W+(x-X0)]=0; });
     els.filter(e=>e.f===f&&e.t==='wall').forEach(e=>fillR(m,e,1));
     if(f===0) s0.forEach(e=>fillR(m,e,0));
-    if(f===2){ fillR(m,{x1:26,y1:433,x2:1084,y2:443},1); els.filter(e=>e.f===2&&(e.t==='s'||e.t==='wn')).forEach(e=>fillR(m,e,0)); }
+    if(f===2){ fillR(m,{x1:26,y1:433,x2:1084,y2:443},1); els.filter(e=>e.f===2&&(e.t==='s'||e.t==='wn'||(e.t==='r'&&e.cls==='ci'&&e.y2>433))).forEach(e=>fillR(m,e,0)); }   /* knee wall, open where a loft stair or its arrival passes */
     const specs={1:null}; const key=sp=>sp.join();
     els.filter(e=>e.f===f&&['w','d','pk'].includes(e.t)).forEach(e=>{
       const sp=e.t==='w'?wspec(f,e):['door',0,(e.x2<=0||(e.x2-e.x1>150&&e.y2-e.y1<=10))?210:(f===0?205:200)];
@@ -2025,7 +2025,7 @@ function gen3d(c,items,paint){
     rects(m,W,H,X0,Y0).forEach(([L,x1,y1,x2,y2])=>{ const sp=specs[L], top=(f===0&&(x2<=0||y1>=662))?240:zt;
       const segs=sp?((sp[1]>0?[[z0,z0+sp[1]]]:[]).concat([[z0+sp[2],top]])):[[z0,top]];
       if(f<2) segs.forEach(([a,b])=>box('wall',LAY[f],'wall',x1,y1,a,x2,y2,b));
-      else { const xs=[x1].concat(DSP.filter(v=>v>x1&&v<x2)).concat([x2]);
+      else { const xs=[x1].concat(DSP.concat(DORM?[DORM.ix1,DORM.ix2+1]:[]).filter(v=>v>x1&&v<x2).sort((a,b)=>a-b)).concat([x2]);   /* split at the rear dormer ends and the front dormer sides so no wall takes a taller cap than its roof */
         for(let i=0;i<xs.length-1;i++){ const xa=xs[i],xb=xs[i+1], ys=[y1].concat(331>y1&&331<y2?[331]:[]).concat([y2]);
           for(let j=0;j<ys.length-1;j++){ const ya=ys[j],yb=ys[j+1], flat=ya<331&&xa>=DSP[0]&&xa<DSP[1]; let cuts=[ya]; if(!flat) for(let v=ya+20;v<yb;v+=20) cuts.push(v); cuts.push(yb);
             for(let k=0;k<cuts.length-1;k++){ const ca=cuts[k],cb=cuts[k+1], cap=Math.min(under(xa,ca),under(xa,cb)); segs.forEach(([a,b])=>box('wall','l','wall',xa,ca,a,xb,cb,Math.min(b,cap))); } } } }
