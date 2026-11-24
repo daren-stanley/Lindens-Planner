@@ -182,9 +182,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v54 · 24 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v55 · 24 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v54';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v55';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -540,7 +540,8 @@ const rearExt=(c,d=200)=>{const i=d-26, sw=d===200?[-140,-70,-160,-30]:[-66,-16,
   Object.assign(WN(0,0,sw[0],26,sw[1]),{hasRs:1}),Object.assign(WN(0,674,sw[2],700,sw[3]),{hasRs:1}),
   WE(0,797,0,859,26),D(0,859,0,939,26),WE(0,939,0,1005,26),TX(0,-60,-d/2,'small window'),TX(0,770,-d/2,'panel window'),TX(0,890,-16,'living windows as today')];};
 const GEO={
- S1:c=>[R(0,202,400,708,636,'ci','Hall',c.H==='H2'?'open':'enclosed',{top:1}),ST(0,202,524,278,546,'N',1),R(0,202,546,278,636,'ci'),ST(0,278,546,550,636,'E',12),
+ S1:c=>[R(0,202,400,708,636,'ci','Hall',c.H==='H2'?'open':'enclosed',{top:1}),ST(0,202,524,278,546,'S',1),WD(0,202,546,278,636,278,546,1),ST(0,278,546,550,636,'E',12),   /* v55: the half landing is a raised flat landing in the run (was a floor-level room, a hole in 3D) */
+   
    WL(0,[[240,515],[240,591],[540,591]]),...front(c,550,[WE(0,524,636,578,662),D(0,578,636,657,662),WE(0,657,636,707,662)]),WE(0,202,636,326,662),
    ...(c.F==='F1'?[D(0,708,420,718,500)]:[]),TX(0,380,712,'Existing stair, half landing'),
    R(1,296,400,708,636,'ci','Landing','',{top:1}),ST(1,344,542,550,636,'E',8),WL(1,[[352,589],[540,589]]),WE(1,523,636,707,662)],
