@@ -1,10 +1,11 @@
 # Lindens Planner — state
 
-_Last updated: 24 Nov 2026 · app version v49_
+_Last updated: 24 Nov 2026 · app version v50_
 
 ## Current state
 - Single-file app: `index.html` (~2,610 lines). Plus `.nojekyll`. No build step.
-- Latest release **v49**: new loft stair **L5** = L4 evolved with a **small front dormer** (architect: Woking often approve front dormers that don't overlook a house).
+- Latest release **v50**: **L6** = L5 stair with a taller front dormer giving **2.4 m over the landing** (steps keep ≥2.0 m). `DORM` for L6: x 433–575, y 541–648 (1.42 × 1.07 m plan), ceiling 605, top 625, face ~0.9 m above the roof, window 548–600. `GEO.L6` reuses `GEO.L5`. Cost points 1.7; own planning note.
+- v49: new loft stair **L5** = L4 evolved with a **small front dormer** (architect: Woking often approve front dormers that don't overlook a house).
   - Layout (`GEO.L5`): 4 steps west (x 523–613, going 225), flat 80×80 quarter landing (x 443–523, y 556–636, drawn as a 1-step winder `WD(...,1)` = landing), 7 steps north (y 399–556, going 224) into the loft; 13 risers × 195 mm, ~41°. Rules as L4 (S4/S5 only, LO11 only). Cost points 1.4. Planning note: front dormer needs full planning.
   - Dormer (`DORM` in `gen3d`): smallest flat-roofed box giving 2.0 m over the landing and upper west steps. Outside x 433–575 (1.42 m wide), y 589–648 (0.59 m deep in plan, face set back 14 cm from the brick face so the eaves run on in front), ceiling 565, roof top 585 (flush with the slope at the back), face ~0.5 m above the roof with a 1.0 × 0.33 m window. `under()` lifts to 565 inside it; roof slab gets an `open` hole (`slabHoles` skips plug/pane). Without it the landing would have 1.64 m at its front edge.
   - Stair card: landings count as one tread, headroom sampled over the whole landing; L5 reads min headroom 2.03 m (L4: 1.98 m at the winder centre line, ~1.64 m at its outer edge).
