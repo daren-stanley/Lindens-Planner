@@ -182,9 +182,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v57 · 25 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v58 · 25 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v57';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v58';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -387,7 +387,7 @@ const SLOTS={
   ['LO0','Leave the loft','Roof space as today',1],
   ['LO10','Store + office + bedroom','Store left of the stair top, office and bedroom to the right · dormer about 8.9 m'],
   ['LO11','Bedroom + office either side of the stair','Bedroom 3.4 m to the west wall, 3.6 m office east of the stair · roof-store door under the ridge · dormer about 8.1 m · goes with L5/L6'],
-  ['LO12','Open-plan office at the stair, bedroom east','As LO11 swapped: 2 m store at the west end (no dormer, door under the ridge), office open to the stair top with one window, 5.9 m bedroom to the east · dormer about 8.1 m · goes with L5/L6']]},
+  ['LO12','Open-plan office at the stair, bedroom east','As LO11 swapped: 2 m store at the west end (no dormer, door under the ridge), office (3.2 m) open to the stair top with one window, 4.9 m bedroom to the east · dormer about 8.1 m · goes with L5/L6']]},
  KL:{name:'Kitchen layout',ctx:'K',fit:1},
  BL:{name:'Family bathroom layout',ctx:'B',fit:1},
  EL:{name:'Ensuite layout',ctx:'M',fit:1},
@@ -583,7 +583,7 @@ const GEO={
  H2:c=>{const g=[];
    if(c.S==='S1') g.push(R(0,202,390,708,400,'ci'),GL(1,b1wide(c)?343:296,536,560,542),D(1,560,536,640,542),GL(1,640,536,708,542));
    else if(corner(c)) g.push(R(0,290,390,708,400,'ci'),GL(1,296,536,568,542),D(1,568,536,648,542),GL(1,648,536,708,542));
-   else if(flipped(c)) g.push(R(0,inn(c.W,['W4','W5','W10'])?386:290,390,708,400,'ci'),D(1,296,493,380,499),GL(1,380,493,386,542),GL(1,380,536,517,542),GL(1,517,542,523,636));
+   else if(flipped(c)) g.push(R(0,inn(c.W,['W4','W5','W10'])?386:290,390,708,400,'ci'),D(1,296,493,380,499),GL(1,380,493,386,542),...(inn(c.L,['L4','L5','L6'])?[]:[GL(1,380,536,517,542),GL(1,517,542,523,636)]));   /* v58: with a loft stair these two panes stood across its flights (the 'shower screen' on the landing that stopped the walk) */
    else g.push(R(0,480,390,708,400,'ci'),D(1,290,515,380,521),GL(1,380,515,576,521),GL(1,570,521,576,636));
    g.push(RS(0,c.S==='S1'?202:c.S==='S6'?480:inn(c.W,['W4','W5','W10'])?386:290,390,708,400));
    g.push(TX(1,880,712,'Mist throughout · fire screen at the stair top'));return g;},
@@ -741,10 +741,10 @@ const GEO={
    D(2,298,40,308,100),D(2,388,40,398,100),D(2,800,300,810,380),WN(2,80,0,240,26),WN(2,480,0,720,26),TX(2,413,-16,'Shorter dormer, about 7.7 m')],
  LO11:c=>[R(2,26,26,370,433,'be','Bedroom','3.4 × 4.1*'),R(2,380,26,460,433,'ci'),R(2,380,433,460,468,'ci'),R(2,470,26,833,433,'of','Office','3.6 × 4.1*'),R(2,843,26,1084,433,'rs','Roof store','under the slope'),
    D(2,370,300,380,380),D(2,460,300,470,380),D(2,833,291,843,371),WN(2,80,0,340,26),WN(2,530,0,770,26),WN(2,380,0,460,26,FULL),TX(2,430,-16,'Dormer about 8.1 m')],
- /* v56 LO12: LO11 swapped. Store x 26-226 under the slope (no dormer), door under the ridge; office x 236-460 open to the stair arrival (no wall at x 370-380), one window;
-    bedroom x 470-1059 so the rear dormer stays 8.4 m outside (x 226-1069, same as LO11). x 1069-1084 is solid under the slope */
- LO12:c=>[R(2,26,26,226,433,'rs','Store','2.0 m · under the slope'),R(2,236,26,460,433,'of','Office','2.2 × 4.1* open to stair'),R(2,380,433,460,468,'ci'),R(2,470,26,1059,433,'be','Bedroom','5.9 × 4.1*'),
-   D(2,226,291,236,371),D(2,460,300,470,380),WN(2,258,0,438,26),WN(2,644,0,884,26),TX(2,648,-16,'Dormer about 8.1 m')],
+ /* v56 LO12: LO11 swapped. Store x 26-226 under the slope (no dormer), door under the ridge; office x 236-560 (v58: wall/door moved 1 m east) open to the stair arrival (no wall at x 370-380), one window;
+    bedroom x 570-1059 so the rear dormer stays 8.4 m outside (x 226-1069, same as LO11). x 1069-1084 is solid under the slope */
+ LO12:c=>[R(2,26,26,226,433,'rs','Store','2.0 m · under the slope'),R(2,236,26,560,433,'of','Office','3.2 × 4.1* open to stair'),R(2,380,433,460,468,'ci'),R(2,570,26,1059,433,'be','Bedroom','4.9 × 4.1*'),
+   D(2,226,291,236,371),D(2,560,300,570,380),WN(2,288,0,508,26),WN(2,694,0,934,26),TX(2,648,-16,'Dormer about 8.1 m')],
  LO10:c=>[R(2,26,26,199,433,'rs','Store','under the slope'),R(2,299,26,640,433,'of','Office','3.4 × 4.1*'),R(2,209,352,299,433,'of'),R(2,650,26,1084,433,'be','Bedroom','4.3 × 4.1*'),
    D(2,199,368,209,428),D(2,289,40,299,110),D(2,640,60,650,140),WN(2,380,0,600,26),WN(2,760,0,1000,26),TX(2,640,-16,'Dormer about 8.9 m · bedroom through the office')],
  LO9:c=>[R(2,26,26,298,220,'of','Office','2.7 × 1.9'),R(2,26,230,298,433,'ut','Store','2.7 × 2.0*'),R(2,398,26,800,433,'be','Bedroom','4.0 × 4.1*'),
@@ -1947,7 +1947,7 @@ const FB3={0:0,1:264.3,2:517.8}, FT3={0:240.3,1:500,2:752.8}, DX3=246;
 /* v48 Velux: porch gable and shallow rear-extension lean-to. Eave tops sit at 252 cm; the lean-to rises towards the house wall, so the first-floor full-height windows over it get a sill 15 cm above the roof there */
 const EXT_DEG=10, PORCH_DEG=30;
 const extSillOf=c=>extD(c)?Math.ceil(252+(extD(c)+12)*Math.tan(EXT_DEG*Math.PI/180)+15-FB3[1]):0;
-const MCOL={wall:0xECE4D6,slab:0xBEBAB2,roof:0x5C5450,glass:0x96C8EB,door:0x6E482C,stair:0xC49668,unit:0xF5F5F0,worktop:0x3C3C3C,san:0xFFFFFF,brick:0xA0523C,stone:0xCDC8C0,flame:0xF0823C,plant:0x608C50,rail:0x6E482C,ground:0xB9C7A5};
+const MCOL={wall:0xECE4D6,slab:0xBEBAB2,roof:0x5C5450,glass:0x96C8EB,door:0x6E482C,stair:0xC49668,unit:0xF5F5F0,worktop:0x3C3C3C,san:0xFFFFFF,brick:0xA0523C,stone:0xCDC8C0,flame:0xF0823C,plant:0x608C50,rail:0x6E482C,ground:0xB9C7A5,balu:0xD8E8EE};
 
 function load3js(cb){
   if(window.THREE) return cb();
@@ -2106,7 +2106,7 @@ function gen3d(c,items,paint){
     pieces.filter(p=>!used.has(p)).forEach(p=>{ used.add(p); chains.push([[p,p.t==='s'?ends(p)[0]:pe(p)[0],p.t==='s'?ends(p)[1]:pe(p)[1]]]); });
     chains.sort((a,b)=>a.reduce((s,q)=>s+(q[0].n||1),0)-b.reduce((s,q)=>s+(q[0].n||1),0));
     const seq=chains.flat(), nT=seq.reduce((s,q)=>s+(q[0].n||1),0), r=(zTop-zBase)/(nT+1); let k=0;
-    const stat={risers:nT+1,rise:r,goS:[],goW:[],wid:[],head:1e9};   /* step height, goings (straight, winder at the centre line), widths, lowest clear height under the pitch line */
+    const stat={risers:nT+1,rise:r,goS:[],goW:[],wid:[],head:1e9}, bal=[];   /* bal: open tread sides for the v58 glass banisters */   /* step height, goings (straight, winder at the centre line), widths, lowest clear height under the pitch line */
     const hd=(x,y,z)=>{ if(ceilAt){ const v=ceilAt(x,y)-z; if(v<stat.head) stat.head=v; } };
     seq.forEach(([p,en,ex])=>{ const n=p.n||1;
       if(p.t==='s'){ const L=(p.dir==='E'||p.dir==='W')?(p.x2-p.x1)/n:(p.y2-p.y1)/n;
@@ -2114,6 +2114,7 @@ function gen3d(c,items,paint){
           if(p.dir==='E') a=[p.x1+j*L,p.y1,p.x1+(j+1)*L,p.y2]; else if(p.dir==='W') a=[p.x2-(j+1)*L,p.y1,p.x2-j*L,p.y2];
           else if(p.dir==='S') a=[p.x1,p.y1+j*L,p.x2,p.y1+(j+1)*L]; else a=[p.x1,p.y2-(j+1)*L,p.x2,p.y2-j*L];
           box('tread',lay,'stair',a[0],a[1],top-22,a[2],a[3],top);
+          if(p.dir==='E'||p.dir==='W') bal.push({p,o:'h',at:a[1],s:-1,a:a[0],b:a[2],z:top},{p,o:'h',at:a[3],s:1,a:a[0],b:a[2],z:top}); else bal.push({p,o:'v',at:a[0],s:-1,a:a[1],b:a[3],z:top},{p,o:'v',at:a[2],s:1,a:a[1],b:a[3],z:top});
           stat.goS.push(L); stat.wid.push((p.dir==='E'||p.dir==='W')?p.y2-p.y1:p.x2-p.x1);
           const mx=(a[0]+a[2])/2, my=(a[1]+a[3])/2;
           [.06,.5,.94].forEach(u=>{ const q=p.dir==='E'?[a[0]+u*L,my]:p.dir==='W'?[a[2]-u*L,my]:p.dir==='S'?[mx,a[1]+u*L]:[mx,a[3]-u*L]; hd(q[0],q[1],top+u*r); }); } }
@@ -2126,12 +2127,13 @@ function gen3d(c,items,paint){
           const rel=t=>{ let v=(t-a0)/d; return v; }; const rc=(()=>{ let v=ac-a0; while(v>Math.PI) v-=2*Math.PI; while(v<=-Math.PI) v+=2*Math.PI; return v/d; })();
           if(rc>j/n+1e-6&&rc<(j+1)/n-1e-6) pts.push([fx,fy]); pts.push(hit(t1));
           const top=zBase+(k+j+1)*r; prisms.push({n:'tread',lay,m:'stair',ax:'z',pts,a0:top-22,a1:top,walk:1});
+          for(let i=1;i+1<pts.length;i++){ const [ax,ay]=pts[i],[bx,by]=pts[i+1]; if(Math.abs(ax-bx)<1&&Math.abs(ay-by)>1) bal.push({p,o:'v',at:ax,s:ax>px?1:-1,a:Math.min(ay,by),b:Math.max(ay,by),z:top}); else if(Math.abs(ay-by)<1&&Math.abs(ax-bx)>1) bal.push({p,o:'h',at:ay,s:ay>py?1:-1,a:Math.min(ax,bx),b:Math.max(ax,bx),z:top}); }
           const wr=Math.min(Math.abs(fx-px),Math.abs(fy-py))/2; stat.wid.push(wr*2);
           if(n===1){ stat.land=(stat.land||0)+1; [.15,.5,.85].forEach(u=>[.15,.5,.85].forEach(v=>hd(p.x1+u*(p.x2-p.x1),p.y1+v*(p.y2-p.y1),top))); }   /* flat landing: whole area */
           else { stat.goW.push(wr*Math.abs(d)/n); [.06,.5,.94].forEach(u=>{ const th=a0+d*(j+u)/n; hd(px+wr*Math.cos(th),py+wr*Math.sin(th),top+u*r); }); } } }
       k+=n; });
     const last=seq[seq.length-1], first=seq[0];
-    return {exit:last[2],entry:first[1],last:last[0],first:first[0],stat};
+    return {exit:last[2],entry:first[1],last:last[0],first:first[0],stat,bal,pieces};
   }
   const inH=(hs,x,y)=>hs.some(h=>x>h[0]&&x<h[2]&&y>h[1]&&y<h[3]);
   const run0=stairRun(s0,0,264.3,'g',(x,y)=>inH(holes1,x,y)?500:240.3), run1=LO0?null:stairRun(s1own,264.3,517.8,'f',(x,y)=>inH(holes2,x,y)?under(x,y):500);
@@ -2145,8 +2147,18 @@ function gen3d(c,items,paint){
     holes.forEach(h=>{ const sides=[['h',h[1],h[0],h[2],-1],['h',h[3],h[0],h[2],1],['v',h[0],h[1],h[3],-1],['v',h[2],h[1],h[3],1]];
       sides.forEach(([o,at,a,b,s])=>{ let st=null; for(let t=a;t<=b;t+=5){ const px=o==='h'?t:at+s*6, py=o==='h'?at+s*6:t;
           const need=t<b&&!inHole(px,py)&&!isWall(px,py)&&!nearExit(o==='h'?t:at,o==='h'?at:t)&&!(f===1&&loftOver(o==='h'?t:at,o==='h'?at:t))&&!(f===2&&under(px,py)<FB3[2]+150);   /* no loft rail under the low eaves (it poked through the roof) */
-          if(need&&st===null) st=t; if((!need||t+5>b)&&st!==null){ const e=need?b:t; if(e-st>=10){ if(o==='h') box('rail',LAY[f],'rail',st,at-(s<0?4:0),z,e,at+(s>0?4:0),z+92); else box('rail',LAY[f],'rail',at-(s<0?4:0),st,z,at+(s>0?4:0),e,z+92); } st=null; } } }); }); }
+          if(need&&st===null) st=t; if((!need||t+5>b)&&st!==null){ const e=need?b:t; if(e-st>=10){ if(o==='h') box('rail',LAY[f],'balu',st,at-(s<0?2:0),z,e,at+(s>0?2:0),z+90); else box('rail',LAY[f],'balu',at-(s<0?2:0),st,z,at+(s>0?2:0),e,z+90); } st=null; } } }); }); }
   rails(holes1,1,run0); if(run1) rails(holes2,2,run1);
+  /* v58: 0.9 m translucent glass banister on every open side of every tread (not against a wall or another flight) */
+  function banisters(run,f){ if(!run) return; const m=wallMask[f];
+    const isWall=(x,y)=>{ if(!m) return false; const X=Math.round(x)-X0, Y=Math.round(y)-Y0; return X>=0&&Y>=0&&X<W&&Y<H&&m[Y*W+X]>0; };
+    const onStair=(q,x,y)=>run.pieces.some(o=>o!==q&&x>o.x1&&x<o.x2&&y>o.y1&&y<o.y2);
+    run.bal.forEach(e=>{ if(e.b-e.a<3) return; let st=null;
+      for(let t=e.a;t<=e.b;t+=5){ const px=e.o==='h'?Math.min(t,e.b-1):e.at+e.s*6, py=e.o==='h'?e.at+e.s*6:Math.min(t,e.b-1);
+        const need=t<e.b&&!isWall(px,py)&&!onStair(e.p,px,py);
+        if(need&&st===null) st=t; if((!need||t+5>e.b)&&st!==null){ const en=need?e.b:t; if(en-st>=3){
+          if(e.o==='h') box('rail',LAY[f],'balu',st,e.at-(e.s<0?0:2),e.z,en,e.at+(e.s<0?2:0),e.z+90); else box('rail',LAY[f],'balu',e.at-(e.s<0?0:2),st,e.z,e.at+(e.s<0?2:0),en,e.z+90); } st=null; } } }); }
+  banisters(run0,0); banisters(run1,1);
   if(run0){ const ex=run0.exit, c1=ex.o==='h'?[(ex.a+ex.b)/2,ex.at]:[ex.at,(ex.a+ex.b)/2], lp=run0.last; const dx=Math.sign(c1[0]-(lp.x1+lp.x2)/2)*(ex.o==='v'?1:0), dy=Math.sign(c1[1]-(lp.y1+lp.y2)/2)*(ex.o==='h'?1:0);
     spots[1]={x:c1[0]+dx*45,y:c1[1]+dy*45,yaw:Math.atan2(dx,-dy)}; }
   if(run1){ const ex=run1.exit, c1=ex.o==='h'?[(ex.a+ex.b)/2,ex.at]:[ex.at,(ex.a+ex.b)/2], lp=run1.last; const dx=Math.sign(c1[0]-(lp.x1+lp.x2)/2)*(ex.o==='v'?1:0), dy=Math.sign(c1[1]-(lp.y1+lp.y2)/2)*(ex.o==='h'?1:0);
@@ -2543,8 +2555,8 @@ function w3Build(c,items,paint){
   Object.values(buckets).forEach(B=>{ const g=new T.BufferGeometry();
     g.setAttribute('position',new T.BufferAttribute(new Float32Array(B.p),3)); g.setAttribute('normal',new T.BufferAttribute(new Float32Array(B.n),3));
     const col=B.col?new T.Color(B.col):new T.Color(MCOL[B.m]||0xCCCCCC);
-    const glass=B.m==='glass';
-    const mat=new T.MeshLambertMaterial({color:col,side:T.DoubleSide,transparent:glass,opacity:glass?0.28:1,depthWrite:!glass});
+    const glass=B.m==='glass'||B.m==='balu';
+    const mat=new T.MeshLambertMaterial({color:col,side:T.DoubleSide,transparent:glass,opacity:B.m==='balu'?0.42:glass?0.28:1,depthWrite:!glass});
     const mesh=new T.Mesh(g,mat); mesh.castShadow=!glass; mesh.receiveShadow=!glass; groups[B.lay].add(mesh);
     if(!glass){ const eg=new T.EdgesGeometry(g,25); const ln=new T.LineSegments(eg,new T.LineBasicMaterial({color:0x4A4540,transparent:true,opacity:0.35})); groups[B.lay].add(ln); } });
   /* collision: solid boxes and walkable tops, hashed in 1 m cells */
@@ -2562,7 +2574,7 @@ function w3Ground(x,y,feet){ let best=-1; /* the outside ground is at -1 */
   for(const o of w3Near(x,y)){ if(!o.walk) continue; const b=o.b; if(x<b.x1||x>b.x2||y<b.y1||y>b.y2) continue;
     if(o.p&&!inPoly(x,y,o.p.pts)) continue; const top=b.z2; if(top<=feet+45&&top>best) best=top; }
   return best; }
-function w3Blocked(x,y,feet){ const R=20, z0=feet+40, z1=feet+175;
+function w3Blocked(x,y,feet){ const R=13, z0=feet+40, z1=feet+175;   /* v58: body radius 20 -> 13 cm, so 80 cm stairs between walls (loft stair) aren't a 40 cm tightrope */
   for(const o of w3Near(x,y).concat(w3Near(x+R,y),w3Near(x-R,y),w3Near(x,y+R),w3Near(x,y-R))){ const b=o.b; if(!o.solid&&!(o.walk&&(o.b.n==='tread'||(o.p&&o.p.n==='tread'))&&b.z2>feet+45)) continue;
     if(b.z2<=z0||b.z1>=z1) continue; const cx=Math.max(b.x1,Math.min(x,b.x2)), cy=Math.max(b.y1,Math.min(y,b.y2));
     const r=b.z1>=feet+130?6:R;   /* only the head reaches things overhead (slab edges, rails, stairs above): a narrow check, so the stair's inner edge is walkable */
