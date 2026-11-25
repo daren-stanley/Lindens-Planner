@@ -182,9 +182,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v56 · 25 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v57 · 25 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v56';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v57';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -236,6 +236,7 @@ body.nosteel .rsj{display:none}
     <button type="button" class="btn" data-w3a="sun" aria-pressed="false">☀ Sun</button><button type="button" class="btn" data-w3a="dl" aria-pressed="false">Daylight map</button>
     <span class="seg" id="w3vx"><span class="btn" id="w3vxl" style="pointer-events:none;opacity:.75">Velux</span><button type="button" class="btn" data-w3v="all" aria-pressed="false">All</button><button type="button" class="btn" data-w3v="p" aria-pressed="false">Porch</button><button type="button" class="btn" data-w3v="e" aria-pressed="false">Extension</button><button type="button" class="btn" data-w3v="r" aria-pressed="false">Roof rooms</button><button type="button" class="btn" data-w3v="d" aria-pressed="true">Front dormer</button></span>
     <button type="button" class="btn" data-w3a="full">Full screen</button>
+    <span class="seg" id="w3vr" hidden><button type="button" class="btn primary" data-w3a="vr">Enter VR</button><button type="button" class="btn" data-w3s="stand" aria-pressed="true">Standing</button><button type="button" class="btn" data-w3s="seat" aria-pressed="false">Seated</button></span>
   </div>
   <div id="w3wrap"><div id="w3view" data-mode="walk">
     <div class="w3help">Drag to look · joystick or W A S D to move · Shift runs<span class="w3o"> · in Orbit drag turns the house, pinch or wheel zooms</span></div>
@@ -1769,7 +1770,7 @@ function fitShare(){ const st=state(); return st.complete?makeCode(st.c)+(ITEMS.
 function syncHash(){ const h=fitShare(); try{ if(h) history.replaceState(null,'','#'+h); }catch(e){} if(typeof BD!=='undefined'&&!BD.mode) bdBar(); }
 function setPage(p){
   const st=state(); if(p===2&&!st.complete){ $('msg').textContent='Finish the structure first: every part on page 1 needs a pick.'; p=1; }
-  PAGE=p; document.body.classList.toggle('p2',p===2); document.body.classList.toggle('p3',p===3); if(p!==3) W3.running=false;
+  PAGE=p; document.body.classList.toggle('p2',p===2); document.body.classList.toggle('p3',p===3); if(p!==3){ W3.running=false; if(W3.renderer&&!(W3.renderer.xr&&W3.renderer.xr.isPresenting)) W3.renderer.setAnimationLoop(null); }
   document.querySelectorAll('[data-page]').forEach(b=>b.setAttribute('aria-pressed',+b.dataset.page===p));
   try{ localStorage.setItem('lindens-page',String(p)); }catch(e){}
   if(p===2) renderFit(true); else if(p===3) w3Start(); else render();
@@ -2381,16 +2382,141 @@ function w3SunUI(){
   w3SunApply();
 }
 
+/* ---------- VR (v57): WebXR for the Quest browser ----------
+   The camera sits in W3.rig, scaled x100 (headset metres -> model cm). Left stick walks (w3Blocked / w3Ground at the head), right stick snap-turns 30°,
+   A / B next / previous floor, X sun on/off, Y shows the wrist menu. The wrist menu (canvas texture on the left controller) has sun, time, date,
+   Velux zones, daylight map, floors and standing / seated; point with the right controller and pull the trigger (hold it on the time bar to drag). */
+const XR={on:false,seated:false,off:0,ctl:[],menu:null,cv:null,tex:null,btns:[],hover:null,show:true,prev:{},snapArm:{left:true,right:true},last:''};
+try{ XR.seated=localStorage.getItem('lindensSeated')==='1'; }catch(e){}
+function xrUI(){ const el=$('w3vr'); if(!el||!navigator.xr||!navigator.xr.isSessionSupported) return; xrPostureUI();
+  navigator.xr.isSessionSupported('immersive-vr').then(ok=>{ el.hidden=!ok; }).catch(()=>{}); }
+function xrInit(T){
+  const r=W3.renderer; r.xr.enabled=true; r.xr.setReferenceSpaceType('local-floor'); if(r.xr.setFoveation) r.xr.setFoveation(1);
+  W3.rig=new T.Group(); W3.rig.add(W3.camera);
+  const rayG=new T.BufferGeometry().setFromPoints([new T.Vector3(0,0,0),new T.Vector3(0,0,-1)]);
+  for(let i=0;i<2;i++){ const c=r.xr.getController(i), g=r.xr.getControllerGrip(i);
+    const ray=new T.Line(rayG,new T.LineBasicMaterial({color:0xFFFFFF,transparent:true,opacity:.7})); ray.scale.z=1.5; ray.visible=false; c.add(ray); c.userData.ray=ray;
+    const hand=new T.Mesh(new T.BoxGeometry(0.035,0.035,0.11),new T.MeshLambertMaterial({color:0x3D3A35})); hand.position.z=0.03; g.add(hand);
+    c.addEventListener('connected',e=>{ c.userData.src=e.data; c.userData.hand=e.data.handedness; g.userData.hand=e.data.handedness; xrAttachMenu(); });
+    c.addEventListener('disconnected',()=>{ c.userData.src=null; c.userData.hand=null; g.userData.hand=null; });
+    W3.rig.add(c,g); XR.ctl.push({c,g}); }
+  const cv=document.createElement('canvas'); cv.width=512; cv.height=800; XR.cv=cv; XR.tex=new T.CanvasTexture(cv);
+  const m=new T.Mesh(new T.PlaneGeometry(0.2,0.2*800/512),new T.MeshBasicMaterial({map:XR.tex,transparent:true,depthTest:false,side:T.DoubleSide,toneMapped:false}));
+  m.renderOrder=999; m.position.set(0,0.1,-0.02); m.rotation.x=-0.55; m.visible=false; XR.menu=m;
+  r.xr.addEventListener('sessionstart',xrStart); r.xr.addEventListener('sessionend',xrEnd);
+}
+function xrAttachMenu(){ const L=XR.ctl.find(q=>q.g.userData.hand==='left'); if(L&&XR.menu.parent!==L.g) L.g.add(XR.menu); }
+function xrHead(){ const cam=W3.renderer.xr.getCamera(), T=THREE;
+  const p=new T.Vector3().setFromMatrixPosition(cam.matrixWorld), d=new T.Vector3(0,0,-1).transformDirection(cam.matrixWorld);
+  return {p, yaw:Math.atan2(d.x,-d.z)};   /* model yaw: 0 looks along -y (north side of the plan), as in walk mode */ }
+/* put the head at model (x,y) facing model yaw, feet at W3.feet */
+function xrPlace(x,y,yaw){ const R=W3.rig, h=xrHead(), T=THREE; R.updateMatrixWorld(true);
+  const hl=R.worldToLocal(h.p.clone()), phiL=-h.yaw-R.rotation.y;   /* head yaw inside the rig */
+  R.rotation.y=-yaw-phiL; R.position.set(x,W3.feet+XR.off,y); R.updateMatrixWorld(true);
+  const hw=R.localToWorld(hl); R.position.x+=x-hw.x; R.position.z+=y-hw.z; R.updateMatrixWorld(true); }
+function xrSeatCal(){ const h=xrHead(); const eye=h.p.y-W3.rig.position.y;   /* head height above the rig floor, cm */
+  XR.off=XR.seated?Math.max(0,Math.min(90,W3.eye-eye)):0; W3.rig.position.y=W3.feet+XR.off; }
+function xrSetSeated(s){ XR.seated=s; try{ localStorage.setItem('lindensSeated',s?'1':'0'); }catch(e){} xrPostureUI(); if(XR.on) xrSeatCal(); XR.last=''; }
+function xrPostureUI(){ document.querySelectorAll('[data-w3s]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.w3s==='seat')===XR.seated)); }
+async function xrEnter(){
+  if(!navigator.xr||!W3.renderer){ return; }
+  try{ const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor']}); await W3.renderer.xr.setSession(s); }
+  catch(e){ $('w3msg').textContent='Could not start VR: '+e.message; console.error(e); }
+}
+function xrStart(){ XR.on=true; XR.calib=3; XR.start={x:W3.pos.x,y:W3.pos.y,yaw:W3.yaw}; const cam=W3.camera; cam.near=0.05; cam.far=250;   /* session space is metres; the rig scales x100 */
+  if(W3.mode!=='walk') w3Mode('walk'); W3.rig.scale.setScalar(100); XR.show=true; XR.last='';
+  xrShadow(2048); W3.rig.rotation.y=-W3.yaw; W3.rig.position.set(W3.pos.x,W3.feet,W3.pos.y); }
+function xrEnd(){ XR.on=false; const cam=W3.camera, R=W3.rig;
+  R.scale.setScalar(1); R.position.set(0,0,0); R.rotation.set(0,0,0); cam.near=5; cam.far=20000; cam.scale.set(1,1,1); cam.updateProjectionMatrix();
+  XR.menu.visible=false; xrShadow(4096); w3Resize(); }
+function xrShadow(n){ const sl=W3.sunL; if(!sl) return; n=Math.min(n,W3.renderer.capabilities.maxTextureSize||2048);
+  if(sl.shadow.mapSize.x===n) return; sl.shadow.mapSize.set(n,n); if(sl.shadow.map){ sl.shadow.map.dispose(); sl.shadow.map=null; } }
+/* --- wrist menu --- */
+function xrMenuDraw(){
+  const S=W3.sun, p=sunPos(S.doy,S.min), hm=String(Math.floor(S.min/60)).padStart(2,'0')+':'+String(S.min%60).padStart(2,'0');
+  const zn={p:'Porch',e:'Extension',r:'Roof rooms',d:'Front dormer'}, zs=['p','e','r','d'].filter(z=>W3.vxn[z]);
+  const key=[S.on,S.doy,S.min,S.trees,zs.map(z=>W3.vx[z]).join(),W3.dl&&W3.dl.on,XR.seated,XR.hover&&XR.hover.id].join('|'); if(key===XR.last) return; XR.last=key;
+  const c=XR.cv.getContext('2d'), W=512; c.clearRect(0,0,W,800); c.fillStyle='rgba(250,248,244,.94)'; c.beginPath(); c.roundRect?c.roundRect(0,0,W,800,28):c.rect(0,0,W,800); c.fill();
+  const B=[]; let y=24;
+  const txt=(s,yy,sz,bold,col)=>{ c.fillStyle=col||'#3D3A35'; c.font=(bold?'700 ':'500 ')+sz+'px system-ui,sans-serif'; c.textAlign='left'; c.fillText(s,24,yy); };
+  const row=(items,h)=>{ const gap=10, w=(W-48-gap*(items.length-1))/items.length; items.forEach((it,i)=>B.push(Object.assign({x:24+i*(w+gap),y,w,h},it))); y+=h+12; };
+  const dn={355:'21 Dec',80:'21 Mar',172:'21 Jun'}[S.doy]||'day '+S.doy;
+  txt(hm+(p.bst?' BST':' GMT')+' · '+dn,y+30,32,1); y+=44;
+  const dirs=['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  txt(!S.on?'Sun is off (plain lighting)':p.alt>0.3?'Sun '+Math.round(p.alt)+'° up in the '+dirs[Math.round(p.az/22.5)%16]:'Sun below the horizon',y+22,22,0,'#6B645B'); y+=40;
+  row([{id:'sun',t:S.on?'☀ Sun on':'Sun off',on:S.on},{id:'trees',t:'Trees',on:S.trees}],56);
+  B.push({id:'slider',x:24,y,w:W-48,h:50,slider:1}); const sb=B[B.length-1]; y+=62;
+  row([{id:'t-60',t:'−1 h'},{id:'t-15',t:'−15 m'},{id:'t+15',t:'+15 m'},{id:'t+60',t:'+1 h'}],52);
+  row([355,80,172].map(d=>({id:'d'+d,t:dn&&{355:'21 Dec',80:'21 Mar',172:'21 Jun'}[d],on:S.doy===d})),52);
+  txt('Velux',y+22,22,1); y+=34;
+  if(zs.length){ const it=zs.map(z=>({id:'v'+z,t:zn[z],on:W3.vx[z]})); if(it.length>2){ row(it.slice(0,2),52); row(it.slice(2),52); } else row(it,52); } else { txt('No Velux in this design',y+20,20,0,'#6B645B'); y+=34; }
+  row([{id:'dl',t:'Daylight map',on:!!(W3.dl&&W3.dl.on)}],52);
+  row([{id:'f0',t:'Ground'},{id:'f1',t:'First'},{id:'f2',t:'Loft'}],52);
+  row([{id:'stand',t:'Standing',on:!XR.seated},{id:'seat',t:'Seated',on:XR.seated}],52);
+  txt('Stick: walk · turn   A / B: floor   X: sun   Y: menu',y+20,19,0,'#6B645B');
+  B.forEach(b=>{ const hv=XR.hover&&XR.hover.id===b.id; c.fillStyle=b.slider?'#E8E2D8':b.on?'#E8743B':hv?'#D9D2C6':'#ECE7DF'; c.beginPath(); c.roundRect?c.roundRect(b.x,b.y,b.w,b.h,12):c.rect(b.x,b.y,b.w,b.h); c.fill();
+    if(hv){ c.strokeStyle='#3D3A35'; c.lineWidth=3; c.stroke(); }
+    if(b.slider){ const f=(S.min-240)/1080; c.fillStyle='#F2C14E'; c.fillRect(b.x+8,b.y+20,(b.w-16)*f,10); c.fillStyle='#3D3A35'; c.beginPath(); c.arc(b.x+8+(b.w-16)*f,b.y+25,13,0,7); c.fill();
+      c.font='500 16px system-ui'; c.fillStyle='#6B645B'; c.textAlign='left'; c.fillText('04:00',b.x+8,b.y+48); c.textAlign='right'; c.fillText('22:00',b.x+b.w-8,b.y+48); return; }
+    c.fillStyle=b.on?'#fff':'#3D3A35'; c.font='600 22px system-ui,sans-serif'; c.textAlign='center'; c.fillText(b.t,b.x+b.w/2,b.y+b.h/2+8); });
+  XR.btns=B; XR.tex.needsUpdate=true; }
+function xrPress(b,u){ const S=W3.sun;
+  if(b.slider){ S.min=Math.round((240+Math.max(0,Math.min(1,(u*512-b.x-8)/(b.w-16)))*1080)/5)*5; if(!S.on){ S.on=true; } w3SunUI(); return; }
+  const id=b.id;
+  if(id==='sun'){ S.on=!S.on; w3SunUI(); } else if(id==='trees'){ S.trees=!S.trees; w3SunUI(); }
+  else if(id[0]==='t'&&/^t[+-]/.test(id)){ S.min=Math.max(240,Math.min(1320,S.min+ +id.slice(1))); if(!S.on) S.on=true; w3SunUI(); }
+  else if(id[0]==='d'&&id!=='dl'){ S.doy=+id.slice(1); if(!S.on) S.on=true; w3SunUI(); }
+  else if(id[0]==='v'){ const z=id[1]; W3.vx[z]=!W3.vx[z]; w3VxUI(); }
+  else if(id==='dl'){ W3.dl.on=!W3.dl.on; const db=document.querySelector('[data-w3a="dl"]'); if(db) db.setAttribute('aria-pressed',W3.dl.on); w3DlRefresh(); }
+  else if(id[0]==='f'){ xrFloor(+id[1]); }
+  else if(id==='stand'||id==='seat') xrSetSeated(id==='seat');
+  XR.last=''; }
+function xrFloor(f){ const s=W3.spots[f]||W3.spots[0]; if(!s) return; w3Goto(f); xrPlace(s.x,s.y,s.yaw); }
+/* --- per-frame VR controls --- */
+function xrFrame(dt){
+  const T=THREE, R=W3.rig; if(XR.calib>0){ XR.calib--; if(!XR.calib){ xrSeatCal(); const s=XR.start; xrPlace(s.x,s.y,s.yaw); } return; }
+  const pads={}; XR.ctl.forEach(q=>{ const s=q.c.userData.src; if(s&&s.gamepad) pads[s.handedness]={gp:s.gamepad,c:q.c}; });
+  const edge=(hand,i)=>{ const gp=pads[hand]&&pads[hand].gp, k=hand+i, on=!!(gp&&gp.buttons[i]&&gp.buttons[i].pressed), was=XR.prev[k]; XR.prev[k]=on; return on&&!was; };
+  const held=(hand,i)=>{ const gp=pads[hand]&&pads[hand].gp; return !!(gp&&gp.buttons[i]&&gp.buttons[i].pressed); };
+  const ax=(hand,i)=>{ const gp=pads[hand]&&pads[hand].gp; if(!gp) return 0; const a=gp.axes.length>=4?gp.axes[i+2]:gp.axes[i]||0; return Math.abs(a)<0.15?0:a; };
+  const h=xrHead();
+  /* walk with the left stick, in the direction the head faces */
+  const fx=Math.sin(h.yaw), fy=-Math.cos(h.yaw), fwd=-ax('left',1), str=ax('left',0);
+  if(fwd||str){ const sp=(held('left',3)?2:1)*140*dt; const dx=(fx*fwd-fy*str)*sp, dy=(fy*fwd+fx*str)*sp, x=h.p.x, y=h.p.z;
+    let mx=0,my=0; if(!w3Blocked(x+dx,y+dy,W3.feet)){ mx=dx; my=dy; } else if(!w3Blocked(x+dx,y,W3.feet)) mx=dx; else if(!w3Blocked(x,y+dy,W3.feet)) my=dy;
+    R.position.x+=mx; R.position.z+=my; }
+  const g=w3Ground(h.p.x,h.p.z,W3.feet); if(g>W3.feet) W3.feet=g; else W3.feet=Math.max(g,W3.feet-500*dt);
+  R.position.y+=(W3.feet+XR.off-R.position.y)*Math.min(1,dt*12);
+  /* snap turn 30° on the right stick */
+  const tx=ax('right',0); if(Math.abs(tx)>0.7&&XR.snapArm.right){ XR.snapArm.right=false; xrPlace(h.p.x,h.p.z,h.yaw+(tx>0?1:-1)*Math.PI/6); } else if(Math.abs(tx)<0.3) XR.snapArm.right=true;
+  /* buttons: A next floor, B previous floor, X sun, Y menu */
+  const cur=W3.feet>FB3[2]-60?2:W3.feet>FB3[1]-60?1:0;
+  if(edge('right',4)) xrFloor((cur+1)%3); if(edge('right',5)) xrFloor((cur+2)%3);
+  if(edge('left',4)){ W3.sun.on=!W3.sun.on; w3SunUI(); XR.last=''; } if(edge('left',5)) XR.show=!XR.show;
+  /* menu: visible on the left wrist, pointed at with the right controller */
+  const M=XR.menu, menuOn=XR.show&&!!M.parent&&!!pads.left; M.visible=menuOn;
+  XR.ctl.forEach(q=>{ q.c.userData.ray.visible=menuOn&&q.c.userData.hand==='right'; });
+  let hit=null; const rc=XR.ctl.find(q=>q.c.userData.hand==='right');
+  if(menuOn&&rc){ const o=new T.Vector3().setFromMatrixPosition(rc.c.matrixWorld), d=new T.Vector3(0,0,-1).transformDirection(rc.c.matrixWorld);
+    const ray=new T.Raycaster(o,d,0,500); const I=ray.intersectObject(M)[0];
+    if(I&&I.uv){ const px=I.uv.x*512, py=(1-I.uv.y)*800; hit=XR.btns.find(b=>px>=b.x&&px<=b.x+b.w&&py>=b.y&&py<=b.y+b.h)||null; if(hit) hit.u=I.uv.x;
+      rc.c.userData.ray.scale.z=I.distance/100; } else rc.c.userData.ray.scale.z=1.5; }
+  XR.hover=hit; const trig=edge('right',0);
+  if(hit&&(trig||(hit.slider&&held('right',0)))) xrPress(hit,hit.u);
+  if(menuOn) xrMenuDraw();
+  W3.pos.x=h.p.x; W3.pos.y=h.p.z; W3.pos.z=h.p.y; W3.yaw=h.yaw;
+}
+
 /* ---------- three.js scene ---------- */
 function w3Build(c,items,paint){
   const T=THREE, M=gen3d(c,items,paint);
   W3.boxes=M.boxes; W3.prisms=M.prisms; W3.spots=M.spots;
   if(!W3.renderer){
     const r=new T.WebGLRenderer({antialias:true}); r.setPixelRatio(Math.min(devicePixelRatio||1,2)); W3.renderer=r; r.shadowMap.enabled=true; r.shadowMap.type=T.PCFSoftShadowMap; $('w3view').appendChild(r.domElement);
-    W3.camera=new T.PerspectiveCamera(70,1,5,20000);
+    W3.camera=new T.PerspectiveCamera(70,1,5,20000); xrInit(T);
     new ResizeObserver(w3Resize).observe($('w3view'));
   }
-  const sc=new T.Scene(); sc.background=new T.Color(0xDCE6EC); W3.scene=sc;
+  const sc=new T.Scene(); sc.background=new T.Color(0xDCE6EC); W3.scene=sc; sc.add(W3.rig);
   const hemi=new T.HemisphereLight(0xFFFFFF,0xD6CFC2,0.72); sc.add(hemi); const dl=new T.DirectionalLight(0xFFFFFF,0.4); dl.position.set(-600,1500,1400); sc.add(dl);
   const dl2=new T.DirectionalLight(0xFFFFFF,0.18); dl2.position.set(900,800,-1200); sc.add(dl2);
   W3.hemi=hemi; W3.dl=dl; W3.dl2=dl2; w3SunRig(T,sc);
@@ -2449,10 +2575,11 @@ function w3Goto(f){ const s=W3.spots[f]||W3.spots[0]; if(!s) return; W3.pos.x=s.
 function w3Visibility(){ const g=W3.groups; if(!g) return; const u=W3.mode==='walk'?3:W3.showUpTo;
   g.g.visible=true; g.gF.visible=W3.fit; g.f.visible=u>=1; g.fF.visible=u>=1&&W3.fit; g.l.visible=u>=2; g.lF.visible=u>=2&&W3.fit; g.r.visible=u>=3;
   const V=W3.vx; if(g.pOn){ g.pOn.visible=V.p; g.pOff.visible=!V.p; g.eOn.visible=V.e; g.eOff.visible=!V.e; g.rOn.visible=V.r&&u>=3; g.rOff.visible=!V.r&&u>=3; g.dOn.visible=V.d&&u>=3; g.dOff.visible=!V.d&&u>=3; } }
-function w3Resize(){ const v=$('w3view'); if(!W3.renderer||!v) return; const w=v.clientWidth, h=v.clientHeight; if(!w||!h) return; W3.renderer.setSize(w,h,false); W3.camera.aspect=w/h; W3.camera.updateProjectionMatrix(); }
+function w3Resize(){ const v=$('w3view'); if(!W3.renderer||!v||(W3.renderer.xr&&W3.renderer.xr.isPresenting)) return; const w=v.clientWidth, h=v.clientHeight; if(!w||!h) return; W3.renderer.setSize(w,h,false); W3.camera.aspect=w/h; W3.camera.updateProjectionMatrix(); }
 function w3Frame(t){
-  if(!W3.running) return; requestAnimationFrame(w3Frame);
+  if(!W3.running&&!XR.on) return;
   const dt=Math.min(0.05,(t-(W3.last||t))/1000); W3.last=t;
+  if(XR.on){ xrFrame(dt); W3.renderer.render(W3.scene,W3.camera); return; }
   const K=W3.keys, cam=W3.camera;
   let fwd=-W3.joy.y+((K.KeyW||K.ArrowUp)?1:0)-((K.KeyS||K.ArrowDown)?1:0), str=W3.joy.x+((K.KeyD)?1:0)-((K.KeyA)?1:0);
   if(K.ArrowLeft) W3.yaw-=1.6*dt; if(K.ArrowRight) W3.yaw+=1.6*dt;
@@ -2482,7 +2609,7 @@ function w3Start(){
   load3js(()=>{ const key=makeCode(src.c)+'~'+fitCode(src.items,src.paint);
     try{ if(key!==W3.key){ w3Build(src.c,src.items,src.paint); W3.key=key; } }catch(e){ msg.textContent='Could not build the 3D model: '+e.message; console.error(e); return; }
     msg.textContent=(W3.src==='link'?'Pasted design ':'Your current design ')+makeCode(src.c)+' · '+src.items.length+' fittings';
-    w3Resize(); if(!W3.running){ W3.running=true; W3.last=0; requestAnimationFrame(w3Frame); } });
+    w3Resize(); if(!W3.running){ W3.running=true; W3.last=0; W3.renderer.setAnimationLoop(w3Frame); } xrUI(); });
 }
 function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.w3m===m));
   $('w3view').dataset.mode=m; w3Visibility();
@@ -2521,6 +2648,8 @@ function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b
     else if(b.dataset.w3a==='sun'){ W3.sun.on=!W3.sun.on; w3SunUI(); }
     else if(b.dataset.w3a==='dl'){ W3.dl.on=!W3.dl.on; b.setAttribute('aria-pressed',W3.dl.on); w3DlRefresh(); }
     else if(b.dataset.w3v){ const k=b.dataset.w3v; if(k==='all'){ const zs=['p','e','r','d'].filter(z=>W3.vxn[z]), on=!zs.every(z=>W3.vx[z]); zs.forEach(z=>W3.vx[z]=on); } else W3.vx[k]=!W3.vx[k]; w3VxUI(); }
+    else if(b.dataset.w3a==='vr') xrEnter();
+    else if(b.dataset.w3s) xrSetSeated(b.dataset.w3s==='seat');
     else if(b.dataset.w3a==='full'){ const el=$('w3wrap'); try{ if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el).catch(()=>{}); }catch(e){} }
   });
   $('w3sun').addEventListener('click',ev=>{ const b=ev.target.closest('[data-w3d]'); if(!b) return; W3.sun.doy=+b.dataset.w3d; w3SunUI(); });

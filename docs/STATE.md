@@ -1,10 +1,11 @@
 # Lindens Planner — state
 
-_Last updated: 25 Nov 2026 · app version v56_
+_Last updated: 25 Nov 2026 · app version v57_
 
 ## Current state
 - Single-file app: `index.html` (~2,610 lines). Plus `.nojekyll`. No build step.
-- Latest release **v56**: new loft option **LO12** (appended, goes with L4/L5/L6 like LO11) = LO11 swapped. Store x 26–226 (`rs`, no dormer, door `D(2,226,291,236,371)` under the ridge); office x 236–460 is one room with the stair corridor (no wall at x 370–380), arrival `ci` 380–460 / 433–468 as LO11; one office window x 258–438 (no full-length stair window); bedroom x 470–1059 (5.9 × 4.1 m), door x 460–470 as LO11's office door, window x 644–884. Rear dormer `DSP` [226,1069] = same 8.43 m span as LO11 ("about 8.1 m"); x 1069–1084 is solid under the slope. Loft front-slope Velux panes now shift sideways clear of the front dormer (`DORM`) — needed for the LO12 office. Cost 0.9 like LO11. Checked headless: L4/L5/L6 + LO12 build with no errors/NaN; stair headroom unchanged.
+- Latest release **v57**: **VR (WebXR) for the Quest 3S** on page 3. "Enter VR" + Standing/Seated buttons (`#w3vr`, shown only if `isSessionSupported('immersive-vr')`). Code block `XR` / `xr*` just before the three.js scene section. Camera lives in `W3.rig` (scaled ×100 in VR, camera near/far 0.05/250 m in-session, restored on exit); the page now runs on `renderer.setAnimationLoop(w3Frame)` (no rAF); `w3Resize` skips while presenting; sun shadow map 2048 in VR. Controls (`xrFrame`): left stick walks where the head faces (collision `w3Blocked`/`w3Ground` at the head; stick press runs), right stick snap-turns 30° (`xrPlace` pivots round the head), A/B next/previous floor, X sun on/off, Y wrist menu. **Wrist menu** on the left controller (canvas texture 512×800, `xrMenuDraw`, redraws only on change): sun on/off, trees, time bar (hold the trigger to drag, 04:00–22:00), ±15 min / ±1 h, 21 Dec/Mar/Jun, Velux zones present in the design, Daylight map, Ground/First/Loft, Standing/Seated; right-controller ray + trigger (`xrPress`). Seated mode lifts the view so eyes are at 1.6 m (calibrated from head height on entry/toggle; saved in localStorage). Tested headless with Meta's IWER emulator (Quest 3 profile, `installRuntime({forceInstall:true})`): enter/exit, walk, snap turn, floor jump, X, menu ray hit + trigger, every menu button; normal 3D unchanged. Not yet tried on a real headset.
+- v56: new loft option **LO12** (appended, goes with L4/L5/L6 like LO11) = LO11 swapped. Store x 26–226 (`rs`, no dormer, door `D(2,226,291,236,371)` under the ridge); office x 236–460 is one room with the stair corridor (no wall at x 370–380), arrival `ci` 380–460 / 433–468 as LO11; one office window x 258–438 (no full-length stair window); bedroom x 470–1059 (5.9 × 4.1 m), door x 460–470 as LO11's office door, window x 644–884. Rear dormer `DSP` [226,1069] = same 8.43 m span as LO11 ("about 8.1 m"); x 1069–1084 is solid under the slope. Loft front-slope Velux panes now shift sideways clear of the front dormer (`DORM`) — needed for the LO12 office. Cost 0.9 like LO11. Checked headless: L4/L5/L6 + LO12 build with no errors/NaN; stair headroom unchanged.
 - v55: original stair S1: the corner half landing was a floor-level `R(0,202,546,278,636,'ci')` room, so 3D showed a hole between the first step and the flight. Now `ST(…,'S',1)` + flat `WD(0,202,546,278,636,278,546,1)` + 12 E: landing raised in the run; 15 risers of 176 mm (was 14 × 189 with no landing tread). Ask Daren to count the real risers; if 14, make the first step part of the landing instead.
 - v54: (1) Front-dormer window is a Velux-style toggle, zone `d` ("Front dormer" button, on by default): glass in layer `dOn`, filled-in wall in `dOff`; pane registered with `vxPane('d',…)` so the daylight map counts it (zone lists p/e/r/d everywhere: W3.vx/vxn, VXON/VXOFF, groups, ZF, Wz, A, dlEval, w3VxUI, "All"). (2) Neighbour garage in `SUN_ENV.blocks` replaced: was a 3 m survey parallelogram cutting through our garage; now a mirror of our original garage (G0 shell 3.28 × 5.84 m, 2.55 m high) across the west boundary, x −7.62…−4.34 m, y 0.78…6.62 m. (3) Walk mode: `w3Blocked` uses a 6 cm radius for anything starting 1.3 m+ above the feet (head only), 20 cm below. The 20 cm body radius had been catching the first-floor slab edge and landing rail over the inner edge of the main stair, so you stuck about halfway up unless you kept to the centre. Test rig `/tmp/walk.py` idea: step along a path calling w3Blocked/w3Ground like the frame loop.
 - v53: fixes to v52 in 3D. (1) The loft knee wall (gen3d fills y 433–443 on floor 2) is now opened wherever a floor-2 `ci` room crosses it, so the LO11 corridor meets the stair arrival (`R(2,380,433,460,468,'ci')`); loft walls `WA(2,370,443,380,648)` and `WA(2,460,443,470,556)` close the stair off from the eaves. (2) Loft wall pieces are now split at the front-dormer sides (`DORM.ix1`, `DORM.ix2+1`) as well as the rear-dormer ends, so no knee-wall piece takes the dormer's tall cap (that was the cream strip through the roof east of the dormer). Test rig: playwright + local three r149 (npm) routed in place of the CDN; checks no non-roof box tops the roof.
@@ -48,16 +49,13 @@ _Last updated: 25 Nov 2026 · app version v56_
 | 1932 | page 3: 3D model generator `gen3d` (walls, slabs, stairs, fittings; Velux roofs ~2019; main roof + loft panes ~2185) |
 | 2196 | sun simulator (`SITE`, `SUN_ENV`, `sunPos`, `w3Sun*`, `w3Compass`) |
 | 2249 | daylight map (`dlCompute`, `dlEval`, `w3DlRefresh`), then `w3VxUI` ~2318 |
-| 2337 | three.js scene (`w3Build`, `w3Visibility`, controls) |
-| 2491 | shared boards (Supabase: `sbGet`, `sbRpc`, `bd*`), then `init` |
+| 2389 | VR (`XR`, `xrInit`, `xrFrame`, wrist menu `xrMenuDraw` / `xrPress`) |
+| 2510 | three.js scene (`w3Build`, `w3Visibility`, `w3Frame`, controls) |
+| 2670 | shared boards (Supabase: `sbGet`, `sbRpc`, `bd*`), then `init` |
 
-## VR plan (Quest 3S) — scoped 25 Nov, not built
-- Phase 1 (one release, ~200 lines in page 3): "Enter VR" button shown only if `navigator.xr.isSessionSupported('immersive-vr')`; `renderer.xr.enabled=true`, `local-floor` space, foveation 1; loop moves from `requestAnimationFrame(w3Frame)` to `renderer.setAnimationLoop`; camera inside a rig Group placed at `W3.pos.x/y` and `W3.feet`, scaled ×100 (headset metres → scene cm); `w3Resize` must skip while presenting.
-- Controls from `session.inputSources` gamepads: left stick walks relative to head direction (reuse `w3Blocked`/`w3Ground`, so stairs and walls work), right stick snap-turn 30°, buttons jump floors (`w3Goto`), toggle Velux / sun. Choices (floor, Velux, sun time, board) are made on the 2D page in the Quest Browser before entering.
-- Performance: geometry already merged per layer/colour (good). In VR drop the sun shadow map to 2048 (or 1024) and use `PCFShadowMap`; target 72 Hz.
-- Phase 2 (optional): teleport arc, in-headset wrist menu (canvas-texture buttons), simple controller rays (no GLTF controller models: the app uses the global three.min.js build, r149 has no examples/js), seated-height offset.
-- Phase 3 (optional): `immersive-ar` passthrough tabletop model (Orbit view as a 1:50 model on a real table).
-- Can't be tested here; expect one fix round after Daren tries it in the Quest Browser.
+## VR — still to do
+- First real-headset test: menu position/tilt on the wrist (`XR.menu` position 0,0.1,-0.02, rotation.x −0.55), walk speed, comfort on stairs, frame rate with sun shadows (drop to 1024 / `PCFShadowMap` if it stutters).
+- Maybe later: teleport, controller models, passthrough tabletop model.
 
 ## Next steps
 - v52 fixed the corridor-under-the-loft-stair problem (see above). Review with the architect: the front dormer is now much bigger (2.2 × 2.4–2.9 m, 2.0–2.4 m face) — planning risk on the road side.
@@ -69,7 +67,7 @@ _Last updated: 25 Nov 2026 · app version v56_
 - Daylight map ignores trees/neighbours and the sun disc; could add `SUN_ENV` obstruction and a sunlight-hours view.
 - Check the sun simulator on the phone (slider drag on a touch screen, compass, performance with shadows). Refine tree heights/positions if the shading looks wrong; consider a "bare winter trees" toggle.
 - Confirm the grey garage-like block next to the SSE end is a neighbour's (it is modelled as a 3 m neighbour block at x −1…−7 m).
-- VR: build phase 1 (see VR plan) when Daren confirms; decide snap vs smooth turn, standing vs seated default.
+- VR: Daren to try v57 on the Quest 3S (Quest Browser → the GitHub Pages link → page 3 → Enter VR) and report what needs fixing.
 - Review LO12 in 3D with the family (open-plan office at the stair top, 5.9 m bedroom).
 - Decide whether the stairwell openings should be redrawn so headroom reaches 2.0 m.
 - Check FP5 and DS1 in plan and 3D (leaf look, fire facing, clearances); W10 too in the 3D walk-through (corridor, slider, WC) and confirm dimensions/fixtures look right.
