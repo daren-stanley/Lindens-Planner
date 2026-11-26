@@ -57,7 +57,8 @@ body.sunon #w3view{height:min(60vh,720px)}body.sunon #w3wrap:fullscreen #w3view{
 .w3ud{position:absolute;right:18px;bottom:18px;display:none;flex-direction:column;gap:10px}
 .w3ud button{width:56px;height:56px;border-radius:50%;border:2px solid rgba(60,55,50,.35);background:rgba(255,255,255,.5);font-size:20px}
 #w3view[data-mode="fly"] .w3ud{display:flex}
-#w3page .seg .btn[aria-pressed="true"],#w3page [data-w3a="fit"][aria-pressed="true"],#w3page [data-w3a="sun"][aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}</style></head><body>
+#w3page .seg .btn[aria-pressed="true"],#w3page [data-w3a="fit"][aria-pressed="true"],#w3page [data-w3a="sun"][aria-pressed="true"]{background:var(--accent-soft);border-color:var(--accent)}
+#w3shots{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}#w3shots img{height:64px;border-radius:6px;border:1px solid #CFC7BB;cursor:pointer}#w3shots .note{margin:0}</style></head><body>
 <title>Lindens house picker</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -184,7 +185,7 @@ body.nosteel .rsj{display:none}
   <div>
     <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v59 · 25 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v59';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v60';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -236,6 +237,7 @@ body.nosteel .rsj{display:none}
     <button type="button" class="btn" data-w3a="sun" aria-pressed="false">☀ Sun</button><button type="button" class="btn" data-w3a="dl" aria-pressed="false">Daylight map</button>
     <span class="seg" id="w3vx"><span class="btn" id="w3vxl" style="pointer-events:none;opacity:.75">Velux</span><button type="button" class="btn" data-w3v="all" aria-pressed="false">All</button><button type="button" class="btn" data-w3v="p" aria-pressed="false">Porch</button><button type="button" class="btn" data-w3v="e" aria-pressed="false">Extension</button><button type="button" class="btn" data-w3v="r" aria-pressed="false">Roof rooms</button><button type="button" class="btn" data-w3v="d" aria-pressed="true">Front dormer</button></span>
     <button type="button" class="btn" data-w3a="full">Full screen</button>
+    <button type="button" class="btn" data-w3a="snap" title="Save a picture of this view (key P)">📷 Snapshot</button>
     <span class="seg" id="w3vr" hidden><button type="button" class="btn primary" data-w3a="vr">Enter VR</button><button type="button" class="btn" data-w3s="stand" aria-pressed="true">Standing</button><button type="button" class="btn" data-w3s="seat" aria-pressed="false">Seated</button></span>
   </div>
   <div id="w3wrap"><div id="w3view" data-mode="walk">
@@ -255,6 +257,7 @@ body.nosteel .rsj{display:none}
     <div><div class="lg"></div><div class="lgl"><span>0%</span><span>1%</span><span>2%</span><span>3%</span><span>4%</span><span>6%+</span></div></div>
     <div id="w3dlt"></div>
   </div>
+  <div id="w3shots" hidden></div>
   <p id="w3msg" class="note"></p>
 </div>
 <div id="fitPage">
@@ -2440,14 +2443,14 @@ function xrStart(){ XR.on=true; XR.calib=3; XR.start={x:W3.pos.x,y:W3.pos.y,yaw:
   xrShadow(2048); W3.rig.rotation.y=-W3.yaw; W3.rig.position.set(W3.pos.x,W3.feet,W3.pos.y); }
 function xrEnd(){ XR.on=false; const cam=W3.camera, R=W3.rig;
   R.scale.setScalar(1); R.position.set(0,0,0); R.rotation.set(0,0,0); cam.near=5; cam.far=20000; cam.scale.set(1,1,1); cam.updateProjectionMatrix();
-  XR.menu.visible=false; xrShadow(4096); w3Resize(); }
+  XR.menu.visible=false; xrShadow(4096); w3Resize(); if(SHOT.vr){ $('w3msg').textContent=SHOT.vr+' VR photo'+(SHOT.vr>1?'s':'')+' ready below: tap Save all or Share.'; SHOT.vr=0; } }
 function xrShadow(n){ const sl=W3.sunL; if(!sl) return; n=Math.min(n,W3.renderer.capabilities.maxTextureSize||2048);
   if(sl.shadow.mapSize.x===n) return; sl.shadow.mapSize.set(n,n); if(sl.shadow.map){ sl.shadow.map.dispose(); sl.shadow.map=null; } }
 /* --- wrist menu --- */
 function xrMenuDraw(){
   const S=W3.sun, p=sunPos(S.doy,S.min), hm=String(Math.floor(S.min/60)).padStart(2,'0')+':'+String(S.min%60).padStart(2,'0');
   const zn={p:'Porch',e:'Extension',r:'Roof rooms',d:'Front dormer'}, zs=['p','e','r','d'].filter(z=>W3.vxn[z]);
-  const key=[S.on,S.doy,S.min,S.trees,zs.map(z=>W3.vx[z]).join(),W3.dl&&W3.dl.on,XR.seated,XR.hover&&XR.hover.id].join('|'); if(key===XR.last) return; XR.last=key;
+  const key=[S.on,S.doy,S.min,S.trees,zs.map(z=>W3.vx[z]).join(),W3.dl&&W3.dl.on,XR.seated,SHOT.vr,XR.hover&&XR.hover.id].join('|'); if(key===XR.last) return; XR.last=key;
   const c=XR.cv.getContext('2d'), W=512; c.clearRect(0,0,W,800); c.fillStyle='rgba(250,248,244,.94)'; c.beginPath(); c.roundRect?c.roundRect(0,0,W,800,28):c.rect(0,0,W,800); c.fill();
   const B=[]; let y=24;
   const txt=(s,yy,sz,bold,col)=>{ c.fillStyle=col||'#3D3A35'; c.font=(bold?'700 ':'500 ')+sz+'px system-ui,sans-serif'; c.textAlign='left'; c.fillText(s,24,yy); };
@@ -2462,7 +2465,7 @@ function xrMenuDraw(){
   row([355,80,172].map(d=>({id:'d'+d,t:dn&&{355:'21 Dec',80:'21 Mar',172:'21 Jun'}[d],on:S.doy===d})),52);
   txt('Velux',y+22,22,1); y+=34;
   if(zs.length){ const it=zs.map(z=>({id:'v'+z,t:zn[z],on:W3.vx[z]})); if(it.length>2){ row(it.slice(0,2),52); row(it.slice(2),52); } else row(it,52); } else { txt('No Velux in this design',y+20,20,0,'#6B645B'); y+=34; }
-  row([{id:'dl',t:'Daylight map',on:!!(W3.dl&&W3.dl.on)}],52);
+  row([{id:'dl',t:'Daylight map',on:!!(W3.dl&&W3.dl.on)},{id:'snap',t:'📷 Photo'+(SHOT.vr?' ('+SHOT.vr+')':'')}],52);
   row([{id:'f0',t:'Ground'},{id:'f1',t:'First'},{id:'f2',t:'Loft'}],52);
   row([{id:'stand',t:'Standing',on:!XR.seated},{id:'seat',t:'Seated',on:XR.seated}],52);
   txt('Stick: walk · turn   A / B: floor   X: sun   Y: menu',y+20,19,0,'#6B645B');
@@ -2482,6 +2485,7 @@ function xrPress(b,u){ const S=W3.sun;
   else if(id==='dl'){ W3.dl.on=!W3.dl.on; const db=document.querySelector('[data-w3a="dl"]'); if(db) db.setAttribute('aria-pressed',W3.dl.on); w3DlRefresh(); }
   else if(id[0]==='f'){ xrFloor(+id[1]); }
   else if(id==='stand'||id==='seat') xrSetSeated(id==='seat');
+  else if(id==='snap') SHOT.want=true;
   XR.last=''; }
 function xrFloor(f){ const s=W3.spots[f]||W3.spots[0]; if(!s) return; w3Goto(f); xrPlace(s.x,s.y,s.yaw); }
 /* --- per-frame VR controls --- */
@@ -2518,6 +2522,52 @@ function xrFrame(dt){
   if(menuOn) xrMenuDraw();
   W3.pos.x=h.p.x; W3.pos.y=h.p.z; W3.pos.z=h.p.y; W3.yaw=h.yaw;
 }
+
+/* ---------- snapshot (v60): save the current view as a PNG, e.g. to hand to an AI for an interior render ----------
+   Set SHOT.want; the next frame renders the scene again from the same camera into an off-screen target (1.5x supersampled,
+   so edges are smooth), with the VR controllers and wrist menu hidden. Outside VR it downloads at once; in VR the shots are
+   kept and appear in the #w3shots strip after exiting (no downloads inside the headset session). */
+const SHOT={want:false,shots:[],vr:0};
+function w3SnapName(){ const src=w3Source(), code=src?makeCode(src.c):'design';
+  const f=W3.mode!=='walk'&&!XR.on?'outside':W3.feet>=FB3[2]-30?'loft':W3.feet>=FB3[1]-30?'first':'ground';
+  const S=W3.sun, t=S.on?'_'+({355:'21Dec',80:'21Mar',172:'21Jun'}[S.doy]||'d'+S.doy)+'-'+String(Math.floor(S.min/60)).padStart(2,'0')+String(S.min%60).padStart(2,'0'):'';
+  return 'Lindens_'+code+'_'+f+t+'_'+(SHOT.shots.length+1)+'.png'; }
+function w3Snap(){ SHOT.want=false; const T=THREE, r=W3.renderer; if(!r||!W3.scene) return;
+  try{
+    const cam=new T.PerspectiveCamera(70,1,5,20000), p=new T.Vector3(), q=new T.Quaternion(), s=new T.Vector3();
+    let w,h;
+    if(XR.on){ r.xr.getCamera().matrixWorld.decompose(p,q,s); cam.fov=62; w=1920; h=1080; }   /* headset: 16:9 frame along the gaze */
+    else { W3.camera.updateMatrixWorld(); W3.camera.matrixWorld.decompose(p,q,s); cam.fov=W3.camera.fov;
+      const v=$('w3view'), a=(v.clientWidth||16)/(v.clientHeight||9); if(a>=1){ w=1920; h=Math.round(1920/a); } else { h=1920; w=Math.round(1920*a); } }
+    cam.position.copy(p); cam.quaternion.copy(q); cam.aspect=w/h; cam.updateProjectionMatrix(); cam.updateMatrixWorld(true);
+    const mx=Math.min(r.capabilities.maxTextureSize||4096,4096); let W=Math.round(w*1.5), H=Math.round(h*1.5); const k=Math.min(1,mx/Math.max(W,H)); W=Math.floor(W*k); H=Math.floor(H*k);
+    const rt=new T.WebGLRenderTarget(W,H), prev=r.getRenderTarget(), xe=r.xr.enabled, hid=[];
+    XR.ctl.forEach(o=>[o.c,o.g].forEach(n=>{ if(n.visible){ n.visible=false; hid.push(n); } }));
+    r.xr.enabled=false; r.setRenderTarget(rt); r.clear(); r.render(W3.scene,cam);
+    const px=new Uint8Array(W*H*4); r.readRenderTargetPixels(rt,0,0,W,H,px);
+    r.setRenderTarget(prev); r.xr.enabled=xe; hid.forEach(n=>n.visible=true); rt.dispose();
+    const big=document.createElement('canvas'); big.width=W; big.height=H; const bc=big.getContext('2d'), id=bc.createImageData(W,H);
+    for(let y=0;y<H;y++) id.data.set(px.subarray((H-1-y)*W*4,(H-y)*W*4),y*W*4);   /* GL rows are bottom-up */
+    bc.putImageData(id,0,0);
+    const out=document.createElement('canvas'); out.width=w; out.height=h; const oc=out.getContext('2d'); oc.imageSmoothingQuality='high'; oc.drawImage(big,0,0,w,h);
+    const name=w3SnapName();
+    out.toBlob(b=>{ if(!b) return; const shot={name,blob:b,url:URL.createObjectURL(b)}; SHOT.shots.push(shot);
+      if(SHOT.shots.length>12){ URL.revokeObjectURL(SHOT.shots[0].url); SHOT.shots.shift(); }
+      if(XR.on){ SHOT.vr++; XR.last=''; } else { w3SnapSave(shot); $('w3msg').textContent='Saved '+name+' ('+w+' × '+h+')'; }
+      w3ShotsUI(); },'image/png');
+  }catch(e){ $('w3msg').textContent='Could not take the snapshot: '+e.message; console.error(e); }
+}
+function w3SnapSave(shot){ const a=document.createElement('a'); a.href=shot.url; a.download=shot.name; document.body.appendChild(a); a.click(); a.remove(); }
+function w3ShotsUI(){ const el=$('w3shots'); if(!el) return; el.hidden=!SHOT.shots.length; if(!SHOT.shots.length){ el.innerHTML=''; return; }
+  const canShare=(()=>{ try{ return !!(navigator.canShare&&navigator.canShare({files:[new File([SHOT.shots[0].blob],SHOT.shots[0].name,{type:'image/png'})]})); }catch(e){ return false; } })();
+  el.innerHTML='<span class="note">Snapshots (tap one to save it):</span>'+SHOT.shots.map((s,i)=>'<img src="'+s.url+'" alt="'+s.name+'" title="'+s.name+'" data-i="'+i+'">').join('')
+    +'<button type="button" class="btn" data-sh="all">Save all</button>'+(canShare?'<button type="button" class="btn primary" data-sh="share">Share…</button>':'')+'<button type="button" class="btn" data-sh="clear">Clear</button>'; }
+function w3ShotsInit(){ const el=$('w3shots'); if(!el) return;
+  el.addEventListener('click',async ev=>{ const im=ev.target.closest('img'); if(im){ w3SnapSave(SHOT.shots[+im.dataset.i]); return; }
+    const b=ev.target.closest('button'); if(!b) return; const k=b.dataset.sh;
+    if(k==='all') SHOT.shots.forEach((s,i)=>setTimeout(()=>w3SnapSave(s),i*300));
+    else if(k==='share'){ try{ await navigator.share({files:SHOT.shots.map(s=>new File([s.blob],s.name,{type:'image/png'})),title:'Lindens views'}); }catch(e){ if(e.name!=='AbortError') $('w3msg').textContent='Share failed: '+e.message; } }
+    else if(k==='clear'){ SHOT.shots.forEach(s=>URL.revokeObjectURL(s.url)); SHOT.shots=[]; w3ShotsUI(); } }); }
 
 /* ---------- three.js scene ---------- */
 function w3Build(c,items,paint){
@@ -2591,7 +2641,7 @@ function w3Resize(){ const v=$('w3view'); if(!W3.renderer||!v||(W3.renderer.xr&&
 function w3Frame(t){
   if(!W3.running&&!XR.on) return;
   const dt=Math.min(0.05,(t-(W3.last||t))/1000); W3.last=t;
-  if(XR.on){ xrFrame(dt); W3.renderer.render(W3.scene,W3.camera); return; }
+  if(XR.on){ xrFrame(dt); W3.renderer.render(W3.scene,W3.camera); if(SHOT.want) w3Snap(); return; }
   const K=W3.keys, cam=W3.camera;
   let fwd=-W3.joy.y+((K.KeyW||K.ArrowUp)?1:0)-((K.KeyS||K.ArrowDown)?1:0), str=W3.joy.x+((K.KeyD)?1:0)-((K.KeyA)?1:0);
   if(K.ArrowLeft) W3.yaw-=1.6*dt; if(K.ArrowRight) W3.yaw+=1.6*dt;
@@ -2608,7 +2658,7 @@ function w3Frame(t){
       p.z+=(W3.feet+W3.eye-p.z)*Math.min(1,dt*12); }
     cam.position.set(W3.pos.x,W3.pos.z,W3.pos.y);
     const cp=Math.cos(W3.pitch); cam.lookAt(W3.pos.x+Math.sin(W3.yaw)*cp*100,W3.pos.z+Math.sin(W3.pitch)*100,W3.pos.y-Math.cos(W3.yaw)*cp*100); }
-  W3.renderer.render(W3.scene,cam); if(W3.sun.on) w3Compass();
+  W3.renderer.render(W3.scene,cam); if(W3.sun.on) w3Compass(); if(SHOT.want) w3Snap();
 }
 function w3Source(){
   if(W3.src==='link'&&W3.srcCode) return {c:W3.srcCode,items:W3.srcItems||[],paint:(W3.srcItems&&W3.srcItems.paint)||[]};
@@ -2650,7 +2700,7 @@ function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b
   J.addEventListener('pointerup',jEnd); J.addEventListener('pointercancel',jEnd);
   v.querySelectorAll('.w3ud button').forEach(b=>{ const k=b.dataset.ud; b.addEventListener('pointerdown',ev=>{ ev.stopPropagation(); W3[k]=true; });
     ['pointerup','pointerleave','pointercancel'].forEach(t=>b.addEventListener(t,()=>{ W3[k]=false; })); });
-  document.addEventListener('keydown',ev=>{ if(PAGE!==3||/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; W3.keys[ev.code]=true; if(ev.code.startsWith('Arrow')||ev.code==='Space') ev.preventDefault(); });
+  document.addEventListener('keydown',ev=>{ if(PAGE!==3||/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName)) return; W3.keys[ev.code]=true; if(ev.code==='KeyP'&&!ev.repeat) SHOT.want=true; if(ev.code.startsWith('Arrow')||ev.code==='Space') ev.preventDefault(); });
   document.addEventListener('keyup',ev=>{ W3.keys[ev.code]=false; });
   $('w3bar').addEventListener('click',ev=>{ const b=ev.target.closest('button'); if(!b) return;
     if(b.dataset.w3m) w3Mode(b.dataset.w3m);
@@ -2661,6 +2711,7 @@ function w3Mode(m){ W3.mode=m; document.querySelectorAll('[data-w3m]').forEach(b
     else if(b.dataset.w3a==='dl'){ W3.dl.on=!W3.dl.on; b.setAttribute('aria-pressed',W3.dl.on); w3DlRefresh(); }
     else if(b.dataset.w3v){ const k=b.dataset.w3v; if(k==='all'){ const zs=['p','e','r','d'].filter(z=>W3.vxn[z]), on=!zs.every(z=>W3.vx[z]); zs.forEach(z=>W3.vx[z]=on); } else W3.vx[k]=!W3.vx[k]; w3VxUI(); }
     else if(b.dataset.w3a==='vr') xrEnter();
+    else if(b.dataset.w3a==='snap') SHOT.want=true;
     else if(b.dataset.w3s) xrSetSeated(b.dataset.w3s==='seat');
     else if(b.dataset.w3a==='full'){ const el=$('w3wrap'); try{ if(document.fullscreenElement) document.exitFullscreen(); else (el.requestFullscreen||el.webkitRequestFullscreen).call(el).catch(()=>{}); }catch(e){} }
   });
@@ -2787,6 +2838,7 @@ async function bdSave(asNew,force){
 
 /* start: code in the address wins, then the last picks in this browser */
 (function init(){
+  w3ShotsInit();
   let p=null, fi;
   try{ const fs=JSON.parse(localStorage.getItem(FKEY)||'[]'); if(Array.isArray(fs)) ITEMS=mergeScreens(fs.filter(it=>it&&CAT[it.t])); const ps=JSON.parse(localStorage.getItem('lindens-paint-v1')||'[]'); if(Array.isArray(ps)) PAINT=ps.filter(q=>q&&/^#[0-9A-F]{6}$/i.test(q.col)); }catch(e){}
   try{ if(location.hash.length>1){ const [sc,fc]=decodeURIComponent(location.hash.slice(1)).split('~'); p=readCode(sc); if(p&&fc!=null){ fi=readFit(fc)||undefined; } } }catch(e){}
