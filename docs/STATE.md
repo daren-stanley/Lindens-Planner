@@ -1,10 +1,17 @@
 # Lindens Planner — state
 
-_Last updated: 26 Nov 2026 · app version v60_
+_Last updated: 26 Nov 2026 · app version v61_
 
 ## Current state
-- Single-file app: `index.html` (~2,610 lines). Plus `.nojekyll`. No build step.
-- Latest release **v60**: **📷 Snapshot** on page 3 (bar button, key P, and a `📷 Photo` button on the VR wrist menu next to Daylight map). `SHOT` block just before the three.js scene section: `SHOT.want` is set, the next `w3Frame` calls `w3Snap()`, which re-renders the scene from the current camera (VR: the headset pose, 62° fov, 16:9) into an off-screen target at 1.5× and downsamples to 1920 px on the long side, controllers/menu hidden. Outside VR it downloads straight away; VR shots are kept and shown after exit. Strip `#w3shots` under the view: thumbnails (tap = save), Save all, Share… (Web Share with files, if the browser supports it), Clear; last 12 kept. File name `Lindens_<code>_<ground|first|loft|outside>[_<date>-<hhmm> if sun on]_<n>.png`. Purpose: hand views to an AI for interior-design renders. (Note `SNAP` is the fittings snap-to-grid flag — don't reuse the name.) Tested headless (walk + orbit, button + key, strip, menu draw); VR photo not yet tried on the headset.
+- Single-file app: `index.html` (~3,080 lines). Plus `.nojekyll`. No build step.
+- Latest release **v61**: 3D realism pass (items 1–4 of the 26 Nov plan).
+  - **Textures, drawn in code** (`w3Tex`, cached in `W3.tex`; no downloads): oak boards, 30 cm floor tiles, brick (stretcher bond, full colour), plain roof tiles (also used tile-hung on dormer cheeks, `hang`), plaster/ceiling, felt (flat roofs), concrete (garage), grass (ground). Grey detail maps tint with the surface colour, so painted floors/walls keep their colour. In `w3Build` every face picks its surface (`surf`): slab top → oak, undersides → `ceil`, roof ≥0.97 up → `flat`, sloped → `tiles`; walls → brick if open air on one side (`outFace`, tested both ways because some prism faces are wound inwards; slabs also test the main block only), else plaster. World-scale UVs in cm (`tri`: u = up×n, v = n×u up the surface; horizontal faces use plan x/y). Outlines merged to one `LineSegments` per layer. `ceil`/`plaster` get a little emissive (stand-in for bounced light).
+  - **Room floors** (gen3d, after the slabs): a 1 cm `floorpaint` box per room, rasterised smallest-on-top, stair holes cut out; `we/ut/po/ou` → tile, `ga` → concrete, else oak; painted floor colour tints it. gen3d now returns `isOut(f,x,y)` (outside every shell of that floor) and `dorm`.
+  - **Trim** (gen3d): 13 cm skirting round every room where there's wall below 13 cm (in the floor loop, uses the opening `specs`); windows: frame, mullions (~70 cm panes, ~110 for full height), transom 42 cm under the head if ≥1 m tall, stone sill outside + window board inside (side from `isOut`); doors ≤1.5 m: lining, architraves on inside faces, oak leaf open 90° against the wall (tries both hinge and swing sides, needs a clear footprint, prefers swinging into a room over a corridor), lever handle; pocket doors (`pk`) and wide openings: no leaf. Names `trim/frame/sill/leaf/handle` are non-solid for walking.
+  - **Fittings** (`fitParts(k,w,d,h,col,o)` before `load3js`, parts in local cm: v=0 back/wall, v=d front; boxes plus extruded rounded rects / ellipses / cylinders; `ns` parts are non-solid): sofa modules (base, back, seat + back cushions, feet; an **arm on any open end** — gen3d looks just past each end for another sofa piece), armchair, bed (base, headboard, mattress, duvet, 1–2 pillows), tables, chairs, stools, kitchen units (plinth, door/drawer fronts with gaps, bar handles), sink unit, hob rings, sinks, WC (cistern, flush, bowl, seat), pedestal basin + tap, vanities (1/2 bowls), shower (tray, waste, riser, head), bath (inner bowl, taps), wardrobes/tall/fridges (doors + handles), American fridge, washer/dryer (porthole), bookcases, drawers, plant, lamp. Structure fittings (`wt/tall/bath/shw/wc/bas/sk` fx) use the same models via `fxQ`, facing away from the side with most wall (WC: `dir`).
+  - **Snapshot quality pass** (`SNAPQ` shaders + `w3Snap`): colour render with full-precision depth (the default 16-bit target depth z-fought on painted-wall skins), sun shadow map raised to 8192 for that frame only (if sun on), screen-space AO (24 samples, 35 cm walk / 60 cm orbit, distance-scaled bias, 4×4 blur, strength 0.85). Checkbox **“+ depth & lines”** (`#w3x`, `SHOT.extra`, localStorage `lindens-snapx`) also saves `…_depth.png` (inverse depth, levels stretched, sky black) and `…_lines.png` (Sobel on normals + Laplacian of 1/depth; black on white) — ControlNet-style inputs. Strip keeps the last 18 files. Falls back to the plain render if the pass fails.
+  - Tested headless: 162 random designs (incl. L4/L5/L6) build with no errors/NaN, every stair climbable tread by tread; max ~20k triangles, ~129 visible meshes+lines (was 65–95; watch on the Quest with sun shadows). Screenshots checked inside/outside, snapshot + depth + lines.
+- v60: **📷 Snapshot** on page 3 (bar button, key P, and a `📷 Photo` button on the VR wrist menu next to Daylight map). `SHOT` block just before the three.js scene section: `SHOT.want` is set, the next `w3Frame` calls `w3Snap()`, which re-renders the scene from the current camera (VR: the headset pose, 62° fov, 16:9) into an off-screen target at 1.5× and downsamples to 1920 px on the long side, controllers/menu hidden. Outside VR it downloads straight away; VR shots are kept and shown after exit. Strip `#w3shots` under the view: thumbnails (tap = save), Save all, Share… (Web Share with files, if the browser supports it), Clear; last 12 kept. File name `Lindens_<code>_<ground|first|loft|outside>[_<date>-<hhmm> if sun on]_<n>.png`. Purpose: hand views to an AI for interior-design renders. (Note `SNAP` is the fittings snap-to-grid flag — don't reuse the name.) Tested headless (walk + orbit, button + key, strip, menu draw); VR photo not yet tried on the headset.
 - v59: (1) **Original house** (built-in `DRAWN` '0') fittings code: the 3 stray first-floor `screen` items removed (an L of two in the master bedroom at x 71/115, y 302/345, and one on the landing at x 241, y 548); re-encoded with `fitCode`, other 22 items and their colours unchanged. (2) **B1 bathroom door** fixed at the rear end of its east wall: y 410–480 (10 cm nib from the y 400 wall; was 440–510), both the 2.6 m and wide 3.1 m variants.
 - v58: (1) **LO12** bedroom wall + door moved 1 m east: office x 236–560 (3.2 m), bedroom x 570–1059 (4.9 m), door `D(2,560,300,570,380)`, windows x 288–508 / 694–934. (2) **Loft-stair walk fix**: the "stuck before the corner" was the **H2 fire-screen glass** (`GL(1,517,542,523,636)` + `GL(1,380,536,517,542)`, flipped stairs) standing across the L5/L6 flights — Daren saw it as a "shower screen on the landing". Those two panes are now dropped when L4/L5/L6 is picked. Walk body radius `w3Blocked` R 20 → 13 cm so 80 cm stairs between walls aren't a tightrope. Headroom unchanged: L5 2.01 m, L6 2.26 m. (3) **Glass banisters**: material `balu` (pale, opacity 0.42, no shadow); `stairRun` now returns `bal` (open sides of every tread / winder outer edge) and `banisters(run,f)` puts a 2 cm × 0.9 m pane on each side not against a wall (wall mask) or another flight; stairwell guard rails switched from wood 92 cm to the same glass at 90 cm. Tested headless: loft walk up/down on 9 lines + corner-cut for L5/L6 × LO11/LO12 with H2, 60 random designs (no errors/NaN, no tread centre blocked), screenshots.
 - v57: **VR (WebXR) for the Quest 3S** on page 3. "Enter VR" + Standing/Seated buttons (`#w3vr`, shown only if `isSessionSupported('immersive-vr')`). Code block `XR` / `xr*` just before the three.js scene section. Camera lives in `W3.rig` (scaled ×100 in VR, camera near/far 0.05/250 m in-session, restored on exit); the page now runs on `renderer.setAnimationLoop(w3Frame)` (no rAF); `w3Resize` skips while presenting; sun shadow map 2048 in VR. Controls (`xrFrame`): left stick walks where the head faces (collision `w3Blocked`/`w3Ground` at the head; stick press runs), right stick snap-turns 30° (`xrPlace` pivots round the head), A/B next/previous floor, X sun on/off, Y wrist menu. **Wrist menu** on the left controller (canvas texture 512×800, `xrMenuDraw`, redraws only on change): sun on/off, trees, time bar (hold the trigger to drag, 04:00–22:00), ±15 min / ±1 h, 21 Dec/Mar/Jun, Velux zones present in the design, Daylight map, Ground/First/Loft, Standing/Seated; right-controller ray + trigger (`xrPress`). Seated mode lifts the view so eyes are at 1.6 m (calibrated from head height on entry/toggle; saved in localStorage). Tested headless with Meta's IWER emulator (Quest 3 profile, `installRuntime({forceInstall:true})`): enter/exit, walk, snap turn, floor jump, X, menu ray hit + trigger, every menu button; normal 3D unchanged. Not yet tried on a real headset.
@@ -40,32 +47,30 @@ _Last updated: 26 Nov 2026 · app version v60_
 ## Section map of index.html (approx. line numbers — re-grep if edited)
 | Lines | Section |
 |---|---|
-| 1–180 | CSS (two `<style>` blocks; `#w3sun,#w3dl` panel styles) |
-| 181–272 | HTML shell; `APP_VERSION` ~184; page-3 bar (Sun, Daylight map, Velux buttons) + sun and daylight panels ~225–265 |
-| 273 | catalogue (`SLOTS`, options per slot) |
-| 399 | rules (clash checks) |
-| 466 | geometry (cm; x east from west outer corner, y south from rear face) |
-| 732 | fit-out layouts |
-| 1046 | svg floor plans (`floorSvg`) |
-| 1151–1740 | page 2 fittings, share codes, state, cost (`costHtml`, `totals` ~1496), `render` ~1590, page-2 controller ~1736, `setPage` ~1742, events ~1822 |
-| 1913 | `W3` state; `EXT_DEG`/`PORCH_DEG`/`extSillOf` ~1919 |
-| 1932 | page 3: 3D model generator `gen3d` (walls, slabs, stairs, fittings; Velux roofs ~2019; main roof + loft panes ~2185) |
-| 2196 | sun simulator (`SITE`, `SUN_ENV`, `sunPos`, `w3Sun*`, `w3Compass`) |
-| 2249 | daylight map (`dlCompute`, `dlEval`, `w3DlRefresh`), then `w3VxUI` ~2318 |
-| 2400 | VR (`XR`, `xrInit`, `xrFrame`, wrist menu `xrMenuDraw` / `xrPress`) |
-| 2510 | three.js scene (`w3Build`, `w3Visibility`, `w3Frame`, controls) |
-| 2670 | shared boards (Supabase: `sbGet`, `sbRpc`, `bd*`), then `init` |
+| 1–180 | CSS (two `<style>` blocks; `#w3sun,#w3dl,#w3shots` styles) |
+| 181–272 | HTML shell; `APP_VERSION` ~188; page-3 bar (Sun, Daylight map, Velux, Snapshot + depth & lines) ~231–243 |
+| 280 | catalogue (`SLOTS`), rules ~414 |
+| 480 | geometry (cm; x east from west outer corner, y south from rear face); svg floor plans `floorSvg` ~1075 |
+| 1096 | `CAT` fittings catalogue, `DEFCOL`; page 2, share codes, state, cost, `render` ~1622, `setPage` ~1774 |
+| 1945 | `W3` state, `MCOL`; `FCOL` + `fitParts` (fittings models) ~1958 |
+| 2044 | `gen3d` (walls + skirting, trim, slabs, room floors, Velux roofs, stairs, wardrobes, fx, placed fittings `emit`, roof/dormers) |
+| 2372 | sun simulator; daylight map ~2426; `w3VxUI` ~2495 |
+| 2518 | VR (`XR`, `xrInit`, `xrFrame`, wrist menu) |
+| 2644 | snapshot (`SHOT`, `SNAPQ` shaders, `w3Snap`, strip) |
+| 2735 | `w3Tex` textures; `w3Build` ~2780 (surface choice `surf`, UVs `tri`, merged outlines), walk/collision, frame loop |
+| 2963 | shared boards (Supabase), then `init` |
 
-## 3D detail — headroom (scoped 26 Nov, v60)
-- Measured: 230–460 boxes, ~10–12k triangles, 65–95 draw calls per frame, all `MeshLambertMaterial`, flat colours, no UVs/textures; geometry merged per layer+material+colour in `w3Build`.
-- Rough budgets: Quest 3S browser ~150–200 draw calls and ~300k triangles at 72 Hz (shadows count twice); the Fold 6 several times that. So ~20× triangle headroom, ~2× draw-call headroom: keep merging by material.
-- Plan (in order): (1) world-scale UVs in `tri()` + small procedural canvas textures (oak boards, tiles, brick, roof tiles, plaster) — no downloads; (2) architectural trim: skirting, architraves, door leaves, window frames/mullions, sills; (3) low-poly fittings (sofa arms/cushions, beds+pillows, basins/taps, worktop edges, cabinets with door lines), ~0.5–2k tris each; (4) snapshot-only quality pass (bigger shadow map, SSAO, optional depth/line image for AI tools); (5) maybe glTF models later (needs GLTFLoader + asset files).
+## 3D detail — status
+- Done in v61: textures, trim, better fittings, snapshot quality pass (see above). Left from the plan: (5) glTF furniture models (needs GLTFLoader + asset files in the repo) — only if the built-in models aren't enough.
+- Budgets: Quest 3S browser ~150–200 draw calls, ~300k triangles at 72 Hz (shadows count twice). v61 is ~20k tris, ~130 meshes; if VR stutters, first merge colours per material (fewer buckets) or drop outlines in VR.
 
 ## VR — still to do
 - First real-headset test: menu position/tilt on the wrist (`XR.menu` position 0,0.1,-0.02, rotation.x −0.55), walk speed, comfort on stairs, frame rate with sun shadows (drop to 1024 / `PCFShadowMap` if it stutters).
 - Maybe later: teleport, controller models, passthrough tabletop model.
 
 ## Next steps
+- Look at v61 on the phone and the Quest: textures/trim/fittings, frame rate in VR (with and without sun), door leaves that open the wrong way, and try a snapshot with “+ depth & lines” into an AI render tool (depth + line images as ControlNet inputs).
+- Exterior is brick everywhere (dormer cheeks tile-hung); add a render/brick choice if the real house differs.
 - v52 fixed the corridor-under-the-loft-stair problem (see above). Review with the architect: the front dormer is now much bigger (2.2 × 2.4–2.9 m, 2.0–2.4 m face) — planning risk on the road side.
 - Supabase `save_board` (24 Nov): code check widened to `^LND-[0-9A-Z]{12,20}(-[0-9A-Z]{3,16})?$` (old `{3,6}` fit part refused 7-char fit codes since DS was added in v44).
 - Maybe add an M5-style variant entered by the Bedroom 3 door with L4–L6.
