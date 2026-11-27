@@ -1,10 +1,18 @@
 # Lindens Planner — state
 
-_Last updated: 27 Nov 2026 · app version v66_
+_Last updated: 27 Nov 2026 · app version v67_
 
 ## Current state
-- Single-file app: `index.html` (~3,280 lines). Plus `.nojekyll`. No build step.
-- Latest release **v66**: **master pick split in three** (STRUCT now 16 chars: `…,'A','ME','MD'`; CS[1] gains ME, MD; group First floor = L, M, ME, MD, N, B).
+- Single-file app: `index.html` (~3,290 lines). Plus `.nojekyll`. No build step.
+- Latest release **v67** (Daren's fixes, 27 Nov):
+  - **D4 redefined** = D3 + **equal east bedrooms**: the Bedroom 2 / front-east-bedroom wall moves 0.8 m north (south face y 380 → 298, wall 298–308), lobby grows with it (`ci` 718–817 × 308–490, Bedroom 2 door at y 298), both ≈ 9.9 m². Master untouched (`LW` back to 708; the old 639 wall is gone). `eastBlock(x0,yw)`. Rule "E1 not with D4" removed. Old M14 codes still map to E13 + D4 (now this layout).
+  - **E13 secret door walkable**: wardrobe strip is one `wd` 156–216 × 26–390 with the `DA` passage (two separate `wd` rooms left a solid wall in the gap).
+  - **Front-dormer cheeks** are now prisms sitting on the roof slope (were boxes from z 500 = 10 cm walls through the LO11/LO12 rooms at x 370–380 and 580–590 — the "brick pier"). **LO12** office/bedroom wall moved 10 cm east to x 570–580 (office 3.3 m, bedroom 4.8 m, door `D(2,570,300,580,380)`) so it lines up with the dormer side.
+  - **Loft walls under the slope**: each 20 cm step now gets a wedge prism up to the slope (no saw-tooth gaps under the ceiling); cuts added at `DORM.y1/y2`; no wedge inside the dormer.
+  - **Finishes on doors and stairs**: tap a door leaf → `{k:'door'}` (all doors), a tread/landing → `{k:'stair'}` (all stairs). Code: kind 3, f 0 door / 1 stair. Materials: door = plain, slats, wood grain (default); stair = plain, oak (default), marble, concrete, carpet, wood grain, terrazzo. Applied in `w3Build` `face()` (`DOORF`/`STAIRF`); `finHL` highlights every leaf/tread.
+  - Tested headless: E13 gap walkable, plans for D4, loft views (LO12 + L6), 140 ME×MD×L×LO×S combos build with no errors/NaN, door/stair tap + code round-trip. Not checked: Supabase boards for D4 (SQL read was refused this session).
+  - Known (pre-existing): east reveal of the front-dormer window renders tile-hung instead of plaster.
+- v66: **master pick split in three** (STRUCT now 16 chars: `…,'A','ME','MD'`; CS[1] gains ME, MD; group First floor = L, M, ME, MD, N, B).
   - **M** (where): `MW` first floor west, `M7` east, `M8` loft, `M0` as today. **ME** (Ensuite & dressing, only with MW): E2 secret door + dressing, E13 long ensuite, E3 separate doors, E4 through dressing, E5 big dressing, E1 passage, E9 across the loft stair (L3), E6 no ensuite; hidden `E0` when not MW. **MD** (Master door & Bedroom 2): D1 east wardrobe strip + door by the bathroom (only one allowed with L2), D2 today's Bedroom 3 door, D3 east-end door, D4 = D3 + Bedroom 2 wall at x 639–649 (equal ~15.4 m²); hidden `D0`. `state().vis` hides ME/MD when forced to E0/D0.
   - Geometry: `GEO.MW` → `masterWest(c)` (one entry per ME in `W`, east side from MD: `strip`/`mDoor`, `eastBlock(x0)`); `nw(c)` = MW with D2–D4, `LW(c)` = 639 for D4. Rules: E1/E9 not with D1, E1 not with D4 (today's window), E5+D1+B1 clash, L2 needs D1 with E2–E6. Cost/steels keyed on E*/D4; EL ctx mapped from ME (`ctxOf`: E13→MS etc.), so fit codes are unchanged.
   - Old codes: `M_V3` (old M list) + `splitM(p)` convert v3/legacy codes and stored localStorage picks (M4/M5 with L0 → D2, M10–12 → D2, M13 → D3, M14 → D4). DRAWN and all 5 Supabase boards rewritten to v4 codes (same houses; checked by reading both).

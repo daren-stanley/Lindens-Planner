@@ -190,9 +190,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v66 · 27 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v67 · 27 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v66';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v67';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -362,7 +362,7 @@ const SLOTS={
   ['E3','Separate doors','Dressing 2.2 × 1.7 and ensuite 2.2 × 1.8, each off the bedroom'],
   ['E4','Through the dressing room','Ensuite 2.2 × 1.7 through a 2.2 × 1.8 dressing room'],
   ['E5','Big dressing room','Ensuite 2.7 × 1.7 through a 2.7 × 1.8 dressing room (all of old Bedroom 4)'],
-  ['E1','Passage','Dressing 2.7 × 2.2 and ensuite 2.7 × 1.3 off a passage · bedroom in old Bedroom 3 only · not with D1 or D4'],
+  ['E1','Passage','Dressing 2.7 × 2.2 and ensuite 2.7 × 1.3 off a passage · bedroom in old Bedroom 3 only · not with D1'],
   ['E9','Across the loft stair','Loft stair (L3) in old Bedroom 4 · dressing + ensuite beyond it, reached behind the stair top · full-height window'],
   ['E6','No ensuite','One big bedroom across both rooms'],
   ['E0','—','Master not on the first floor west',0,1]]},
@@ -370,7 +370,7 @@ const SLOTS={
   ['D1','East wardrobe, door by the bathroom','0.9 m walk-in wardrobe along the east wall (with L2: the loft stair and a nook) · landing door just east of the bathroom'],
   ['D2','Today’s Bedroom 3 door','No east wardrobe · enter by today’s Bedroom 3 door · not with L2'],
   ['D3','New door at the east end','No east wardrobe · landing door at the east end, 10 cm from the Bedroom 2 wall · not with L2'],
-  ['D4','East-end door, equal bedrooms','As D3 with the Bedroom 2 wall moved 0.7 m west: master and Bedroom 2 about 15.4 m² each · not with L2'],
+  ['D4','East-end door, equal east bedrooms','As D3, and the wall between Bedroom 2 and the front east bedroom moves 0.8 m north (the lobby grows with it): both about 9.9 m² · master unchanged · not with L2'],
   ['D0','—','Master not on the first floor west',0,1]]},
  N:{name:'Bedrooms 3 and 4',opts:[
   ['N1','Keep both as today','As today',6],
@@ -405,7 +405,7 @@ const SLOTS={
   ['LO0','Leave the loft','Roof space as today',1],
   ['LO10','Store + office + bedroom','Store left of the stair top, office and bedroom to the right · dormer about 8.9 m'],
   ['LO11','Bedroom + office either side of the stair','Bedroom 3.4 m to the west wall, 3.6 m office east of the stair · roof-store door under the ridge · dormer about 8.1 m · goes with L5/L6'],
-  ['LO12','Open-plan office at the stair, bedroom east','As LO11 swapped: 2 m store at the west end (no dormer, door under the ridge), office (3.2 m) open to the stair top with one window, 4.9 m bedroom to the east · dormer about 8.1 m · goes with L5/L6']]},
+  ['LO12','Open-plan office at the stair, bedroom east','As LO11 swapped: 2 m store at the west end (no dormer, door under the ridge), office (3.3 m) open to the stair top with one window, 4.8 m bedroom to the east · dormer about 8.1 m · goes with L5/L6']]},
  KL:{name:'Kitchen layout',ctx:'K',fit:1},
  BL:{name:'Family bathroom layout',ctx:'B',fit:1},
  EL:{name:'Ensuite layout',ctx:'M',fit:1},
@@ -445,7 +445,7 @@ const RULES=[
  [['K','F'],c=>!inn(c.K,['K0','K3'])||c.F==='F1'],                           /* with the spine wall kept, the living room is reached from the hall */
  [['M','ME'],c=>(c.M==='MW')===(c.ME!=='E0')],
  [['M','MD'],c=>(c.M==='MW')===(c.MD!=='D0')],
- [['ME','MD'],c=>c.MD==='D0'||!(inn(c.ME,['E1','E9'])&&c.MD==='D1')&&!(c.ME==='E1'&&c.MD==='D4')],   /* E1/E9 have no east wardrobe; E1 keeps today's window, which the D4 wall would hit */
+ [['ME','MD'],c=>c.MD==='D0'||!(inn(c.ME,['E1','E9'])&&c.MD==='D1')],   /* E1/E9 have no east wardrobe */
  [['M','N'],c=>c.M==='MW'?c.N==='N0':c.M==='M8'?inn(c.N,['N1','N3']):inn(c.N,['N1','N2','N3','N4','N5'])],
  [['N','B'],c=>({N0:['B0','B1','B3'],N1:['B0','B3'],N2:['B0','B3'],N3:['B2'],N4:['B0','B3'],N5:['B0','B1','B3']}[c.N]).includes(c.B)],
  [['S','B'],c=>c.B!=='B3'||inn(c.S,['S1','S2','S3','S4','S5'])],
@@ -527,9 +527,10 @@ const bed3=(c,x0)=>{const own=x0!=null;x0=own?x0:b3w(c);const d=((c.L==='L2'?618
   return c.L==='L2'?[R(1,x0,26,618,390,'be','Bedroom 3',dm,{lx:own?500:undefined}),R(1,628,26,708,106,'ut','Store'),D(1,618,36,628,96),D(1,500,390,580,400),WE(1,418,0,598,26)]
    :[R(1,x0,26,708,390,'be','Bedroom 3',dm,{lx:own?520:undefined}),D(1,575,390,655,400),WE(1,418,0,661,26)];};
 const stripCpd=c=>inn(c.N,['N1','N3'])?[R(1,303,26,364,127,'ut','Cpd'),R(1,303,137,364,238,'ut','Cpd'),R(1,303,248,364,390,'ut','HWC'),D(1,295,40,303,110),D(1,364,153,374,225),D(1,295,266,303,340)]:c.ME==='E1'?[R(1,303,116,364,390,'ut','Cpd')]:[];
-function eastBlock(x0){x0=x0||718;return [
-  R(1,x0,26,1084,380,'be','Bedroom 2',((1084-x0)/100).toFixed(1)+' × 3.5'),R(1,718,390,817,490,'ci'),R(1,827,390,1084,505,'be'),
-  R(1,718,500,1084,636,'be','Bedroom','about 8 m²'),D(1,708,416,718,490),D(1,745,380,817,390),D(1,745,490,827,500),
+/* east bedrooms; yw = south face of Bedroom 2 (380 today; 298 with D4: the wall moves 0.8 m north and the lobby grows with it, both bedrooms about 9.9 m²) */
+function eastBlock(x0,yw){x0=x0||718;yw=yw||380;return [
+  R(1,x0,26,1084,yw,'be','Bedroom 2',((1084-x0)/100).toFixed(1)+' × '+((yw-26)/100).toFixed(1)),R(1,718,yw+10,817,490,'ci'),R(1,827,yw+10,1084,505,'be'),
+  R(1,718,500,1084,636,'be','Bedroom',yw===380?'about 8 m²':'about 10 m²'),D(1,708,416,718,490),D(1,745,yw,817,yw+10),D(1,745,490,827,500),
   WE(1,794,0,977,26),WE(1,779,636,1019,662)];}
 const loftStair=(c,dy,h)=>{ const lf=e=>Object.assign(e,{loft:1}); return [lf(ST(1,460,556,640,636,'W',8)),lf(WD(1,380,556,460,636,460,556,1)),lf(ST(1,380,468,460,556,'N',3)),
    WL(1,[[635,596],[420,596],[420,473]]),TX(1,560,738,'loft stair: 8 up, landing, 3 up · landing corridor clear'),
@@ -554,7 +555,7 @@ const openP=c=>inn(c.P,['P2','P4']);
 const front=(c,x1,els)=>openP(c)?[D(0,x1,636,708,662),RS(0,x1,636,708,662)]:els;
 /* the 0.9 m strip east of the master: nook + loft stair (L2), or a walk-in wardrobe when there is no loft stair */
 const nw=c=>c.M==='MW'&&inn(c.MD,['D2','D3','D4']);   /* west master with no east wardrobe strip */
-const LW=c=>nw(c)?(c.MD==='D4'?639:708):c.L==='L2'?618:608;   /* west face of the wall beside the loft-stair strip: L2's 0.8 m stair sits tight to the east wall */
+const LW=c=>nw(c)?708:c.L==='L2'?618:608;   /* west face of the wall beside the loft-stair strip: L2's 0.8 m stair sits tight to the east wall */
 /* first-floor west master (v66): ME draws the west end and the master room, MD the east side (wardrobe strip, landing door, Bedroom 2 wall) */
 function masterWest(c){
   const xe=LW(c), d1=c.MD==='D1', ens=(x1,y1,x2,y2,dims,o)=>R(1,x1,y1,x2,y2,'we',c._fit?'':'Ensuite',c._fit?'':dims,o);
@@ -574,12 +575,12 @@ function masterWest(c){
    E6:()=>[room(26,{lx:330,ly:70}),bedE,WE(1,101,0,286,26),WN(1,300,0,598,26)],
    E9:()=>[R(1,26,26,199,234,'be','Dressing','1.7 × 2.1'),ens(26,244,199,390,'1.7 × 1.5'),D(1,60,234,130,244),room(299,{lx:500,ly:330}),BED(1,xe-210,100,xe,280),
      WM(1,101,0,189,26),WN(1,382,0,625,26,FULL),TX(1,503,-16,'full-height window'),TX(1,880,712,'dressing room reached behind the loft stair top')],
-   E13:()=>[room(216,{lx:(216+xe)/2,ly:70}),R(1,156,26,216,168,'wd'),R(1,156,248,216,390,'wd'),DA(1,156,168,216,248,''),
+   E13:()=>[room(216,{lx:(216+xe)/2,ly:70}),R(1,156,26,216,390,'wd'),DA(1,156,168,216,248,''),
      ens(26,26,146,390,'1.2 × 3.6',{lx:86,ly:330}),D(1,146,168,156,248),WM(1,46,0,126,26),bedE,...full()]
   };
   const west=(W[c.ME]||W.E6)();
   const east=d1?[...strip(c),RS(1,xe,36,xe+10,96),D(1,xe,36,xe+10,96),...(c.ME==='E5'?[]:[mDoor(c)])]:[mDoor(c)];
-  return [...west,...(c.ME==='E1'?[]:[RS(1,364,26,374,390)]),...east,...eastBlock(c.MD==='D4'?xe+10:718)];
+  return [...west,...(c.ME==='E1'?[]:[RS(1,364,26,374,390)]),...east,...eastBlock(718,c.MD==='D4'?298:380)];
 }
 const strip=c=>nw(c)?[]:c.L==='L2'?[R(1,628,26,708,106,'be')]:[R(1,618,26,708,390,'ut','Wardrobe','0.9 × 3.6')];
 
@@ -769,10 +770,10 @@ const GEO={
    D(2,298,40,308,100),D(2,388,40,398,100),D(2,800,300,810,380),WN(2,80,0,240,26),WN(2,480,0,720,26),TX(2,413,-16,'Shorter dormer, about 7.7 m')],
  LO11:c=>[R(2,26,26,370,433,'be','Bedroom','3.4 × 4.1*'),R(2,380,26,460,433,'ci'),R(2,380,433,460,468,'ci'),R(2,470,26,833,433,'of','Office','3.6 × 4.1*'),R(2,843,26,1084,433,'rs','Roof store','under the slope'),
    D(2,370,300,380,380),D(2,460,300,470,380),D(2,833,291,843,371),WN(2,80,0,340,26),WN(2,530,0,770,26),WN(2,380,0,460,26,FULL),TX(2,430,-16,'Dormer about 8.1 m')],
- /* v56 LO12: LO11 swapped. Store x 26-226 under the slope (no dormer), door under the ridge; office x 236-560 (v58: wall/door moved 1 m east) open to the stair arrival (no wall at x 370-380), one window;
-    bedroom x 570-1059 so the rear dormer stays 8.4 m outside (x 226-1069, same as LO11). x 1069-1084 is solid under the slope */
- LO12:c=>[R(2,26,26,226,433,'rs','Store','2.0 m · under the slope'),R(2,236,26,560,433,'of','Office','3.2 × 4.1* open to stair'),R(2,380,433,460,468,'ci'),R(2,570,26,1059,433,'be','Bedroom','4.9 × 4.1*'),
-   D(2,226,291,236,371),D(2,560,300,570,380),WN(2,288,0,508,26),WN(2,694,0,934,26),TX(2,648,-16,'Dormer about 8.1 m')],
+ /* v56 LO12: LO11 swapped. Store x 26-226 under the slope (no dormer), door under the ridge; office x 236-570 (v58: wall/door moved 1 m east; v67: 10 cm more, so the wall lines up with the front dormer's east side x 580) open to the stair arrival (no wall at x 370-380), one window;
+    bedroom x 580-1059 so the rear dormer stays 8.4 m outside (x 226-1069, same as LO11). x 1069-1084 is solid under the slope */
+ LO12:c=>[R(2,26,26,226,433,'rs','Store','2.0 m · under the slope'),R(2,236,26,570,433,'of','Office','3.3 × 4.1* open to stair'),R(2,380,433,460,468,'ci'),R(2,580,26,1059,433,'be','Bedroom','4.8 × 4.1*'),
+   D(2,226,291,236,371),D(2,570,300,580,380),WN(2,288,0,508,26),WN(2,694,0,934,26),TX(2,648,-16,'Dormer about 8.1 m')],
  LO10:c=>[R(2,26,26,199,433,'rs','Store','under the slope'),R(2,299,26,640,433,'of','Office','3.4 × 4.1*'),R(2,209,352,299,433,'of'),R(2,650,26,1084,433,'be','Bedroom','4.3 × 4.1*'),
    D(2,199,368,209,428),D(2,289,40,299,110),D(2,640,60,650,140),WN(2,380,0,600,26),WN(2,760,0,1000,26),TX(2,640,-16,'Dormer about 8.9 m · bedroom through the office')],
  LO9:c=>[R(2,26,26,298,220,'of','Office','2.7 × 1.9'),R(2,26,230,298,433,'ut','Store','2.7 × 2.0*'),R(2,398,26,800,433,'be','Bedroom','4.0 × 4.1*'),
@@ -1344,6 +1345,7 @@ function place(it,px,py){
 }
 /* ---------- code: base64url of a small binary record per item ---------- */
 /* v62 finishes: FIN records {k:'floor'|'wall'|'ext', f, x, y (a point just inside the room), s (wall side 0 y1, 1 y2, 2 x1, 3 x2), m (MATS index), col}.
+   v67: also {k:'door'} (every door leaf) and {k:'stair'} (every stair tread and landing), kind 3 with f 0 door / 1 stair.
    Code: 253, kind|f<<2|s<<4|hasCol<<6, x, y, m, [rgb]. Item materials (it.m body, it.m2 worktop) follow their item as 252, flags, [m], [m2]. */
 function fitCode(items,paint,fin){
   paint=paint||[]; fin=fin||[]; if(!items.length&&!paint.length&&!fin.length) return '';
@@ -1357,7 +1359,7 @@ function fitCode(items,paint,fin){
     if(it.sc) b.push(it.sc);
     if(it.m!=null||it.m2!=null){ b.push(252,(it.m!=null?1:0)|(it.m2!=null?2:0)); if(it.m!=null) b.push(it.m); if(it.m2!=null) b.push(it.m2); } });
   paint.forEach(q=>{ b.push(q.k==='wall'?254:255,q.f); u16(q.x); u16(q.y); const n=parseInt(q.col.slice(1),16); b.push(n>>16,(n>>8)&255,n&255); });
-  fin.forEach(q=>{ const kd={floor:0,wall:1,ext:2}[q.k]; b.push(253,kd|((q.f||0)<<2)|((q.s||0)<<4)|(q.col?64:0)); u16(q.x||0); u16(q.y||0); b.push(q.m==null?255:q.m);
+  fin.forEach(q=>{ const kd={floor:0,wall:1,ext:2,door:3,stair:3}[q.k], qf=q.k==='door'?0:q.k==='stair'?1:(q.f||0); b.push(253,kd|(qf<<2)|((q.s||0)<<4)|(q.col?64:0)); u16(q.x||0); u16(q.y||0); b.push(q.m==null?255:q.m);
     if(q.col){ const n=parseInt(q.col.slice(1),16); b.push(n>>16,(n>>8)&255,n&255); } });
   let s=''; b.forEach(x=>s+=String.fromCharCode(x));
   return 'F1'+btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
@@ -1369,7 +1371,7 @@ function readFit(code){
   const paint=[], fin=[]; out.paint=paint; out.fin=fin; const hex=()=>'#'+[b[i++],b[i++],b[i++]].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase();
   try{ while(i<b.length){ const t=b[i++], fl=b[i++];
       if(t===252){ const it=out[out.length-1]; if(fl&1){ const v=b[i++]; if(it) it.m=v; } if(fl&2){ const v=b[i++]; if(it) it.m2=v; } if(i>b.length) return null; continue; }
-      if(t===253){ const q={k:['floor','wall','ext'][fl&3]||'floor',f:(fl>>2)&3,x:u16(),y:u16()}; if(q.k==='wall') q.s=(fl>>4)&3; const m=b[i++]; if(m!==255) q.m=m; if(fl&64) q.col=hex();
+      if(t===253){ const q={k:(fl&3)===3?(((fl>>2)&3)===1?'stair':'door'):['floor','wall','ext'][fl&3],f:(fl&3)===3?0:(fl>>2)&3,x:u16(),y:u16()}; if(q.k==='wall') q.s=(fl>>4)&3; const m=b[i++]; if(m!==255) q.m=m; if(fl&64) q.col=hex();
         if(i>b.length) return null; fin.push(q); continue; }
       if(t>=254){ const q={k:t===254?'wall':'floor',f:fl&3,x:u16(),y:u16()}; q.col='#'+[b[i++],b[i++],b[i++]].map(x=>x.toString(16).padStart(2,'0')).join('').toUpperCase(); if(i>b.length) return null; paint.push(q); continue; }
       if(!CAT[t]) return null; const it={t,f:fl&3,x:u16(),y:u16(),r:b[i++]*15};
@@ -1986,22 +1988,22 @@ const MCOL={wall:0xECE4D6,slab:0xBEBAB2,roof:0x5C5450,glass:0x96C8EB,door:0x6E48
 /* v62 finishes library. The index is stored in board codes: only ever APPEND. tx = texture key in w3Tex, col = default colour, use = where it's offered
    (floor, wall, ext = outside walls, top = worktops, body = cabinets/furniture). Grey textures take the chosen colour; brick is full colour (colour tints it). */
 const MATS=[
-  {id:'plain',name:'Plain / paint',tx:'plaster',col:'#ECE4D6',use:'floor wall ext top body'},
-  {id:'oak',name:'Oak boards',tx:'oak',col:'#C59D72',use:'floor'},
+  {id:'plain',name:'Plain / paint',tx:'plaster',col:'#ECE4D6',use:'floor wall ext top body door stair'},
+  {id:'oak',name:'Oak boards',tx:'oak',col:'#C59D72',use:'floor stair'},
   {id:'herring',name:'Herringbone',tx:'herring',col:'#C29A6E',use:'floor'},
   {id:'plank',name:'Wide planks',tx:'plank',col:'#B89A7A',use:'floor wall'},
   {id:'tile30',name:'Tiles 30 cm',tx:'tile',col:'#E3DFD7',use:'floor wall'},
   {id:'tile60',name:'Large tiles 60 cm',tx:'tile60',col:'#D9D4CB',use:'floor wall'},
   {id:'metro',name:'Metro tiles',tx:'metro',col:'#F2F0EB',use:'wall'},
-  {id:'marble',name:'Marble',tx:'marble',col:'#F1EEE9',use:'floor wall top'},
+  {id:'marble',name:'Marble',tx:'marble',col:'#F1EEE9',use:'floor wall top stair'},
   {id:'quartz',name:'Quartz',tx:'quartz',col:'#E8E6E1',use:'top'},
-  {id:'conc',name:'Concrete',tx:'conc',col:'#C9C6BF',use:'floor wall top'},
+  {id:'conc',name:'Concrete',tx:'conc',col:'#C9C6BF',use:'floor wall top stair'},
   {id:'brick',name:'Brick',tx:'brick',col:'#FFFFFF',use:'wall ext'},
   {id:'render',name:'Render',tx:'render',col:'#F2EFE8',use:'ext wall'},
-  {id:'slats',name:'Wood slats',tx:'slats',col:'#B98E62',use:'wall ext body'},
-  {id:'carpet',name:'Carpet',tx:'carpet',col:'#CFC6B8',use:'floor'},
-  {id:'veneer',name:'Wood grain',tx:'veneer',col:'#B68A5E',use:'top body'},
-  {id:'terrazzo',name:'Terrazzo',tx:'terrazzo',col:'#ECE7E0',use:'floor wall top'},
+  {id:'slats',name:'Wood slats',tx:'slats',col:'#B98E62',use:'wall ext body door'},
+  {id:'carpet',name:'Carpet',tx:'carpet',col:'#CFC6B8',use:'floor stair'},
+  {id:'veneer',name:'Wood grain',tx:'veneer',col:'#B68A5E',use:'top body door stair'},
+  {id:'terrazzo',name:'Terrazzo',tx:'terrazzo',col:'#ECE7E0',use:'floor wall top stair'},
   {id:'woodtop',name:'Wood block',tx:'woodtop',col:'#B07A4A',use:'top'}
 ];
 const matOf=i=>i!=null&&MATS[i]?MATS[i]:null;
@@ -2185,8 +2187,9 @@ function gen3d(c,items,paint,fin){
       if(f<2) segs.forEach(([a,b])=>box('wall',LAY[f],'wall',x1,y1,a,x2,y2,b));
       else { const xs=[x1].concat(DSP.concat(DORM?[DORM.ix1,DORM.ix2+1]:[]).filter(v=>v>x1&&v<x2).sort((a,b)=>a-b)).concat([x2]);   /* split at the rear dormer ends and the front dormer sides so no wall takes a taller cap than its roof */
         for(let i=0;i<xs.length-1;i++){ const xa=xs[i],xb=xs[i+1], ys=[y1].concat(331>y1&&331<y2?[331]:[]).concat([y2]);
-          for(let j=0;j<ys.length-1;j++){ const ya=ys[j],yb=ys[j+1], flat=ya<331&&xa>=DSP[0]&&xa<DSP[1]; let cuts=[ya]; if(!flat) for(let v=ya+20;v<yb;v+=20) cuts.push(v); cuts.push(yb);
-            for(let k=0;k<cuts.length-1;k++){ const ca=cuts[k],cb=cuts[k+1], cap=Math.min(under(xa,ca),under(xa,cb)); segs.forEach(([a,b])=>box('wall','l','wall',xa,ca,a,xb,cb,Math.min(b,cap))); } } } }
+          for(let j=0;j<ys.length-1;j++){ const ya=ys[j],yb=ys[j+1], flat=ya<331&&xa>=DSP[0]&&xa<DSP[1]; let cuts=[ya]; if(!flat){ for(let v=ya+20;v<yb;v+=20) cuts.push(v); if(DORM) [DORM.y1,DORM.y2].forEach(v=>{ if(v>ya&&v<yb) cuts.push(v); }); cuts.sort((p,q)=>p-q); } cuts.push(yb);
+            for(let k=0;k<cuts.length-1;k++){ const ca=cuts[k],cb=cuts[k+1], cap=Math.min(under(xa,ca),under(xa,cb)); segs.forEach(([a,b])=>{ box('wall','l','wall',xa,ca,a,xb,cb,Math.min(b,cap));
+              const lo=Math.max(a,cap), ta=Math.max(lo,Math.min(b,under(xa,ca))), tb=Math.max(lo,Math.min(b,under(xa,cb))); if(!flat&&cb-ca>0.5&&Math.max(ta,tb)>lo+0.5&&!(DORM&&xa>DORM.ix1-1&&xa<DORM.ix2+1&&cb>DORM.y1&&ca<DORM.y2)) prisms.push({n:'wall',lay:'l',m:'wall',ax:'x',pts:[[ca,lo],[cb,lo],[cb,tb],[ca,ta]],a0:xa,a1:xb}); }); } } } }   /* v67: a wedge fills the step up to the slope (the 20 cm steps left saw-tooth gaps under the ceiling) */
     });
   }
   /* --- v61 trim: window frames, glazing bars and sills; door linings, architraves and an open leaf --- */
@@ -2422,7 +2425,7 @@ function gen3d(c,items,paint,fin){
       slabHoles('y',-25,1135,331,697,FZ,20,'r','r',holes);
       if(DORM){ const D=DORM, sill=D.y2-12, gz=D.gz;
         box('dormer','r','roof',D.x1-4,D.y1,D.ceil,D.x2+4,D.y2+6,D.top);                                   /* flat roof */
-        [[D.x1,D.ix1],[D.ix2,D.x2]].forEach(([a,b])=>box('dormer','r','wall',a,D.y1,500,b,D.y2,D.ceil));     /* cheeks */
+        [[D.x1,D.ix1],[D.ix2,D.x2]].forEach(([a,b])=>prisms.push({n:'dormer',lay:'r',m:'wall',ax:'x',pts:[[D.y1,under0(0,D.y1)],[D.y2,under0(0,D.y2)],[D.y2,D.ceil],[D.y1,D.ceil]],a0:a,a1:b}));   /* cheeks: v67 sit on the roof slope (they used to stand from the loft floor, a 10 cm wall through the LO11/LO12 rooms) */
         box('dormer','r','wall',D.x1,sill,500,D.x2,D.y2,gz[0]); box('dormer','r','wall',D.x1,sill,gz[1],D.x2,D.y2,D.ceil);   /* face round the window */
         box('dormer','r','wall',D.x1,sill,gz[0],D.ix1+10,D.y2,gz[1]); box('dormer','r','wall',D.ix2-10,sill,gz[0],D.x2,D.y2,gz[1]);
         /* the window is a Velux-style toggle (zone 'd'): glass when on, filled in when off */
@@ -2901,12 +2904,14 @@ function finTap(cx,cy){
   ray.setFromCamera(new T.Vector2((cx-r.left)/r.width*2-1,-(cy-r.top)/r.height*2+1),W3.camera);
   const vis=o=>{ for(let q=o;q;q=q.parent) if(!q.visible) return false; return true; };
   const hit=ray.intersectObjects(W3.scene.children,true).find(h=>h.object.isMesh&&h.object.userData.src&&!h.object.material.transparent&&vis(h.object));
-  if(!hit){ finPick(null,'Nothing to finish there. Tap a wall, a floor, a worktop or a unit.'); return; }
+  if(!hit){ finPick(null,'Nothing to finish there. Tap a wall, a floor, a door, the stairs, a worktop or a unit.'); return; }
   const src=hit.object.userData.src[hit.faceIndex], n=hit.face.normal, px=hit.point.x, py=hit.point.z;
   if(!src){ finPick(null); return; }
   if(src.pk!=null){ const t=W3.M.pk[src.pk], it=t&&ITEMS[t.i];
     if(it&&it===W3.bItems[t.i]){ const k=CAT[it.t][6]; if(t.part==='top'||DEFCOL[k]) return finPick({k:'item',i:t.i,part:t.part}); }
     finPick(null,'That fitting has a fixed finish (sanitaryware, appliances and so on).'); return; }
+  if(src.n==='leaf') return finPick({k:'door'});   /* v67: doors and stairs take one finish each for the whole house */
+  if(src.m==='stair') return finPick({k:'stair'});
   const f=finFloorOf(src.lay);
   if(n.y>0.7&&(src.n==='floorpaint'||src.n==='slab')){ const e=roomAt(finRooms(f),px,py); if(e) return finPick({k:'floor',f,x:Math.round(px),y:Math.round(py),room:e}); }
   if(Math.abs(n.y)<0.3&&['wall','slab','brick'].includes(src.m)&&src.n!=='dormer'){
@@ -2915,21 +2920,21 @@ function finTap(cx,cy){
     const e=roomAt(finRooms(f),qx,qy);
     if(e&&src.m==='wall'){ const sd=Math.abs(n.z)>=Math.abs(n.x)?(n.z>0?0:1):(n.x>0?2:3), at=[e.y1,e.y2,e.x1,e.x2][sd], dd=sd<2?Math.abs(py-at):Math.abs(px-at);
       if(dd<14) return finPick({k:'wall',f,x:Math.round(qx),y:Math.round(qy),s:sd,room:e}); } }
-  finPick(null,'That part can’t take a finish. Tap a wall, a floor, a worktop or a unit.');
+  finPick(null,'That part can’t take a finish. Tap a wall, a floor, a door, the stairs, a worktop or a unit.');
 }
 /* the FIN records for a floor/wall/outside target (resolved to the same room rectangle) */
-function finIdx(t){ if(t.k==='ext') return FIN.map((q,i)=>q.k==='ext'?i:-1).filter(i=>i>=0);
+function finIdx(t){ if(['ext','door','stair'].includes(t.k)) return FIN.map((q,i)=>q.k===t.k?i:-1).filter(i=>i>=0);
   const rooms=finRooms(t.f), key=rkey(t.room);
   return FIN.map((q,i)=>q.k===t.k&&q.f===t.f&&(t.k!=='wall'||(q.s||0)===t.s)&&rkey(roomAt(rooms,q.x,q.y))===key?i:-1).filter(i=>i>=0); }
 function finCur(t){ if(t.k==='item'){ const it=ITEMS[t.i]||{}; return t.part==='top'?{m:it.m2,col:it.c2}:{m:it.m,col:it.col}; }
   const q=FIN[finIdx(t)[0]]; return q?{m:q.m,col:q.col}:{}; }
-function finDefM(t){ const id=t.k==='floor'?({we:'tile30',ut:'tile30',po:'tile30',ou:'tile30',ga:'conc'}[t.room&&t.room.cls]||'oak'):t.k==='ext'?'brick':'plain'; return MATS.findIndex(q=>q.id===id); }
+function finDefM(t){ const id=t.k==='floor'?({we:'tile30',ut:'tile30',po:'tile30',ou:'tile30',ga:'conc'}[t.room&&t.room.cls]||'oak'):t.k==='ext'?'brick':t.k==='door'?'veneer':t.k==='stair'?'oak':'plain'; return MATS.findIndex(q=>q.id===id); }
 function finSetOn(t,patch){
   if(t.k==='item'){ const it=ITEMS[t.i]; if(!it) return; const mk=t.part==='top'?'m2':'m', ck=t.part==='top'?'c2':'col';
     if(patch===null){ delete it[mk]; delete it[ck]; return; }
     if('m' in patch){ if(patch.m==null) delete it[mk]; else it[mk]=patch.m; } if('col' in patch){ if(patch.col) it[ck]=patch.col; else delete it[ck]; } return; }
   const ix=finIdx(t), old=ix.length?FIN[ix[0]]:null; FIN=FIN.filter((q,i)=>!ix.includes(i)); if(patch===null) return;
-  const q=old?Object.assign({},old):(t.k==='ext'?{k:'ext',f:0,x:0,y:0}:Object.assign({k:t.k,f:t.f,x:t.x,y:t.y},t.k==='wall'?{s:t.s}:{}));
+  const q=old?Object.assign({},old):(['ext','door','stair'].includes(t.k)?{k:t.k,f:0,x:0,y:0}:Object.assign({k:t.k,f:t.f,x:t.x,y:t.y},t.k==='wall'?{s:t.s}:{}));
   if('m' in patch){ if(patch.m==null) delete q.m; else q.m=patch.m; } if('col' in patch){ if(patch.col) q.col=patch.col; else delete q.col; }
   if(q.m!=null||q.col) FIN.push(q); }
 function finCommit(){ saveFit(); syncHash(); W3.keepView=true; w3Start(); finPanel(); }
@@ -2950,9 +2955,13 @@ function finHL(){
     b=s===0?[e.x1,e.y1+0.8,z0,e.x2,e.y1+2.5,z1]:s===1?[e.x1,e.y2-2.5,z0,e.x2,e.y2-0.8,z1]:s===2?[e.x1+0.8,e.y1,z0,e.x1+2.5,e.y2,z1]:[e.x2-2.5,e.y1,z0,e.x2-0.8,e.y2,z1]; }
   else if(t.k==='item'){ const it=ITEMS[t.i]; if(!it) return; const [x1,y1,x2,y2]=aabb(it), z0=FB3[it.f], h=CAT[it.t][5];
     b=t.part==='top'?[x1-1,y1-1,z0+86,x2+1,y2+1,z0+92]:[x1-1,y1-1,z0,x2+1,y2+1,z0+Math.max(h,6)+1]; }
-  if(!b) return; const [x1,y1,z1,x2,y2,z2]=b, geo=new T.BoxGeometry(x2-x1,z2-z1,y2-y1);
-  const m=new T.Mesh(geo,new T.MeshBasicMaterial({color:0xE06D2B,transparent:true,opacity:0.3,depthWrite:false})); m.position.set((x1+x2)/2,(z1+z2)/2,(y1+y2)/2); m.renderOrder=5; g.add(m);
-  const ln=new T.LineSegments(new T.EdgesGeometry(geo),new T.LineBasicMaterial({color:0xE06D2B})); ln.position.copy(m.position); g.add(ln);
+  let L=b?[b]:[];
+  if((t.k==='door'||t.k==='stair')&&W3.M){ const M=W3.M, pz=p=>[Math.min(...p.pts.map(q=>q[0])),Math.min(...p.pts.map(q=>q[1])),p.a0,Math.max(...p.pts.map(q=>q[0])),Math.max(...p.pts.map(q=>q[1])),p.a1];   /* v67: every leaf / tread */
+    L=t.k==='door'?M.boxes.filter(q=>q.n==='leaf').map(q=>[q.x1,q.y1,q.z1,q.x2,q.y2,q.z2])
+      :M.boxes.filter(q=>q.m==='stair').map(q=>[q.x1,q.y1,q.z1,q.x2,q.y2,q.z2]).concat(M.prisms.filter(p=>p.m==='stair'&&p.ax==='z').map(pz)); }
+  L.forEach(([x1,y1,z1,x2,y2,z2])=>{ const geo=new T.BoxGeometry(x2-x1+1,z2-z1+1,y2-y1+1);
+    const m=new T.Mesh(geo,new T.MeshBasicMaterial({color:0xE06D2B,transparent:true,opacity:0.3,depthWrite:false})); m.position.set((x1+x2)/2,(z1+z2)/2,(y1+y2)/2); m.renderOrder=5; g.add(m);
+    const ln=new T.LineSegments(new T.EdgesGeometry(geo),new T.LineBasicMaterial({color:0xE06D2B})); ln.position.copy(m.position); g.add(ln); });
 }
 function finThumb(i,col){ const mt=MATS[i], key=i+'|'+col; if(FIN_UI.thumbs[key]) return FIN_UI.thumbs[key];
   const tx=w3Tex(THREE)[mt.tx], img=tx&&tx.map.image; if(!img) return '';
@@ -2961,12 +2970,14 @@ function finThumb(i,col){ const mt=MATS[i], key=i+'|'+col; if(FIN_UI.thumbs[key]
 function finPanel(){
   const el=$('w3fin'); if(!el) return; if(!FIN_UI.on){ el.hidden=true; el.innerHTML=''; return; } el.hidden=false;
   const t=FIN_UI.sel, done='<button type="button" class="btn" data-fn="close">Done</button>';
-  if(!t){ el.innerHTML=`<div class="hd"><b>🎨 Finishes</b>${done}</div><div class="note" style="margin:0" role="status">${esc(FIN_UI.msg||'Tap a wall, a floor, a worktop or a kitchen unit in the view. Each change is kept here straight away; press Save in the board bar at the top to share it.')}</div>`; return; }
+  if(!t){ el.innerHTML=`<div class="hd"><b>🎨 Finishes</b>${done}</div><div class="note" style="margin:0" role="status">${esc(FIN_UI.msg||'Tap a wall, a floor, a door, the stairs, a worktop or a kitchen unit in the view. Each change is kept here straight away; press Save in the board bar at the top to share it.')}</div>`; return; }
   let title, use=t.k, extra='';
   if(t.k==='item'){ const it=ITEMS[t.i], k=CAT[it.t][6], top=TOPK.includes(k), body=!!DEFCOL[k]; use=t.part==='top'?'top':'body';
     title=esc(CAT[it.t][2])+' · '+FLOORS[it.f].toLowerCase();
     if(top&&body) extra=`<span class="seg"><button type="button" class="btn" data-fpart="body" aria-pressed="${t.part!=='top'}">Doors &amp; body</button><button type="button" class="btn" data-fpart="top" aria-pressed="${t.part==='top'}">Worktop</button></span>`; }
   else if(t.k==='ext') title='Outside walls · whole house';
+  else if(t.k==='door') title='Doors · every door in the house';
+  else if(t.k==='stair') title='Stairs · every tread and landing';
   else title=(t.k==='wall'?'Wall':'Floor')+' · '+esc(t.room.name||'room')+(t.k==='wall'?' · '+SIDEN[t.s]:'')+' · '+FLOORS[t.f].toLowerCase();
   const cur=finCur(t), dm=finDefM(t), curM=cur.m!=null?cur.m:(use==='top'||use==='body'?0:dm);
   const mats=MATS.map((m,i)=>[m,i]).filter(([m])=>m.use.split(' ').includes(use));
@@ -3003,6 +3014,7 @@ function w3Build(c,items,paint,fin){
   fin=fin||[]; const T=THREE, M=gen3d(c,items,paint,fin);
   W3.M=M; W3.bItems=items; W3.bc=c;
   const fx=fin.find(q=>q.k==='ext'), fxm=fx&&matOf(fx.m), EXT=fx?{tx:fxm?fxm.tx:'brick',col:fx.col||(fxm?fxm.col:null)}:null;   /* v62: outside-wall finish replaces brick */
+  const fsx=k=>{ const q=fin.find(q=>q.k===k), mt=q&&matOf(q.m); return q?{tx:mt?mt.tx:null,col:q.col||(mt?mt.col:null)}:null; }, DOORF=fsx('door'), STAIRF=fsx('stair');   /* v67 */
   W3.boxes=M.boxes; W3.prisms=M.prisms; W3.spots=M.spots;
   if(!W3.renderer){
     const r=new T.WebGLRenderer({antialias:true}); r.setPixelRatio(Math.min(devicePixelRatio||1,2)); W3.renderer=r; r.shadowMap.enabled=true; r.shadowMap.type=T.PCFSoftShadowMap; $('w3view').appendChild(r.domElement);
@@ -3042,6 +3054,7 @@ function w3Build(c,items,paint,fin){
     let nx=uy*vz-uz*vy, ny=uz*vx-ux*vz, nz=ux*vy-uy*vx; const l=Math.hypot(nx,ny,nz); if(l<1e-9) return; nx/=l;ny/=l;nz/=l;
     const k=pts.length, cx=pts.reduce((s,q)=>s+q[0],0)/k, cy=pts.reduce((s,q)=>s+q[1],0)/k, cz=pts.reduce((s,q)=>s+q[2],0)/k;
     let sm=surf(src,nx,ny,nz,cx,cy,cz), col=src.col; if(sm==='brick'&&EXT){ sm=EXT.tx; col=EXT.col; }
+    const DF=src.n==='leaf'?DOORF:src.m==='stair'?STAIRF:null; if(DF){ if(DF.tx) sm=DF.tx; col=DF.col; }
     const B=bucket(src.lay,sm,col);
     for(let i=1;i+1<k;i++){ tri(B,pts[0],pts[i],pts[i+1],nx,ny,nz); B.s.push(src); } };
   const P3=(x,y,z)=>[x,z,y];
@@ -3303,7 +3316,7 @@ async function bdSave(asNew,force){
   { const x=$('w3x'); if(x){ x.checked=SHOT.extra; x.addEventListener('change',()=>{ SHOT.extra=x.checked; try{ localStorage.setItem('lindens-snapx',x.checked?'1':'0'); }catch(e){} }); } }
   let p=null, fi;
   try{ const fs=JSON.parse(localStorage.getItem(FKEY)||'[]'); if(Array.isArray(fs)) ITEMS=mergeScreens(fs.filter(it=>it&&CAT[it.t])); const ps=JSON.parse(localStorage.getItem('lindens-paint-v1')||'[]'); if(Array.isArray(ps)) PAINT=ps.filter(q=>q&&/^#[0-9A-F]{6}$/i.test(q.col));
-    const fn=JSON.parse(localStorage.getItem('lindens-fin-v1')||'[]'); if(Array.isArray(fn)) FIN=fn.filter(q=>q&&['floor','wall','ext'].includes(q.k)); }catch(e){}
+    const fn=JSON.parse(localStorage.getItem('lindens-fin-v1')||'[]'); if(Array.isArray(fn)) FIN=fn.filter(q=>q&&['floor','wall','ext','door','stair'].includes(q.k)); }catch(e){}
   try{ if(location.hash.length>1){ const [sc,fc]=decodeURIComponent(location.hash.slice(1)).split('~'); p=readCode(sc); if(p&&fc!=null){ fi=readFit(fc)||undefined; } } }catch(e){}
   if(!p){ try{ const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s&&typeof s==='object') splitM(s); if(s&&typeof s==='object'&&exists(s)) p=s; }catch(e){} }
   applyPicks(p||{},true,fi);
