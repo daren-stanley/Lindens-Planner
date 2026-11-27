@@ -1,9 +1,11 @@
 # Lindens Planner — state
 
-_Last updated: 27 Nov 2026 · app version v64_
+_Last updated: 27 Nov 2026 · app version v65_
 
 ## Current state
 - Single-file app: `index.html` (~3,280 lines). Plus `.nojekyll`. No build step.
+- v65: **M13 reworked + new M14** (shared `msGeo(c,xe)` before `strip`; `eastBlock(x0)` now takes Bedroom 2's west face, default 718). M13: no east wardrobe strip (master x 216–708, 4.9 m), secret door in the **middle** of the 0.6 m wardrobe wall (y 168–248, ensuite door opposite), landing door `D(1,xe-90,390,xe-10,400)` = 10 cm from the Bedroom 2 wall. **M14** (appended) = M13 with the Bedroom 2 wall at x 639–649 so master (4.2 × 3.6) and Bedroom 2 (4.3 × 3.5) are both ~15.4 m²; ctx MS, cost .9. M13/M14 no longer allowed with L2 (L2's stair is in the old strip). MSA/MSB WC moved to y 300–340 (south of the door). Daren is editing the shared MB Board 2 (v3) — its placed bed still sits where the old strip ended; left for him.
+- Open question (asked 27 Nov): split the master ensuite/dressing arrangement out of the M slot into its own picker (M currently mixes ensuite layout, entrance door, east strip and now Bedroom 2 wall). Needs a code migration for saved boards.
 - v64: **MB Board 2 is now a shared (editable) board** in Supabase (id d10e01a2…, v1, author Daren; codes = the v63 preset). The "Start from a board…" built-in group now lists **only the Original house** (`bdMenu`: `built` = `DRAWN` '0' only). Other `DRAWN` entries stay in the code (used by `nearestDrawn`/`drawnName` for plan matching) but are no longer offered as fixed boards; all four other boards are shared ones.
 - v63: **MB Board 2** preset (`DRAWN`) from MB Architecture drawing P9100 rev P1 (13 Nov 2026, Option A) + Matt Bickerton's PDF comments, as agreed with Daren: S5 H3 **W11** G1 F1 R8 K1 P4 **M13** B0 L6 LO12 N0 A3 FP0 PL3. Fit code = MB Board 1's minus the old WC/utility and master items, plus utility (washer, dryer, 1.06 m sink unit), WC under the stair (WC, basin), super-king bed + bedsides (headboard east), MSA ensuite items.
   - New **W11** (appended): utility in the old cloakroom (garage door A3/A4, new kitchen door x 110–180 on y 390), 1.8 × 2.4 m WC under the flipped stair entered from the utility (`D(0,192,410,202,476)`), old kitchen door closed, new front window to the utility. Added to `underFlip`, the S/W, W/A rules and the hall lists (H2/H3 hall starts at x 386).
