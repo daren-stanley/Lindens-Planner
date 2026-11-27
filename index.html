@@ -190,9 +190,9 @@ body.nosteel .rsj{display:none}
 
 <div class="top">
   <div>
-    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v63 · 27 Nov 2026</small></h1>
+    <h1>Lindens house picker <small id="appVer" style="font-size:.5em;font-weight:500;opacity:.6;letter-spacing:0">v64 · 27 Nov 2026</small></h1>
     <nav class="ptabs" aria-label="Pages"><button type="button" class="btn" data-page="1" aria-pressed="true">1 · Structure</button><button type="button" class="btn" data-page="2" aria-pressed="false">2 · Fittings</button><button type="button" class="btn" data-page="3" aria-pressed="false">3 · Walk-through</button></nav>
-    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v63';document.title='Lindens house picker '+APP_VERSION;</script>
+    <script>/* bump APP_VERSION on every release */ var APP_VERSION='v64';document.title='Lindens house picker '+APP_VERSION;</script>
   </div>
   <div class="actions">
     <select id="theme" class="btn" aria-label="Colour theme"><option value="auto">Theme: auto</option><option value="light">Theme: light</option><option value="dark">Theme: dark</option></select>
@@ -3184,7 +3184,7 @@ const bdCode=b=>b.structure+(b.fittings?'~'+b.fittings:'');
 const bdWhen=t=>{ try{ const d=new Date(t); return d.toLocaleDateString('en-GB',{day:'numeric',month:'short'})+' '+d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}); }catch(e){ return ''; } };
 function bdMenu(){
   const ps=$('preset'), names=new Set(BD.list.map(b=>b.name.toLowerCase()));
-  const built=DRAWN.filter(([n])=>n==='0'||!names.has(n.toLowerCase()));
+  const built=DRAWN.filter(([n])=>n==='0'); /* only the original house is a fixed board; the rest are shared boards */
   ps.innerHTML='<option value="">Start from a board…</option>'+
     (BD.list.length?`<optgroup label="Shared boards">${BD.list.map(b=>`<option value="db:${b.id}">${esc(b.name)}${b.author?' · '+esc(b.author):''} · ${bdWhen(b.updated_at)}</option>`).join('')}</optgroup>`:'')+
     `<optgroup label="${BD.list.length?'Built in':'Boards'}">${built.map(([n])=>`<option value="${esc(n)}">${n==='0'?'Original house':esc(n)}</option>`).join('')}</optgroup>`;

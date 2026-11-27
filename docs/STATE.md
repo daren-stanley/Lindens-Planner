@@ -1,10 +1,11 @@
 # Lindens Planner — state
 
-_Last updated: 27 Nov 2026 · app version v63_
+_Last updated: 27 Nov 2026 · app version v64_
 
 ## Current state
 - Single-file app: `index.html` (~3,280 lines). Plus `.nojekyll`. No build step.
-- Latest release **v63**: **MB Board 2** preset (`DRAWN`) from MB Architecture drawing P9100 rev P1 (13 Nov 2026, Option A) + Matt Bickerton's PDF comments, as agreed with Daren: S5 H3 **W11** G1 F1 R8 K1 P4 **M13** B0 L6 LO12 N0 A3 FP0 PL3. Fit code = MB Board 1's minus the old WC/utility and master items, plus utility (washer, dryer, 1.06 m sink unit), WC under the stair (WC, basin), super-king bed + bedsides (headboard east), MSA ensuite items.
+- v64: **MB Board 2 is now a shared (editable) board** in Supabase (id d10e01a2…, v1, author Daren; codes = the v63 preset). The "Start from a board…" built-in group now lists **only the Original house** (`bdMenu`: `built` = `DRAWN` '0' only). Other `DRAWN` entries stay in the code (used by `nearestDrawn`/`drawnName` for plan matching) but are no longer offered as fixed boards; all four other boards are shared ones.
+- v63: **MB Board 2** preset (`DRAWN`) from MB Architecture drawing P9100 rev P1 (13 Nov 2026, Option A) + Matt Bickerton's PDF comments, as agreed with Daren: S5 H3 **W11** G1 F1 R8 K1 P4 **M13** B0 L6 LO12 N0 A3 FP0 PL3. Fit code = MB Board 1's minus the old WC/utility and master items, plus utility (washer, dryer, 1.06 m sink unit), WC under the stair (WC, basin), super-king bed + bedsides (headboard east), MSA ensuite items.
   - New **W11** (appended): utility in the old cloakroom (garage door A3/A4, new kitchen door x 110–180 on y 390), 1.8 × 2.4 m WC under the flipped stair entered from the utility (`D(0,192,410,202,476)`), old kitchen door closed, new front window to the utility. Added to `underFlip`, the S/W, W/A rules and the hall lists (H2/H3 hall starts at x 386).
   - New **M13** (appended): 1.2 × 3.6 m ensuite x 26–146 down the west wall, 0.6 m wardrobe strip x 156–216 with the secret door at its south end (y 300–380), master x 216–LW (3.9 m with L5/L6), full-height rear window, east wardrobe via `strip`. Allowed with L0, L2, L5, L6. EL context **`MS`** (ctxOf maps M13→MS because layout ids are matched on 2 chars): **MSA** 1.2 m shower under the window, **MSB** 1.6 m walk-in shower.
   - Tested headless: plans for MB Board 2 checked visually; 40 sampled valid houses with W11 or M13 run `gen3d` with no errors/NaN. 3D view itself not rendered here (three.js CDN not reachable from the test box).
