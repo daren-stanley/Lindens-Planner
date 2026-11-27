@@ -1,11 +1,16 @@
 # Lindens Planner — state
 
-_Last updated: 27 Nov 2026 · app version v65_
+_Last updated: 27 Nov 2026 · app version v66_
 
 ## Current state
 - Single-file app: `index.html` (~3,280 lines). Plus `.nojekyll`. No build step.
-- v65: **M13 reworked + new M14** (shared `msGeo(c,xe)` before `strip`; `eastBlock(x0)` now takes Bedroom 2's west face, default 718). M13: no east wardrobe strip (master x 216–708, 4.9 m), secret door in the **middle** of the 0.6 m wardrobe wall (y 168–248, ensuite door opposite), landing door `D(1,xe-90,390,xe-10,400)` = 10 cm from the Bedroom 2 wall. **M14** (appended) = M13 with the Bedroom 2 wall at x 639–649 so master (4.2 × 3.6) and Bedroom 2 (4.3 × 3.5) are both ~15.4 m²; ctx MS, cost .9. M13/M14 no longer allowed with L2 (L2's stair is in the old strip). MSA/MSB WC moved to y 300–340 (south of the door). Daren is editing the shared MB Board 2 (v3) — its placed bed still sits where the old strip ended; left for him.
-- Open question (asked 27 Nov): split the master ensuite/dressing arrangement out of the M slot into its own picker (M currently mixes ensuite layout, entrance door, east strip and now Bedroom 2 wall). Needs a code migration for saved boards.
+- Latest release **v66**: **master pick split in three** (STRUCT now 16 chars: `…,'A','ME','MD'`; CS[1] gains ME, MD; group First floor = L, M, ME, MD, N, B).
+  - **M** (where): `MW` first floor west, `M7` east, `M8` loft, `M0` as today. **ME** (Ensuite & dressing, only with MW): E2 secret door + dressing, E13 long ensuite, E3 separate doors, E4 through dressing, E5 big dressing, E1 passage, E9 across the loft stair (L3), E6 no ensuite; hidden `E0` when not MW. **MD** (Master door & Bedroom 2): D1 east wardrobe strip + door by the bathroom (only one allowed with L2), D2 today's Bedroom 3 door, D3 east-end door, D4 = D3 + Bedroom 2 wall at x 639–649 (equal ~15.4 m²); hidden `D0`. `state().vis` hides ME/MD when forced to E0/D0.
+  - Geometry: `GEO.MW` → `masterWest(c)` (one entry per ME in `W`, east side from MD: `strip`/`mDoor`, `eastBlock(x0)`); `nw(c)` = MW with D2–D4, `LW(c)` = 639 for D4. Rules: E1/E9 not with D1, E1 not with D4 (today's window), E5+D1+B1 clash, L2 needs D1 with E2–E6. Cost/steels keyed on E*/D4; EL ctx mapped from ME (`ctxOf`: E13→MS etc.), so fit codes are unchanged.
+  - Old codes: `M_V3` (old M list) + `splitM(p)` convert v3/legacy codes and stored localStorage picks (M4/M5 with L0 → D2, M10–12 → D2, M13 → D3, M14 → D4). DRAWN and all 5 Supabase boards rewritten to v4 codes (same houses; checked by reading both).
+  - Known: **MB Board 1** (shared) has L4, which is retired (rule `c.L!=='L4'`) → the board can't load (already true before v66). Needs L4 → L5/L6 decided with Daren.
+  - Tested headless: every ME×MD pairing exists; 200 sampled first-floor combos build plan + gen3d (no errors/NaN); DRAWN round-trip; plans checked visually.
+- v65: M13 reworked (secret door centred, no east wardrobe, east-end door) + M14 equal bedrooms — now E13 + D3/D4.
 - v64: **MB Board 2 is now a shared (editable) board** in Supabase (id d10e01a2…, v1, author Daren; codes = the v63 preset). The "Start from a board…" built-in group now lists **only the Original house** (`bdMenu`: `built` = `DRAWN` '0' only). Other `DRAWN` entries stay in the code (used by `nearestDrawn`/`drawnName` for plan matching) but are no longer offered as fixed boards; all four other boards are shared ones.
 - v63: **MB Board 2** preset (`DRAWN`) from MB Architecture drawing P9100 rev P1 (13 Nov 2026, Option A) + Matt Bickerton's PDF comments, as agreed with Daren: S5 H3 **W11** G1 F1 R8 K1 P4 **M13** B0 L6 LO12 N0 A3 FP0 PL3. Fit code = MB Board 1's minus the old WC/utility and master items, plus utility (washer, dryer, 1.06 m sink unit), WC under the stair (WC, basin), super-king bed + bedsides (headboard east), MSA ensuite items.
   - New **W11** (appended): utility in the old cloakroom (garage door A3/A4, new kitchen door x 110–180 on y 390), 1.8 × 2.4 m WC under the flipped stair entered from the utility (`D(0,192,410,202,476)`), old kitchen door closed, new front window to the utility. Added to `underFlip`, the S/W, W/A rules and the hall lists (H2/H3 hall starts at x 386).
@@ -42,7 +47,7 @@ _Last updated: 27 Nov 2026 · app version v65_
 |---|---|
 | 1–180 | CSS (two `<style>` blocks; `#w3sun,#w3dl,#w3shots` styles) |
 | 181–280 | HTML shell; `APP_VERSION` ~195; page-3 bar (Finishes, Sun, Daylight map, Velux, Snapshot) ~238–250; `#w3fin` inside `#w3wrap` |
-| 285 | catalogue (`SLOTS`), rules ~420 |
+| 285 | catalogue (`SLOTS`; M/ME/MD ~353), rules ~430 |
 | 480 | geometry (cm; x east from west outer corner, y south from rear face); svg floor plans `floorSvg` ~1075 |
 | 1100 | `CAT` fittings catalogue, `DEFCOL`; page 2, fit code (`fitCode`/`readFit` ~1320), state, `render`, `setPage` ~1780 |
 | 1945 | `W3` state, `MCOL`, `MATS` ~1956; `FCOL` + `fitParts` ~1981 |
