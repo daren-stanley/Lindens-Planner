@@ -11,7 +11,7 @@ Hosted on GitHub Pages: https://daren-stanley.github.io/Lindens-Planner/ (deploy
 ## Rules
 - Read `CLAUDE.md` and `docs/STATE.md` first; open other files only when the task needs them.
 - Never read large files whole: search (grep), then read only the needed lines.
-  Large files: **`index.html`** (~2,300 lines, ~218 KB — the whole app). Use `docs/STATE.md`'s section map to jump to line ranges.
+  Large files: **`index.html`** (~3,500 lines, ~350 KB — the whole app). Use `docs/STATE.md`'s section map to jump to line ranges.
 - Don't re-read files that haven't changed since you last read them.
 - Supabase: select only the needed columns, always with `LIMIT`.
 - Keep replies brief: say what changed and where; don't echo code back.

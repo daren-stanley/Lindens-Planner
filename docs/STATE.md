@@ -1,10 +1,19 @@
 # Lindens Planner — state
 
-_Last updated: 27 Nov 2026 · app version v67_
+_Last updated: 28 Nov 2026 · app version v68_
 
 ## Current state
 - Single-file app: `index.html` (~3,290 lines). Plus `.nojekyll`. No build step.
-- Latest release **v67** (Daren's fixes, 27 Nov):
+- Latest release **v68** (28 Nov): **Doors & windows** per opening.
+  - Page 2 bar **🚪 Doors & windows** (`DWMODE`, `DSEL`): labels D1…/W1… on the plan (`dwSvg`, ordered by floor, rear→front, west→east; blue = has own settings), chips list + editor in `#fsel` (`dwBar`, `dwClick`, change handler for material/colour). Door swings, sliders and fold stacks are always drawn on the page-2 plan (layer `#dwS` under the fittings).
+  - Door: type Auto / Single / Double-French / Sliding / Pocket / Bifold / Slide & fold / Open (`DTY`), hinge or park end (`hg` 1 low = west/rear end, 2 high), opens to (`sw` 1 low = rear/west side, 2 high; a forced side may open outside), leaf Solid / Glazed / Half glazed / Glazed with bars (`LFS`, bars default black), panels (`np`), own finish (`m`, `col`). Wide openings (>1.5 m) get doors only when a type is set.
+  - Full-height glazing (window with sill 0, ≥0.9 m, kind `glz`, e.g. the R7/R8 garden opening): Fixed / Sliders / Bifold / Slide & fold / French with side lights (`GTY`). Windows: panes across (`cols`) × up (`rows`), opening panes (`OPS`, drawn as sash frames), frame finish.
+  - Data: `DWO` records {f, o, x, y = opening centre, …}; `dwFind` matches within 15 cm on the same floor/run, so a setting follows its opening across option changes. localStorage `lindens-dw-v1`; fit code record **251** (`fitCode(items,paint,fin,dw)`, `readFit` → `.dw`); boards carry it in `fittings`.
+  - gen3d(c,items,paint,fin,**dw**) trim block: `panel()` (leaf/glazed panel), `stack()` (folded panels), boxes tagged `oi` (opening key) and `df` (own finish, used in `w3Build` `face()`); returns `dw` = list with labels and 2D drawing data `g` (sw/pane/zig). `dwList(c)` caches it for page 2 (~60 ms desktop).
+  - 3D 🎨 Finishes: tapping a door leaf or window frame selects **that** opening (`{k:'dw'}`): material/colour, leaf style row, “Same on every door/window”. Global door finish (`{k:'door'}`) is still the default under per-door ones.
+  - Tested headless: 150 random houses × random settings (no errors/NaN), code round-trip ×300, page-2 editor clicks, 3D views (bifold garden doors, French porch doors, Crittall-style door, slider, 4×2 window), phone-width layout, 3D tap on a leaf.
+  - Not done: opening panes are visual only (no open sash); doors show open at 90°, sliders half open.
+- v67 (27 Nov):
   - **D4 redefined** = D3 + **equal east bedrooms**: the Bedroom 2 / front-east-bedroom wall moves 0.8 m north (south face y 380 → 298, wall 298–308), lobby grows with it (`ci` 718–817 × 308–490, Bedroom 2 door at y 298), both ≈ 9.9 m². Master untouched (`LW` back to 708; the old 639 wall is gone). `eastBlock(x0,yw)`. Rule "E1 not with D4" removed. Old M14 codes still map to E13 + D4 (now this layout).
   - **E13 secret door walkable**: wardrobe strip is one `wd` 156–216 × 26–390 with the `DA` passage (two separate `wd` rooms left a solid wall in the gap).
   - **Front-dormer cheeks** are now prisms sitting on the roof slope (were boxes from z 500 = 10 cm walls through the LO11/LO12 rooms at x 370–380 and 580–590 — the "brick pier"). **LO12** office/bedroom wall moved 10 cm east to x 570–580 (office 3.3 m, bedroom 4.8 m, door `D(2,570,300,580,380)`) so it lines up with the dormer side.
@@ -77,6 +86,7 @@ _Last updated: 27 Nov 2026 · app version v67_
 - Maybe later: teleport, controller models, passthrough tabletop model.
 
 ## Next steps
+- Daren to try v68 on the phone: page 2 → 🚪 Doors & windows (porch D7/D9 separately, garden opening types on the R7/R8 opening, window splits), then page 3. Ideas next: show-open/closed toggle, door widths, glass types (obscured), real sash opening.
 - MB Board 2 left out on purpose (Daren: reuse close options): porch 3.0 × 2.0 m with door + window and 2 Velux (P4 used), flat parapet roof with flat rooflights on the extension (lean-to used), full-height sandblasted fixed glazing each side of the living-room chimney, Matt's exact rear openings (≈1.6 m window + 2.9 m sliders; R8 is 2.4 + 3.0), kitchen run on the rear wall / island in the extension / tall units on the hall wall (fittings only, page 2). House-to-garage door is A3 (garage → utility); Matt's base drawing also had A2's kitchen-corner door.
 - Daren to try v62 on the phone: 🎨 Finishes → tap walls/floors/units, check the panel scrolls into view, rebuild speed after each change, and that Save in the board bar picks the finishes up.
 - Phase 2 (agreed idea): **"From photo"** materials — photo/screenshot of a brochure, 4-corner straighten, set real size (e.g. one 60 cm tile), edge blend, upload to Supabase Storage behind the family passcode; MATS-like entries referenced by id in the code. Alternatively Daren gives product names and Claude adds maker swatches to the library.
